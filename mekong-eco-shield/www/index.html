@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="leaflet.css">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});navigator.serviceWorker.register('service-worker.js?v='+Date.now()).catch(function(){})}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b1120;color:#e8eaf6;font-size:14px;line-height:1.5;-webkit-text-size-adjust:100%}
+a{text-decoration:none;color:inherit}
+#app{display:none;min-height:100vh}
+#app.show{display:flex}
+#sidebar{width:240px;background:#131c31;border-right:1px solid #1e2d4a;position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;transition:transform .3s}
+.sbs{flex:1;overflow-y:auto;padding:6px 0}
+.ng{border-bottom:1px solid #1e2d4a}
+.ngt{display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:12px;font-weight:600;color:#e8eaf6;cursor:pointer}
+.ngt:hover{background:#1a2744}
+.ngt .ar{margin-left:auto;font-size:10px;color:#607d8b;transition:transform .2s}
+.ng.open>.ngt .ar{transform:rotate(90deg)}
+.ngi{display:none;padding:0 0 4px}.ng.open .ngi{display:block}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 16px 7px 42px;font-size:12px;color:#b0bec5;cursor:pointer;border-left:3px solid transparent}
+.ni:hover{background:#1a2744;color:#e8eaf6}
+.ni.active{background:rgba(0,200,83,.12);color:#00c853;font-weight:600;border-left-color:#00c853}
+.sbf{padding:12px 16px;border-top:1px solid #1e2d4a;flex-shrink:0}
+#main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+#header{background:#131c31;border-bottom:1px solid #1e2d4a;padding:10px 20px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+#header h1{font-size:14px;font-weight:600}
+.hr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hb{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500;cursor:pointer}
+.hb.g{background:rgba(0,200,83,.12);color:#00c853}
+.hb.b{background:rgba(0,188,212,.12);color:#00bcd4}
+.hb.r{background:rgba(255,23,68,.12);color:#ff1744}
+.up{display:flex;align-items:center;gap:8px;background:#18243c;border:1px solid #1e2d4a;border-radius:20px;padding:4px 12px 4px 4px}
+.up .av{width:28px;height:28px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.up .nm{font-size:12px;font-weight:500}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}
+#ov.show{display:block}
+#content{flex:1;padding:16px 20px;overflow-x:hidden}
+.pt{font-size:18px;font-weight:700;margin-bottom:2px}.ps{font-size:12px;color:#607d8b;margin-bottom:16px}
+.sr{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.sc{background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:14px}.sc:hover{border-color:#00c853}
+.sc .sl{font-size:11px;color:#607d8b;margin-bottom:4px}.sc .sv{font-size:20px;font-weight:700}
+.cr{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.cc{background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:16px;overflow:hidden;width:100%}
+.cc h3{font-size:13px;font-weight:600;margin-bottom:12px}
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{text-align:left;font-size:11px;font-weight:600;color:#607d8b;padding:8px 10px;border-bottom:1px solid #1e2d4a}
+.dt td{padding:8px 10px;border-bottom:1px solid #1e2d4a}
+.dt tr:hover td{background:#1a2744}
+.tg{display:inline-block;font-size:10px;padding:2px 8px;border-radius:12px;font-weight:600}
+.tg.g{background:rgba(0,230,118,.12);color:#00e676}
+.tg.b{background:rgba(0,188,212,.12);color:#00bcd4}
+.tg.o{background:rgba(255,109,0,.12);color:#ff6d00}
+.tg.r{background:rgba(255,23,68,.12);color:#ff1744}
+.tg.p{background:rgba(124,77,255,.12);color:#7c4dff}
+.cb{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.03));border:1px solid rgba(0,200,83,.15);border-radius:10px;margin-top:14px}
+.cb .ca{width:36px;height:36px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.cb .cn{font-weight:600;font-size:12px}.cb .cr2{font-size:11px;color:#607d8b}
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit}.bp{background:#00c853;color:#fff}.br{background:#ff1744;color:#fff}.bs{background:#1e2d4a;color:#90a4ae;font-size:11px;padding:4px 10px}.bs:hover{background:#ff1744;color:#fff}
+.input{background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:8px 12px;color:#e8eaf6;font-size:13px;font-family:inherit;width:100%}
+#footer{background:#131c31;border-top:1px solid #1e2d4a;padding:20px 20px 12px;text-align:center;margin-top:auto;width:100%}
+.fb{font-size:14px;font-weight:700;color:#00c853}.fd{font-size:11px;color:#607d8b;margin-top:4px}
+.fm{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.fm .fmv{width:32px;height:32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.fm .fmn{font-weight:600;font-size:12px}.fm .fmr{font-size:10px;color:#607d8b}
+.fc{font-size:10px;color:#607d8b;margin-top:8px}.fc span{color:#00c853}
+.ac{background:rgba(255,23,68,.12);border:1px solid rgba(255,23,68,.2);border-radius:8px;padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:12px}
+@keyframes pulse-sos{0%,100%{box-shadow:0 0 30px rgba(255,23,68,.4)}50%{box-shadow:0 0 50px rgba(255,23,68,.7)}}
+.leaflet-container{max-width:100%!important;width:100%!important;height:350px!important;border-radius:10px}
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+#loginScreen .lc{max-width:420px;width:100%}
+@media(max-width:1200px){.sr{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.cr{grid-template-columns:1fr}}
+@media(max-width:768px){
+#sidebar{transform:translateX(-100%);width:260px;z-index:200}#sidebar.open{transform:translateX(0)}#main{margin-left:0}#header{padding:8px 12px}.sr{grid-template-columns:1fr 1fr}#content{padding:12px 14px}
+}
+#errorBanner{position:fixed;top:0;left:0;right:0;background:#ff1744;color:#fff;padding:12px 16px;z-index:99999;font-size:12px;display:none;max-height:40vh;overflow:auto}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99998;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-box{background:#131c31;border:1px solid #1e2d4a;border-radius:12px;padding:20px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto}
+.modal-box h3{font-size:15px;font-weight:700;margin-bottom:14px;color:#e8eaf6}
+.modal-box label{font-size:11px;color:#90a4ae;display:block;margin-bottom:2px}
+.modal-box .input{margin-bottom:10px}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.notif-bell{position:relative;cursor:pointer;font-size:18px;padding:4px}
+.notif-bell .badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:#ff1744;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.notif-panel{position:absolute;top:100%;right:0;width:300px;max-height:350px;overflow-y:auto;background:#131c31;border:1px solid #1e2d4a;border-radius:10px;z-index:9999;display:none;box-shadow:0 8px 30px rgba(0,0,0,.5);margin-top:4px}
+.notif-panel.show{display:block}
+.notif-item{padding:10px 12px;border-bottom:1px solid #1e2d4a;font-size:11px;cursor:pointer}
+.notif-item:hover{background:#1a2744}
+.notif-item .nt{font-weight:600;color:#e8eaf6;margin-bottom:2px}
+.notif-item .nd{color:#607d8b;font-size:10px}
+.notif-item.unread{border-left:3px solid #00c853}
+.sb-wrap{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.sb-wrap input{flex:1}.exp-btn{font-size:10px;padding:3px 8px;background:#1e2d4a;color:#90a4ae;border:none;border-radius:4px;cursor:pointer}.exp-btn:hover{background:#00c853;color:#fff}
+.up-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.up-info .up-field{background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:10px}
+.up-info .up-field .up-label{font-size:10px;color:#607d8b;text-transform:uppercase;margin-bottom:2px}
+.up-info .up-field .up-val{font-size:13px;color:#e8eaf6;font-weight:500}
+</style>
+</head>
+<body>
+<div id="errorBanner"></div>
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target==this)closeModal()"><div class="modal-box" id="modalBox"></div></div>
+<div id="loginScreen">
+<div class="lc">
+<div style="text-align:center;margin-bottom:16px">
+<div style="width:56px;height:56px;background:linear-gradient(135deg,#00c853,#00e676);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:26px;color:#fff;margin-bottom:8px">S</div>
+<h2 style="font-size:20px;font-weight:700">MEKONG ECO-SHIELD AI</h2>
+<p style="color:#607d8b;font-size:12px;margin-top:2px">DANH ĐẠT (SÓI CÔ ĐỘC)</p>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">
+<div style="background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.15);border-radius:8px;padding:10px;text-align:center;cursor:pointer" onclick="showLoginModuleInfo(0)">
+<div style="font-size:20px;margin-bottom:2px">🌊</div>
+<div style="font-size:10px;font-weight:600;color:#e8eaf6">Mekong Eco-Shield</div>
+<div style="font-size:8px;color:#607d8b;margin-top:1px">Cảnh báo thiên tai AI</div>
+</div>
+<div style="background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.15);border-radius:8px;padding:10px;text-align:center;cursor:pointer" onclick="showLoginModuleInfo(1)">
+<div style="font-size:20px;margin-bottom:2px">🌱</div>
+<div style="font-size:10px;font-weight:600;color:#e8eaf6">Eco-Farm Ops</div>
+<div style="font-size:8px;color:#607d8b;margin-top:1px">Canh tác sạch & KHKT</div>
+</div>
+<div style="background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.15);border-radius:8px;padding:10px;text-align:center;cursor:pointer" onclick="showLoginModuleInfo(2)">
+<div style="font-size:20px;margin-bottom:2px">💳</div>
+<div style="font-size:10px;font-weight:600;color:#e8eaf6">Eco-Credit AI</div>
+<div style="font-size:8px;color:#607d8b;margin-top:1px">Tín dụng nông nghiệp AI</div>
+</div>
+<div style="background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.15);border-radius:8px;padding:10px;text-align:center;cursor:pointer" onclick="showLoginModuleInfo(3)">
+<div style="font-size:20px;margin-bottom:2px">🔍</div>
+<div style="font-size:10px;font-weight:600;color:#e8eaf6">Traceability Hub</div>
+<div style="font-size:8px;color:#607d8b;margin-top:1px">Truy xuất & Chứng nhận</div>
+</div>
+<div style="background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.15);border-radius:8px;padding:10px;text-align:center;cursor:pointer" onclick="showLoginModuleInfo(4)">
+<div style="font-size:20px;margin-bottom:2px">🏛️</div>
+<div style="font-size:10px;font-weight:600;color:#e8eaf6">Heritage Trust</div>
+<div style="font-size:8px;color:#607d8b;margin-top:1px">Minh bạch tài chính</div>
+</div>
+</div>
+<div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:20px">
+<h3 style="font-size:14px;font-weight:600;margin-bottom:16px">ĐĂNG NHẬP</h3>
+<div style="margin-bottom:12px"><label style="font-size:12px;color:#b0bec5">Email</label><input class="input" id="le" type="email" autocomplete="email" style="margin-top:4px" value="datdanh279@gmail.com"></div>
+<div style="margin-bottom:12px"><label style="font-size:12px;color:#b0bec5">Mật khẩu</label><input class="input" id="lp" type="password" autocomplete="current-password" style="margin-top:4px"></div>
+<div id="le2" style="color:#ff1744;font-size:12px;margin-bottom:10px"></div>
+<button class="btn bp" style="width:100%;padding:12px;font-size:14px;font-weight:700" onclick="tryLogin()">ĐĂNG NHẬP</button>
+<div style="text-align:center;margin-top:12px;font-size:12px;color:#607d8b">Chưa có tài khoản? <span style="color:#00c853;cursor:pointer;font-weight:600" onclick="showReg()">Đăng ký</span></div>
+</div>
+</div>
+</div>
+<div id="app">
+<aside id="sidebar" onclick="event.stopPropagation()">
+<div style="padding:14px 16px;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;gap:10px">
+<div style="width:32px;height:32px;background:linear-gradient(135deg,#00c853,#00e676);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff">S</div>
+<div><div style="font-weight:700;font-size:13px">MEKONG ECO-SHIELD</div><div style="font-size:10px;color:#607d8b">DANH ĐẠT (SÓI CÔ ĐỘC)</div></div>
+</div>
+<div class="sbs"></div>
+<div class="sbf"><div style="font-size:11px;color:#607d8b;margin-bottom:8px">Xin chào, <span id="sbUser"></span></div><div class="btn bp" style="width:100%;text-align:center;padding:6px" onclick="doLogout()">Đăng xuất</div></div>
+</aside>
+<main id="main">
+<header id="header">
+<div style="display:flex;align-items:center;gap:10px"><div style="font-size:18px;cursor:pointer;display:none" id="menuBtn" onclick="toggleSB()">☰</div><h1 id="pgTitle">TỔNG QUAN</h1></div>
+<div class="hr" id="headerRight"><div class="notif-bell" onclick="toggleNotif()">🔔<span class="badge"></span></div></div>
+</header>
+<div id="content"></div>
+<footer id="footer">
+<div class="fb">MEKONG ECO-SHIELD</div>
+<div class="fd">Hệ thống cảnh báo thiên tai thông minh cho DBSCL</div>
+<div class="fm"><div class="fmv">DD</div><div><div class="fmn">DANH ĐẠT (SÓI CÔ ĐỘC)</div><div class="fmr">Soi Co Doc - Founder & Engineer</div></div></div>
+<div class="fc">Mekong Eco-Shield AI v3.1 2026<br><span>&copy; 2026 MEKONG ECO-SHIELD. DANH ĐẠT (SÓI CÔ ĐỘC). Quyền sở hữu trí tuệ.</span></div>
+</footer>
+</main>
+</div>
+<div id="ov" onclick="closeSB()"></div>
+<!-- NLI Assistant Floating Widget -->
+<div id="nliBtn" onclick="toggleNLI()" style="position:fixed;bottom:20px;left:20px;width:50px;height:50px;background:linear-gradient(135deg,#00c853,#00e676);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;cursor:pointer;z-index:9999;box-shadow:0 4px 20px rgba(0,200,83,.4);transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🤖</div>
+<div id="nliPanel" style="position:fixed;bottom:80px;left:20px;width:320px;max-height:420px;background:#131c31;border:1px solid #1e2d4a;border-radius:12px;z-index:9998;display:none;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,.5)">
+<div style="padding:12px 14px;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between;align-items:center">
+<div><span style="font-weight:600;font-size:13px">🤖 DANH ĐẠT (SÓI CÔ ĐỘC)</span><br><span style="font-size:10px;color:#607d8b">Trợ lý ngôn ngữ tự nhiên</span></div>
+<button class="btn bs" style="padding:2px 8px;font-size:10px" onclick="toggleNLI()">✕</button>
+</div>
+<div id="nliMsgs" style="flex:1;overflow-y:auto;padding:10px;min-height:200px;max-height:280px;font-size:12px">
+<div style="color:#607d8b;text-align:center;padding:20px 0">👋 Hỏi tôi bất cứ điều gì về Mekong Eco-Shield!<br><span style="font-size:10px">Ví dụ: "Mùa này mặn lên không?" "Làm sao để vay vốn?"</span></div>
+</div>
+<div style="padding:8px 10px;border-top:1px solid #1e2d4a;display:flex;gap:6px">
+<input class="input" id="nliInput" placeholder="Nhập câu hỏi..." style="font-size:12px;padding:6px 10px" onkeydown="if(event.key==='Enter')sendNLI()">
+<button class="btn bp" style="padding:6px 10px;font-size:11px" onclick="sendNLI()">➤</button>
+<button class="btn bs" style="padding:6px 8px;font-size:10px" onclick="startVoiceNLI()" title="Nhập bằng giọng nói">🎤</button>
+</div>
+</div>
+<script>
+window.onerror=function(m,u,l,c,e){
+ var b=document.getElementById('errorBanner');
+ if(b){b.style.display='block';b.innerHTML+='<div><b>'+(new Date().toLocaleTimeString())+'</b> '+m+(l?' ['+l+':'+c+']':'')+'</div>';b.scrollTop=b.scrollHeight}
+ return true
+};
+window.addEventListener('unhandledrejection',function(e){window.onerror('Promise: '+e.reason)});
+
+// === BLACKBOX SECURITY LAYER ===
+(function(){window.BB={};var g={};BB.lock=function(k,v){g[k]=v};BB.key=function(k){return g[k]};BB.seal=function(){Object.freeze(g)}})();
+
+var LS=(function(){var g={};return{get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));g[k]=v;return 1}catch(e){return 0}},del:function(k){try{localStorage.removeItem(k);delete g[k];return 1}catch(e){return 0}},cache:function(){return g}}}());
+var KS='mes_',U=null;
+
+// === GENESIS KEY SYSTEM ===
+var GK=(function(){
+ var k='',m='',l=0;
+ return{
+  set:function(p){k=p;m='';l=Date.now()},
+  check:function(p){return k&&p===k},
+  auth:function(p,cb){
+   if(!k||!p){return false}
+   if(p===k){m='GENESIS_'+Date.now().toString(36);l=Date.now();if(cb)cb(true);return true}
+   BB.lock('SEC_BREACH',{ts:new Date().toISOString(),type:'GENESIS_FAIL'});
+   if(cb)cb(false);return false
+  },
+  token:function(){return Date.now()-l<300000?m:''},
+  valid:function(){return!!m&&Date.now()-l<300000},
+  clear:function(){k='';m='';l=0}
+ }
+})();
+
+// === API BLACKBOX (Simulated Server-side) ===
+var API=(function(){
+ var p={};
+ p.ECS=function(d,cb){
+  setTimeout(function(){
+   var Sf=Math.min(1000,d.fo*100+(d.foDone||0)*50);
+   var Ss=Math.max(0,1000-(d.alerts||0)*150);
+   var Sfi=Math.min(1000,(d.tr||0)*150);
+   var Se=Math.min(1000,(d.charity||0)*15);
+   var b=Math.round(0.4*Sf+0.25*Ss+0.2*Sfi+0.15*Se);
+   var g=d.alerts>1?Math.min(0.5,d.alerts*0.1):0;
+   var r=Math.round(b*(1-g));
+   var rank=r>=800?'Kim cương':r>=600?'Vàng':r>=400?'Rủi ro':'Tạm khóa';
+   BB.lock('ECS_LAST',{ts:new Date().toISOString(),score:r});
+   cb({base:b,farm:Sf,shield:Ss,finance:Sfi,ethics:Se,gamma:g,realtime:r,rank:rank})
+  },300)
+ };
+ p.REC=function(d,cb){
+  setTimeout(function(){
+   var r=[];
+   if(d.fo===0)r.push({icon:'🌱',title:'Bắt đầu canh tác',desc:'Ghi nhật ký canh tác đầu tiên',page:'farmOps'});
+   if(d.tr===0)r.push({icon:'🔍',title:'Truy xuất sản phẩm',desc:'Tạo lô sản phẩm trên Traceability Hub',page:'traceability'});
+   if(d.fo>=3&&d.tr===0)r.push({icon:'💰',title:'Bán nông sản',desc:'Kết nối nhà thu mua',page:'traceability'});
+   if(d.fo>0&&d.tr>0)r.push({icon:'💳',title:'Kiểm tra ECS Credit',desc:'Xem điểm tín dụng và hạn mức vay',page:'creditAI'});
+   if(d.fo>0)r.push({icon:'📦',title:'Quản lý kho',desc:'Nhập/xuất vật tư nông nghiệp',page:'warehouse'});
+   if(d.fo>=5)r.push({icon:'🏛️',title:'Báo cáo tác động',desc:'Cập nhật dự án Heritage Impact Trust',page:'impactTrust'});
+   r.push({icon:'📊',title:'Xem báo cáo',desc:'Đo lường tác động môi trường',page:'impact'});
+   cb(r.slice(0,5))
+  },200)
+ };
+ return p
+})();
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function calcECS(){
+ var fo=getFO(),t=getT(),tr=getTR(),ir=getIR();
+ var d={fo:fo.length,fd:fo.filter(function(x){return x.st==='done'}).length,al:t.filter(function(x){return x.st==='active'}).length,tr:tr.length,ch:(ir.projects||[]).reduce(function(s,x){return s+(x.charity||0)},0)};
+ var Sf=Math.min(1000,d.fo*100+d.fd*50),Ss=Math.max(0,1000-d.al*150),Sfi=Math.min(1000,d.tr*150),Se=Math.min(1000,d.ch*15);
+ var b=Math.round(0.4*Sf+0.25*Ss+0.2*Sfi+0.15*Se);
+ var g=d.al>1?Math.min(0.5,d.al*0.1):0;
+ var r=Math.round(b*(1-g)),rk=r>=800?'Kim cương':r>=600?'Vàng':r>=400?'Rủi ro':'Tạm khóa';
+ BB.lock('ECS_CALC',{ts:new Date().toISOString(),s:r});
+ return {base:b,farm:Sf,shield:Ss,finance:Sfi,ethics:Se,gamma:g,realtime:r,rank:rk}
+}
+function getRecs(){
+ var r=[],fo=getFO().length,tr=getTR().length;
+ if(fo===0)r.push({icon:'🌱',title:'Bắt đầu canh tác',desc:'Ghi nhật ký canh tác đầu tiên',page:'farmOps'});
+ if(tr===0)r.push({icon:'🔍',title:'Truy xuất sản phẩm',desc:'Tạo lô sản phẩm Traceability Hub',page:'traceability'});
+ if(fo>=3&&tr===0)r.push({icon:'💰',title:'Bán nông sản',desc:'Kết nối nhà thu mua',page:'traceability'});
+ if(fo>0&&tr>0)r.push({icon:'💳',title:'Kiểm tra ECS',desc:'Xem điểm tín dụng và hạn mức',page:'creditAI'});
+ if(fo>0)r.push({icon:'📦',title:'Kho vật tư',desc:'Quản lý nhập/xuất tồn',page:'warehouse'});
+ if(fo>=5)r.push({icon:'🏛️',title:'Tác động',desc:'Báo cáo Heritage Impact Trust',page:'impactTrust'});
+ r.push({icon:'📊',title:'Báo cáo',desc:'Đo lường tác động môi trường',page:'impact'});
+ return r.slice(0,5)
+}
+
+function getU(){return LS.get(KS+'u',[])}
+function sU(a){LS.set(KS+'u',a)}
+function getR(){return LS.get(KS+'r',{})}
+function sR(a){LS.set(KS+'r',a)}
+function getL(){return LS.get(KS+'l',[])}
+function getT(){return LS.get(KS+'t',[])}
+function getFO(){return LS.get(KS+'fo',[])}
+function getCR(){return LS.get(KS+'cr',{farmers:[]})}
+function getTR(){return LS.get(KS+'tr',[])}
+function getIR(){return LS.get(KS+'ir',{projects:[],reports:[]})}
+function getW(){return LS.get(KS+'w',[])}
+function getXP(){return LS.get(KS+'xp',{points:0,level:1,history:[],streak:0,lastDate:''})}
+function sXP(a){LS.set(KS+'xp',a)}
+
+// === RELATIONAL DATA VAULT (Lõi Trung Tâm) ===
+function getIV(){return LS.get(KS+'iv',{vault:[],totalUsers:0})}
+function sIV(a){LS.set(KS+'iv',a)}
+function getDT(){return LS.get(KS+'dt',[])}
+function sDT(a){LS.set(KS+'dt',a)}
+function getFL(){return LS.get(KS+'fl',[])}
+function sFL(a){LS.set(KS+'fl',a)}
+function getHV(){return LS.get(KS+'hv',{pools:[],totalContributions:0,beneficiaries:0})}
+function sHV(a){LS.set(KS+'hv',a)}
+// RLS Check
+function canModify(user){return user&&user.role==='admin'}
+function rlsCheck(user){return canModify(user)?'OWNER':'USER'}
+
+function addXP(amt,reason){
+ var xp=getXP();
+ xp.points+=amt;
+ xp.history.push({amt:amt,reason:reason,ts:new Date().toISOString()});
+ var need=xp.level*1000;
+ if(xp.points>=need){xp.level++;addNotif('LEVEL UP!','Bạn đã đạt cấp độ '+xp.level+' 🎉');toast('Level '+xp.level,'Chúc mừng!')}
+ // Streak
+ var today=new Date().toISOString().slice(0,10);
+ if(xp.lastDate!==today){xp.streak=xp.lastDate===new Date(Date.now()-86400000).toISOString().slice(0,10)?xp.streak+1:1;xp.lastDate=today}
+ sXP(xp)
+}
+
+function calcECS(){
+ var fo=getFO(),t=getT(),tr=getTR(),ir=getIR();
+ var S_farm=Math.min(1000,fo.length*100+(fo.filter(function(x){return x.st==='done'}).length*50));
+ var S_shield=Math.max(0,1000-t.filter(function(x){return x.st==='active'}).length*150);
+ var S_finance=Math.min(1000,tr.length*150);
+ var S_ethics=Math.min(1000,(ir.projects||[]).reduce(function(s,x){return s+(x.charity||0)},0)*15);
+ var base=Math.round(0.4*S_farm + 0.25*S_shield + 0.2*S_finance + 0.15*S_ethics);
+ var gamma=t.filter(function(x){return x.st==='active'}).length>1?Math.min(0.5,t.filter(function(x){return x.st==='active'}).length*0.1):0;
+ var realtime=Math.round(base*(1-gamma));
+ var rank=realtime>=800?'Kim cương':realtime>=600?'Vàng':realtime>=400?'Rủi ro':'Tạm khóa';
+ return {base:base,farm:S_farm,shield:S_shield,finance:S_finance,ethics:S_ethics,gamma:gamma,realtime:realtime,rank:rank}
+}
+
+function getRecs(){
+ var recs=[],fo=getFO().length,tr=getTR().length,t=getT().length;
+ if(fo===0)recs.push({icon:'🌱',title:'Bắt đầu canh tác',desc:'Ghi nhật ký canh tác đầu tiên trên Eco-Farm Ops',page:'farmOps'});
+ if(tr===0)recs.push({icon:'🔍',title:'Truy xuất sản phẩm',desc:'Tạo lô sản phẩm trên Traceability Hub',page:'traceability'});
+ if(fo>=3&&tr===0)recs.push({icon:'💰',title:'Bán nông sản',desc:'Kết nối nhà thu mua qua Traceability Hub',page:'traceability'});
+ if(fo>0&&tr>0)recs.push({icon:'💳',title:'Kiểm tra ECS Credit',desc:'Xem điểm tín dụng và hạn mức vay',page:'creditAI'});
+ if(fo>0)recs.push({icon:'📦',title:'Quản lý kho',desc:'Nhập/xuất vật tư nông nghiệp',page:'warehouse'});
+ if(fo>=5)recs.push({icon:'🏛️',title:'Báo cáo tác động',desc:'Cập nhật dự án trên Heritage Impact Trust',page:'impactTrust'});
+ recs.push({icon:'📊',title:'Xem báo cáo',desc:'Đo lường tác động môi trường',page:'impact'});
+ return recs.slice(0,5)
+}
+
+function crossSellBanner(currentId){
+ var map={dashboard:'farmOps',farms:'warehouse',alerts:'remoteSensing',weather:'alerts',carbon:'token',token:'creditAI',security:'settings',audit:'security',governance:'impactTrust',impact:'governance',farmOps:'creditAI',creditAI:'traceability',traceability:'impactTrust',impactTrust:'farmOps',warehouse:'traceability',profile:'settings',notifications:'profile',settings:'dashboard',dataCenter:'federated',federated:'superAdmin',superAdmin:'admin',rewards:'creditAI',risk:'superAdmin',multiAgent:'securityCenter',securityCenter:'superAdmin',database:'remoteSensing',remoteSensing:'plots',plots:'marketplace',marketplace:'database'};
+ var target=map[currentId]||'dashboard';
+ var labels={farmOps:'🌱 Eco-Farm Ops',creditAI:'💳 Eco-Credit AI',traceability:'🔍 Traceability Hub',impactTrust:'🏛️ Heritage Trust',warehouse:'📦 Kho vật tư',dashboard:'🏠 Tổng quan',alerts:'⚠️ Cảnh báo',weather:'☁️ Thời tiết',farms:'🌾 Nông trại',carbon:'🌱 Carbon',token:'💰 Token',security:'🔒 Bảo mật',audit:'📝 Nhật ký',governance:'🏛️ Quản trị',impact:'📊 Tác động',profile:'👤 Cá nhân',settings:'⚙️ Cài đặt',notifications:'🔔 Thông báo',dataCenter:'🌐 Trung tâm Dữ liệu',federated:'🧠 Học máy Liên kết',superAdmin:'👑 Super Admin',rewards:'🏆 Phần thưởng',risk:'📊 Giám sát',multiAgent:'🧩 Đa tác tử',securityCenter:'🛡️ Bảo mật',database:'🗄️ Cơ sở dữ liệu',remoteSensing:'🛰️ Viễn thám số',plots:'🌍 Lô đất số',marketplace:'🏪 Sàn giao dịch'};
+ return '<div style="background:linear-gradient(135deg,rgba(0,200,83,.06),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.12);border-radius:8px;padding:10px;margin-top:10px;font-size:11px;cursor:pointer" onclick="navigate(\''+target+'\')">💡 Tiếp theo: <span style="color:#00c853;font-weight:600">'+(labels[target]||target)+'</span> →</div>'
+}
+
+function startVoice(inputId){
+ if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){toast('Lỗi','Trình duyệt không hỗ trợ giọng nói');return}
+ var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ var rec=new SR();
+ rec.lang='vi-VN';rec.continuous=false;rec.interimResults=false;
+ rec.onresult=function(e){
+  var inp=document.getElementById(inputId);
+  if(inp)inp.value=e.results[0][0].transcript;
+  toast('Đã nhận','Nhập liệu bằng giọng nói thành công')
+ };
+ rec.onerror=function(){toast('Lỗi','Không thể nhận diện giọng nói')};
+ rec.start()
+}
+// === NLI ASSISTANT (Trợ lý ngôn ngữ tự nhiên) ===
+var nliKB={mua_mat:'Mùa này độ mặn dự báo ở mức <b>4.2‰</b>. Nếu mặn lên trên 5‰, tôi sẽ tự động kích hoạt γ để bảo vệ điểm tín dụng của bạn.',vay_von:'Để vay vốn, bạn cần có ECS ≥ 600. Kiểm tra điểm ECS của bạn tại trang <b>Eco-Credit AI</b> và đảm bảo tuân thủ quy trình canh tác.',thoi_tiet:'Dự báo thời tiết: <b>32°C</b>, nhiều mây, chiều có mưa rào. Kiểm tra thời tiết chi tiết trên trang <b>Thời tiết</b>.',gia_lua:'Giá lúa tham khảo: <b>8.500 - 9.200 đ/kg</b> (tùy loại). Truy xuất nguồn gốc trên <b>Traceability Hub</b> để bán giá cao hơn.',phan_bon:'Gợi ý bón phân: Sử dụng phân hữu cơ, liều lượng phù hợp từng giai đoạn sinh trưởng. Xem nhật ký trên <b>Eco-Farm Ops</b>.',credit_score:'Điểm ECS hiện tại: <b>'+calcECS().realtime+'</b> ('+calcECS().rank+'). Càng nhiều nhật ký canh tác, điểm càng cao.',poi:'Proof of Impact (PoI) là điểm uy tín từ hành động tốt. Mỗi lần tuân thủ quy trình, bạn nhận PoI. 1000 PoI giảm 1% lãi suất.',sos:'Nếu khẩn cấp, hãy nhấn nút <b>SOS</b> trên trang Bản đồ hoặc Dashboard. Tín hiệu sẽ được gửi ngay lập tức.',heritage:'30% lợi nhuận tự động trích vào Quỹ Di sản. Mỗi dự án của bạn đều đóng góp vào phát triển cộng đồng.',default:'Cảm ơn bạn đã hỏi! Tôi là DANH ĐẠT (SÓI CÔ ĐỘC) — Trợ lý AI của Mekong Eco-Shield. Tôi có thể giúp gì cho bạn? Hãy thử hỏi: "thời tiết", "vay vốn", "giá lúa", "phân bón", "mùa mặn", "điểm tín dụng", "PoI", "SOS", "heritage".'};
+var nliKeywords={thoi_tiet:['thời tiết','mưa','nắng','bão','nhiệt độ'],mua_mat:['mặn','mùa mặn','độ mặn','xâm nhập'],vay_von:['vay','vốn','tín dụng','hạn mức','vay vốn'],gia_lua:['giá','lúa','bán','thu mua','giá lúa'],phan_bon:['phân','bón','phân bón','cây trồng','thuốc'],credit_score:['ecs','điểm','credit','tín nhiệm'],poi:['poi','proof','impact','uy tín','điểm thưởng'],sos:['sos','cứu','khẩn cấp','nguy hiểm','cảnh báo'],heritage:['heritage','di sản','30%','thiện nguyện','từ thiện']};
+function toggleNLI(){var p=document.getElementById('nliPanel');if(p){p.style.display=p.style.display==='flex'?'none':'flex';if(p.style.display==='flex')document.getElementById('nliInput').focus()}}
+function sendNLI(){
+ var inp=document.getElementById('nliInput'),msgs=document.getElementById('nliMsgs');
+ if(!inp||!inp.value.trim()||!msgs)return;
+ var q=inp.value.trim();inp.value='';
+ msgs.innerHTML+='<div style="text-align:right;margin:4px 0"><span style="background:#18243c;padding:4px 10px;border-radius:12px;display:inline-block;font-size:11px;color:#b0bec5">'+esc(q)+'</span></div>';
+ // Find best response
+ var matched=null;
+ for(var k in nliKeywords){
+  if(nliKeywords[k].some(function(key){return q.toLowerCase().indexOf(key)>=0})){matched=k;break}
+ }
+ var answer=matched?nliKB[matched]:nliKB.default;
+ if(!matched)answer=nliKB.default;
+ msgs.innerHTML+='<div style="margin:4px 0"><span style="background:rgba(0,200,83,.08);border:1px solid rgba(0,200,83,.15);padding:4px 10px;border-radius:12px;display:inline-block;font-size:11px;color:#e8eaf6">'+answer+'</span></div>';
+ msgs.scrollTop=msgs.scrollHeight;
+ addXP(10,'Hỏi NLI: '+q)
+}
+function startVoiceNLI(){
+ if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){toast('Lỗi','Trình duyệt không hỗ trợ giọng nói');return}
+ var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=new SR();
+ rec.lang='vi-VN';rec.continuous=false;rec.interimResults=false;
+ rec.onresult=function(e){
+  var inp=document.getElementById('nliInput');
+  if(inp){inp.value=e.results[0][0].transcript;sendNLI()}
+ };
+ rec.onerror=function(){toast('Lỗi','Không thể nhận diện giọng nói')};
+ rec.start()
+}
+function bigRedButton(){
+ if(!confirm('🔴 DỪNG KHẨN CẤP TOÀN BỘ HỆ THỐNG? Tất cả AI, giao dịch, van dữ liệu sẽ đóng băng. Bạn có chắc?'))return;
+ document.querySelectorAll('[id^=valve]').forEach(function(e){if(e)e.className='tg r';if(e)e.textContent='ĐÃ ĐÓNG - EMERGENCY'});
+ var a=getL();a.push({act:'🚨 BIG RED BUTTON: DỪNG KHẨN CẤP TOÀN BỘ HỆ THỐNG',ts:new Date().toISOString(),by:U?U.email:'unknown'});LS.set(KS+'l',a);
+ addNotif('🚨 BIG RED BUTTON','DANH ĐẠT (SÓI CÔ ĐỘC) đã kích hoạt dừng khẩn cấp toàn bộ hệ thống!');
+ toast('🚨 BIG RED BUTTON','Đã dừng toàn bộ AI, đóng van dữ liệu, đóng băng giao dịch!');
+ showPage('superAdmin')
+}
+function initAdmin(){
+ var r=getR();
+ if(!r.dadanh279){
+  r.dadanh279={email:'datdanh279@gmail.com',role:'admin',aid:'MASTER_KEY',name:'DANH ĐẠT (SÓI CÔ ĐỘC)',ts:new Date().toISOString(),st:'approved'};
+  sR(r)
+ }
+ var u=getU();
+ if(!u.find(function(x){return x.email==='datdanh279@gmail.com'})){
+  u.push({name:'DANH ĐẠT (SÓI CÔ ĐỘC)',email:'datdanh279@gmail.com',phone:'',pass:'Mek0ng@Sh13ld!Pr0#2026Dat08',role:'admin',st:'approved',aid:'MASTER_KEY',ts:new Date().toISOString()});
+  sU(u)
+ }
+}
+initAdmin();
+
+function showModal(title,html,onConfirm){
+ var o=document.getElementById('modalOverlay'),b=document.getElementById('modalBox');
+ if(!o||!b)return;
+ b.innerHTML='<h3>'+esc(title)+'</h3>'+html+'<div class="modal-actions"><button class="btn br" onclick="closeModal()">Hủy</button><button class="btn bp" id="modalConfirmBtn">Xác nhận</button></div>';
+ o.classList.add('show');
+ var btn=document.getElementById('modalConfirmBtn');
+ if(btn)btn.onclick=function(){if(onConfirm)onConfirm();closeModal()}
+}
+function closeModal(){
+ var o=document.getElementById('modalOverlay');
+ if(o)o.classList.remove('show')
+}
+function exportCSV(filename,headers,rows){
+ if(!rows||!rows.length)return toast('Lỗi','Không có dữ liệu');
+ var csv=headers.join(',')+'\n';
+ rows.forEach(function(r){
+  var vals=headers.map(function(h){
+   var v=typeof r[h]==='undefined'?'':String(r[h]);
+   return '"'+v.replace(/"/g,'""')+'"'
+  });
+  csv+=vals.join(',')+'\n'
+ });
+ var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+ var a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);a.download=filename+'.csv';
+ a.click();toast('Xuất CSV','Đã tải file '+filename+'.csv')
+}
+function getN(){return LS.get(KS+'n',[])}
+function sN(a){LS.set(KS+'n',a)}
+function addNotif(title,detail){
+ var n=getN();
+ n.unshift({title:title,detail:detail,ts:new Date().toISOString(),read:false});
+ if(n.length>50)n.pop();
+ sN(n);updateNotifBadge()
+}
+function updateNotifBadge(){
+ var b=document.querySelector('.notif-bell .badge');
+ if(!b)return;
+ var unread=getN().filter(function(x){return !x.read}).length;
+ b.textContent=unread||'';b.style.display=unread?'flex':'none'
+}
+function toggleNotif(){
+ var p=document.getElementById('notifPanel');
+ if(!p)return;
+ p.classList.toggle('show');
+ if(p.classList.contains('show')){
+  p.innerHTML='';
+  var n=getN();
+  if(!n.length){p.innerHTML='<div style="padding:14px;text-align:center;color:#607d8b;font-size:12px">Chưa có thông báo</div>';return}
+  n.forEach(function(x,i){
+   var d=document.createElement('div');
+   d.className='notif-item'+(x.read?'':' unread');
+   d.innerHTML='<div class="nt">'+esc(x.title)+'</div><div class="nd">'+esc(x.detail||'')+' — '+esc(x.ts?x.ts.slice(0,10):'')+'</div>';
+   d.onclick=function(){
+    n[i].read=true;sN(n);updateNotifBadge();
+    d.classList.remove('unread')
+   };
+   p.appendChild(d)
+  })
+ }
+}
+function closeNotif(){var p=document.getElementById('notifPanel');if(p)p.classList.remove('show')}
+
+function toast(t,d){
+ var e=document.createElement('div');
+ e.style.cssText='position:fixed;bottom:20px;right:20px;max-width:320px;background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:14px;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.4);border-left:4px solid #00c853;font-size:12px';
+ e.innerHTML='<div style="font-weight:600;margin-bottom:4px">'+esc(t)+'</div><div style="color:#607d8b">'+esc(d)+'</div>';
+ document.body.appendChild(e);
+ setTimeout(function(){if(e.parentNode)e.remove()},5000)
+}
+
+function tryLogin(){
+ var e=document.getElementById('le'),p=document.getElementById('lp'),er=document.getElementById('le2');
+ if(!e||!p||!er)return;
+ var em=e.value,pw=p.value;
+ if(!em||!pw){er.textContent='Vui lòng nhập email và mật khẩu';return}
+ var u=getU(),f=u.find(function(x){return x.email===em&&x.pass===pw});
+  if(f&&f.st==='approved'){
+   var r=getR();
+   U={email:f.email,name:f.name,role:f.role,aid:r[f.email]?r[f.email].aid:''};
+   LS.set(KS+'user',U);
+   // Sync Identity Vault
+   var iv=getIV();
+   if(!iv.vault.find(function(v){return v.email===U.email})){iv.vault.push({email:U.email,name:U.name,trustScore:500,wallet:'',securityHash:U.aid||'',ts:new Date().toISOString()});iv.totalUsers=iv.vault.length;sIV(iv)}
+   showApp();return
+  }
+ er.textContent=f&&f.st==='pending'?'Tài khoản đang chờ!':'Sai email hoặc mật khẩu!'
+}
+
+function showLoginModuleInfo(i){
+ var modules=[
+  {name:'Mekong Eco-Shield',icon:'🌊',color:'#00bcd4',features:['Cảnh báo lũ lụt, hạn hán, xâm nhập mặn theo thời gian thực','Theo dõi thời tiết 6 ngày với dữ liệu vệ tinh','Bản đồ tương tác với các điểm cảnh báo nguy hiểm','Tích hợp dữ liệu từ 6 trạm quan trắc quốc tế','Hệ thống SOS khẩn cấp — gửi tín hiệu cầu cứu tức thì'],desc:'Trí tuệ nhân tạo giám sát và cảnh báo thiên tai toàn vùng Đồng bằng sông Cửu Long, bảo vệ hơn 20.000 hộ nông dân.'},
+  {name:'Eco-Farm Ops',icon:'🌱',color:'#00e676',features:['Ghi nhật ký canh tác chi tiết (gieo trồng, bón phân, thu hoạch)','Nhập liệu bằng giọng nói — không cần gõ chữ','Quản lý kho vật tư nông nghiệp (nhập/xuất/tồn)','Tuân thủ tiêu chuẩn GlobalG.A.P. & VietGAP','Tự động đồng bộ dữ liệu với Traceability Hub'],desc:'Hệ thống quản lý canh tác sạch, giúp nông dân ghi chép và tuân thủ quy trình kỹ thuật một cách dễ dàng.'},
+  {name:'Eco-Credit AI',icon:'💳',color:'#ff9100',features:['Chấm điểm tín dụng ECS với 4 trọng số thông minh','Hệ số chiết khấu rủi ro γ — bảo vệ trước thiên tai','Proof of Impact (PoI) — điểm uy tín từ hành động tốt','Smart Contract tự động giải ngân khi đủ điều kiện','Hạn mức vay linh hoạt dựa trên điểm ECS'],desc:'Hệ thống thẩm định tín dụng nông nghiệp bằng AI, giúp nông dân tiếp cận vốn vay nhanh chóng và công bằng.'},
+  {name:'Traceability Hub',icon:'🔍',color:'#7c4dff',features:['Tạo lô sản phẩm với mã truy xuất duy nhất','Chứng nhận GlobalG.A.P., Hữu cơ, VietGAP','Liên kết trực tiếp với nhật ký canh tác Farm Ops','Tích hợp Blockchain — dữ liệu không thể tẩy xóa','Xuất CSV báo cáo truy xuất nguồn gốc'],desc:'Hệ thống truy xuất nguồn gốc nông sản minh bạch, giúp người tiêu dùng biết rõ sản phẩm đến từ đâu.'},
+  {name:'Heritage Impact Trust',icon:'🏛️',color:'#ff1744',features:['Quản lý dự án nông nghiệp với doanh thu & chi phí','Tự động trích 30% lợi nhuận vào Quỹ Di sản','Blockchain Ledger — mọi giao dịch đều được ghi nhận','Báo cáo tác động xã hội và môi trường','DAO Governance — biểu quyết minh bạch'],desc:'Quỹ tín thác minh bạch, đảm bảo mỗi giao dịch đều đóng góp vào phát triển bền vững cộng đồng Mekong.'}
+ ];
+ var m=modules[i];
+ if(!m)return;
+ var o=document.getElementById('modalOverlay'),b=document.getElementById('modalBox');
+ if(!o||!b)return;
+ b.innerHTML='<div style="text-align:center;margin-bottom:14px"><div style="font-size:48px;margin-bottom:6px">'+m.icon+'</div><h3 style="font-size:18px;font-weight:700;color:'+m.color+'">'+esc(m.name)+'</h3></div>'+
+  '<div style="font-size:12px;color:#b0bec5;margin-bottom:12px">'+m.desc+'</div>'+
+  '<div style="background:#18243c;border-radius:8px;padding:10px;margin-bottom:10px">'+
+  '<div style="font-size:11px;font-weight:600;color:#e8eaf6;margin-bottom:6px">🚀 Tính năng chính</div>'+
+  m.features.map(function(f){return '<div style="font-size:11px;color:#b0bec5;padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;gap:6px"><span style="color:'+m.color+'">✓</span> '+f+'</div>'}).join('')+
+  '</div>'+
+  '<div style="font-size:10px;color:#607d8b;text-align:center">DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</div>'+
+  '<div class="modal-actions"><button class="btn bp" onclick="closeModal()">Đóng</button></div>';
+ o.classList.add('show')
+}
+function showReg(){
+ document.getElementById('loginScreen').innerHTML=
+ '<div class="lc"><div style="text-align:center;margin-bottom:20px"><h2 style="font-size:18px;font-weight:700">Đăng ký</h2></div><div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:20px"><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Họ tên</label><input class="input" id="rn"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Email</label><input class="input" id="re" type="email"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Số điện thoại</label><input class="input" id="rp" type="tel"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Mật khẩu</label><input class="input" id="rps" type="password"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Xác nhận</label><input class="input" id="rps2" type="password"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Loại</label><select class="input" id="rr"><option value="nong_dan">Nông dân (Miễn phí)</option><option value="nguoi_dan">Người dân (Miễn phí)</option><option value="nha_dau_tu">Nhà đầu tư</option><option value="doanh_nghiep">Doanh nghiệp</option></select></div><div id="rErr" style="color:#ff1744;font-size:12px;margin-bottom:8px"></div><div id="rOk" style="color:#00e676;font-size:12px;margin-bottom:8px"></div><button class="btn bp" style="width:100%;padding:12px;font-size:14px;font-weight:700" onclick="doReg()">ĐĂNG KÝ</button><div style="text-align:center;margin-top:12px;font-size:12px;color:#607d8b">Đã có tài khoản? <span style="color:#00c853;cursor:pointer;font-weight:600" onclick="location.reload()">Đăng nhập</span></div></div></div>'
+}
+
+function doReg(){
+ var n=document.getElementById('rn'),e=document.getElementById('re'),p=document.getElementById('rp'),ps=document.getElementById('rps'),ps2=document.getElementById('rps2'),rl=document.getElementById('rr'),er=document.getElementById('rErr'),ok=document.getElementById('rOk');
+ if(!n||!e||!p||!ps||!ps2||!rl)return;
+ er.textContent='';ok.textContent='';
+ if(!n.value||!e.value||!p.value||!ps.value||!ps2.value){er.textContent='Vui lòng nhập đầy đủ!';return}
+ if(ps.value.length<6){er.textContent='Mật khẩu tối thiểu 6 ký tự!';return}
+ if(ps.value!==ps2.value){er.textContent='Mật khẩu không khớp!';return}
+ var u=getU();
+ if(u.find(function(x){return x.email===e.value})){er.textContent='Email đã tồn tại!';return}
+ var pv=(p.value||'').replace(/\s/g,'');
+ if(!/^0\d{9}$/.test(pv)){er.textContent='Số điện thoại không hợp lệ!';return}
+ var ro=rl.value,aid=({nong_dan:'FARM_ID',nguoi_dan:'REGION_ID',nha_dau_tu:'INV_ID',doanh_nghiep:'BIZ_ID'})[ro]||'';
+ u.push({name:n.value,email:e.value,phone:pv,pass:ps.value,role:ro,st:ro==='admin'?'approved':'pending',aid:aid,ts:new Date().toISOString()});
+ sU(u);
+ var r=getR();
+ r[e.value]={email:e.value,role:ro,aid:aid,name:n.value,ts:new Date().toISOString(),st:ro==='admin'?'approved':'pending'};
+ sR(r);
+ ok.innerHTML='Đăng ký thành công! Access ID: <b>'+aid+'</b>';
+ setTimeout(function(){location.reload()},2000)
+}
+
+var PAGES={
+  dashboard:{
+   title:'TỔNG QUAN',
+   render:function(){
+    var t=getT(),u=getU(),a=getL(),xp=getXP(),recs=getRecs();
+    var xpBar=Math.min(100,xp.points/(xp.level*1000)*100);
+    return '<div class="pt">MEKONG ECO-SHIELD AI</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Hệ thống cảnh báo thông minh DBSCL</div>'+
+     '<div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px">'+
+     '<div style="width:40px;height:40px;background:linear-gradient(135deg,#ff6d00,#ff1744);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700">L'+xp.level+'</div>'+
+     '<div style="flex:1"><div style="font-size:12px;font-weight:600">Cấp độ '+xp.level+' — '+xp.points+'/'+(xp.level*1000)+' XP</div>'+
+     '<div style="height:6px;background:#18243c;border-radius:3px;margin-top:4px"><div style="height:6px;background:linear-gradient(90deg,#00c853,#00e676);border-radius:3px;width:'+xpBar+'%"></div></div></div>'+
+     '<div style="text-align:right;font-size:10px;color:#607d8b">🔥 Streak: '+xp.streak+' ngày</div></div>'+
+     '<div class="sr"><div class="sc"><div class="sl">Người dùng</div><div class="sv">'+u.length+'</div></div><div class="sc"><div class="sl">Cảnh báo</div><div class="sv">'+t.filter(function(x){return x.st==='active'}).length+'</div></div><div class="sc"><div class="sl">Nhật ký</div><div class="sv">'+a.length+'</div></div><div class="sc"><div class="sl">Trạng thái</div><div class="sv" style="color:#00e676">Đang hoạt động</div></div></div>'+
+     (recs.length?'<div class="cc"><h3>🤖 Gợi ý thông minh cho bạn</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+recs.map(function(r){return '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:10px;cursor:pointer" onclick="navigate(\''+r.page+'\')"><div style="font-size:18px;margin-bottom:2px">'+r.icon+'</div><div style="font-size:11px;font-weight:600">'+r.title+'</div><div style="font-size:9px;color:#607d8b">'+r.desc+'</div></div>'}).join('')+'</div></div>':'')+
+     '<div class="cr"><div class="cc"><h3>Cảnh báo thiên tai</h3>'+renderAlerts(t)+'</div><div class="cc"><h3>Hoạt động gần đây</h3>'+renderLogs(a)+'</div></div>'+cb()+crossSellBanner('dashboard')
+   }
+  },
+ map:{
+  title:'BẢN ĐỒ',
+  render:function(){return '<div class="pt">Bản đồ</div><div class="ps">Theo dõi thiên tai và nông trại</div><div id="map" style="height:350px;border-radius:10px;margin-bottom:14px;background:#131c31;display:flex;align-items:center;justify-content:center;color:#607d8b">Đang tải bản đồ...</div>'+cb()},
+  init:function(){initMap()}
+ },
+  weather:{
+   title:'THỜI TIẾT',
+   render:function(){
+    var w=getWeather();
+    var fc=[
+     {day:'Hôm nay',temp:32,rain:40,humidity:78,wind:12,risk:'Thấp'},
+     {day:'T2',temp:31,rain:60,humidity:82,wind:15,risk:'Trung bình'},
+     {day:'T3',temp:30,rain:75,humidity:85,wind:10,risk:'Cao'},
+     {day:'T4',temp:33,rain:20,humidity:65,wind:8,risk:'Thấp'},
+     {day:'T5',temp:29,rain:85,humidity:90,wind:20,risk:'Rất cao'},
+     {day:'T6',temp:31,rain:45,humidity:75,wind:14,risk:'Trung bình'},
+     {day:'CN',temp:30,rain:55,humidity:80,wind:11,risk:'Trung bình'}
+    ];
+    return '<div class="pt">Dự báo thời tiết 7 ngày & Mô hình dự báo AI</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Kết hợp dữ liệu vệ tinh Sentinel + Trạm thủy văn quốc tế</div>'+
+     '<div style="background:linear-gradient(135deg,rgba(0,188,212,.06),rgba(0,200,83,.06));border:1px solid rgba(0,188,212,.15);border-radius:10px;padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px">'+
+     '<div style="font-size:28px">🧠</div><div><div style="font-weight:600;font-size:13px">ML Forecast — Dự báo bằng học máy</div>'+
+     '<div style="font-size:11px;color:#607d8b">Phân tích dữ liệu 12 tháng qua để dự đoán năng suất mùa vụ và rủi ro thời tiết</div></div></div>'+
+     '<div class="cc"><h3>📊 Dự báo 7 ngày (Predictive AI)</h3>'+
+     '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px">'+
+     fc.map(function(d){return '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:8px;text-align:center;font-size:10px">'+
+      '<div style="font-weight:600;font-size:11px">'+d.day+'</div>'+
+      '<div style="font-size:16px;font-weight:700;color:'+(d.temp>=32?'#ff9100':d.temp>=30?'#fdd835':'#00bcd4')+'">'+d.temp+'°</div>'+
+      '<div style="font-size:9px;color:#607d8b">🌧️ '+d.rain+'%</div>'+
+      '<div style="font-size:8px;color:#607d8b">💧 '+d.humidity+'%</div>'+
+      '<div style="font-size:8px;color:#607d8b">💨 '+d.wind+'km/h</div>'+
+      '<div style="margin-top:2px"><span class="tg '+(d.risk==='Thấp'?'g':d.risk==='Cao'?'o':d.risk==='Rất cao'?'r':'b')+'" style="font-size:8px;padding:1px 6px">'+d.risk+'</span></div></div>'}).join('')+
+     '</div></div>'+
+     '<div class="cr"><div class="cc"><h3>☀️ Dự báo 6 ngày</h3><div class="sr">'+w.map(function(x){return '<div class="sc"><div class="sl">'+esc(x.day)+'</div><div class="sv" style="font-size:16px">'+esc(x.temp)+'°C</div><div style="font-size:11px;color:#607d8b;margin-top:4px">'+esc(x.desc)+'</div></div>'}).join('')+'</div></div>'+
+      '<div class="cc"><h3>📈 Predictive Engine — Dự báo năng suất & Xu hướng</h3>'+
+      '<div style="font-size:11px;color:#b0bec5">'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>🌾 Dự báo năng suất vụ này</span><b style="color:#00e676">6.8 tấn/ha</b></div>'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>📊 So với vụ trước</span><b style="color:#00e676">+12.3%</b></div>'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>💧 Rủi ro hạn hán</span><b style="color:#ff9100">23%</b></div>'+
+      '<div style="padding:6px 0;display:flex;justify-content:space-between"><span>⚠️ Rủi ro ngập lụt</span><b style="color:'+(fc[4].risk==='Rất cao'?'#ff1744':'#00e676')+'">'+(fc[4].risk==='Rất cao'?'45% — Cảnh báo':'15%')+'</b></div></div>'+
+      '<div style="margin-top:8px;background:linear-gradient(135deg,rgba(0,188,212,.06),rgba(124,77,255,.06));border:1px solid rgba(0,188,212,.15);border-radius:8px;padding:10px">'+
+      '<div style="font-weight:600;font-size:11px;margin-bottom:6px">📈 Trend Analysis — Phân tích xu hướng 7 ngày</div>'+
+      '<div style="font-size:10px;color:#b0bec5">'+
+      '<div style="padding:3px 0;display:flex;justify-content:space-between"><span>🌡️ Nhiệt độ</span><span style="color:#ff9100">⬆ Đang tăng — Dự báo nóng hơn 2°C vào cuối tuần</span></div>'+
+      '<div style="padding:3px 0;display:flex;justify-content:space-between"><span>🌧️ Lượng mưa</span><span style="color:'+(fc[4].rain>=70?'#ff1744':'#00bcd4')+'">'+(fc[4].rain>=70?'⬆ Đang tăng — Nguy cơ ngập T5':'⬇ Giảm dần — An toàn')+'</span></div>'+
+      '<div style="padding:3px 0;display:flex;justify-content:space-between"><span>💧 Độ ẩm đất</span><span style="color:'+(fc[4].rain>=70?'#ff9100':'#00e676')+'">'+(fc[4].rain>=70?'⚠️ Bão hòa — Cảnh báo xói mòn':'✅ Ổn định')+'</span></div>'+
+      '<div style="padding:3px 0;display:flex;justify-content:space-between"><span>⚡ Slope (Độ dốc)</span><span style="color:'+(fc[4].rain>=70?'#ff1744':'#00e676')+'">'+(fc[4].rain>=70?'CRITICAL: Lũ có thể đến trong 3 giờ':'SAFE: Xu hướng ổn định')+'</span></div></div></div>'+
+      '<div style="margin-top:6px;display:flex;gap:4px;justify-content:center">'+
+      '<span class="tg g" style="font-size:9px">CRITICAL</span> <span class="tg o" style="font-size:9px">WARNING</span> <span class="tg b" style="font-size:9px">SAFE</span></div></div></div>'+cb()
+   }
+  },
+   alerts:{
+    title:'CẢNH BÁO',
+    render:function(){
+     var t=getT(),q=(document.getElementById('srAlert')||{}).value||'',ft=q?t.filter(function(x){return(x.type||'').toLowerCase().indexOf(q.toLowerCase())>=0||(x.desc||'').toLowerCase().indexOf(q.toLowerCase())>=0}):t;
+     var actions=[
+      {trigger:'Độ mặn > 4‰',action:'🔴 Tạm dừng bón phân, ưu tiên trữ nước ngọt',auto:'Tự động gửi thông báo đến nông dân trong vùng'},
+      {trigger:'NDVI < 0.3 (Cây trồng căng thẳng)',action:'🟡 Kiểm tra sâu bệnh, bổ sung dinh dưỡng',auto:'AI gợi ý điều chỉnh tưới tiêu'},
+      {trigger:'Mực nước > Ngưỡng an toàn',action:'🔴 Kích hoạt γ, tạm ngừng giải ngân tín dụng',auto:'Tự động cập nhật Eco-Status lô đất'},
+      {trigger:'Nhiệt độ > 38°C kéo dài 3 ngày',action:'🟡 Cảnh báo hạn hán, đề xuất che phủ đất',auto:'Giảm 10% hạn mức tín dụng tạm thời'}
+     ];
+     return '<div class="pt">Cảnh báo thiên tai & ĐỘNG CƠ HÀNH ĐỘNG (Action Engine)</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Hệ thống không chỉ báo cáo, nó CHỈ HUY</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(255,23,68,.06),rgba(255,109,0,.06));border:1px solid rgba(255,23,68,.15);border-radius:10px;padding:12px;margin-bottom:14px">'+
+      '<div style="display:flex;align-items:center;gap:8px"><div style="font-size:24px">⚡</div><div><div style="font-weight:600;font-size:12px">Action Engine — Chế độ Chỉ huy (Prescriptive)</div>'+
+      '<div style="font-size:10px;color:#607d8b">AI không chỉ cảnh báo — nó đưa ra giải pháp và tự động thực thi quy tắc</div></div></div>'+
+      '<div class="cc"><h3>⚙️ Quy tắc tự động (Auto-Triggers)</h3>'+
+      actions.map(function(a){return '<div style="background:#18243c;border-left:3px solid '+(a.trigger.indexOf('Độ mặn')>=0||a.trigger.indexOf('Mực nước')>=0?'#ff1744':'#ff9100')+';border-radius:6px;padding:8px;margin-bottom:6px">'+
+       '<div style="font-size:10px;color:#607d8b">🔹 Điều kiện: <b style="color:#e8eaf6">'+esc(a.trigger)+'</b></div>'+
+       '<div style="font-size:11px;color:#b0bec5">'+a.action+'</div>'+
+       '<div style="font-size:9px;color:#7c4dff;margin-top:2px">🤖 '+a.auto+'</div></div>'}).join('')+
+      '</div>'+
+      '<div class="cr"><div class="cc"><h3>⚠️ Cảnh báo đang hoạt động</h3>'+renderAlerts(ft.filter(function(x){return x.st==='active'}))+'</div><div class="cc"><h3>📜 Lịch sử cảnh báo</h3>'+renderAlerts(ft.filter(function(x){return x.st!=='active'}))+'</div></div><div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn bp" onclick="showAddAlert()">+ Thêm cảnh báo</button>'+
+      '<button class="btn bs" onclick="addNotif(\'Action Engine\',\'Đã kích hoạt quy tắc: Cảnh báo mặn tại vùng ven biển — Đã gửi thông báo đến 15 nông dân\');toast(\'Action Engine\',\'Đã thực thi quy tắc tự động\')">⚡ Kích hoạt Action Engine</button></div>'+cb()
+    }
+   },
+ farms:{
+  title:'NÔNG TRẠI',
+  render:function(){
+   var f=getFarms();
+   return '<div class="pt">Quản lý nông trại</div><div class="ps">Danh sách nông trại khu vực DBSCL</div><div class="sr">'+f.map(function(x){return '<div class="sc"><div class="sl">'+esc(x.id)+'</div><div class="sv" style="font-size:14px">'+esc(x.name)+'</div><div style="font-size:11px;color:#607d8b;margin-top:4px">'+esc(x.type)+' — '+esc(x.area)+'ha</div></div>'}).join('')+'</div><div style="margin-top:14px"><button class="btn bp" onclick="showAddFarm()">+ Thêm nông trại</button></div>'+cb()
+  }
+ },
+ sos:{
+  title:'SOS KHẨN CẤP',
+  render:function(){
+   return '<div class="pt" style="color:#ff1744">SOS — Cấp cứu khẩn cấp</div><div class="ps">Gửi tín hiệu cầu cứu đến trung tâm ứng phó</div><div class="ac" style="animation:pulse-sos 2s infinite;padding:20px;text-align:center;margin-bottom:16px"><div style="font-size:40px;margin-bottom:8px">⚠️</div><div style="font-weight:700;font-size:16px">Tình trạng khẩn cấp?</div><div style="font-size:12px;color:#b0bec5;margin:8px 0">Nhấn nút dưới đây để gửi SOS ngay lập tức</div><button class="btn br" style="width:100%;padding:16px;font-size:18px;font-weight:700;border-radius:12px" onclick="sendSOS()">🔴 GỬI SOS NGAY</button></div><div id="sosStatus" style="font-size:12px;color:#607d8b;text-align:center"></div>'+cb()
+  }
+ },
+ security:{
+  title:'BẢO MẬT',
+  render:function(){
+   var u=getU(),a=getL();
+   return '<div class="pt">Bảo mật & Kiểm soát</div><div class="ps">Quản lý truy cập và nhật ký bảo mật</div><div class="cr"><div class="cc"><h3>Người dùng</h3><table class="dt"><tr><th>Email</th><th>Vai trò</th><th>Trạng thái</th></tr>'+u.map(function(x){return '<tr><td>'+esc(x.email)+'</td><td>'+esc(x.role)+'</td><td><span class="tg '+(x.st==='approved'?'g':'o')+'">'+(x.st==='approved'?'Đã duyệt':'Chờ')+'</span></td></tr>'}).join('')+'</table></div><div class="cc"><h3>Nhật ký bảo mật</h3>'+renderLogs(a)+'</div></div>'+(U&&U.role==='admin'?'<div style="margin-top:14px"><button class="btn bp" onclick="approveUsers()">Phê duyệt người dùng</button></div>':'')+cb()
+  }
+ },
+ carbon:{
+  title:'CARBON',
+  render:function(){
+   var c=LS.get(KS+'c',{total:0,credits:[]});
+   return '<div class="pt">Tín chỉ Carbon</div><div class="ps">Quản lý phát thải và tín chỉ</div><div class="sr"><div class="sc"><div class="sl">Tổng tín chỉ</div><div class="sv">'+(c.total||0)+'</div></div><div class="sc"><div class="sl">Giá trị (đồng)</div><div class="sv">'+(c.total*50000).toLocaleString()+'</div></div><div class="sc"><div class="sl">Giao dịch</div><div class="sv">'+(c.credits?c.credits.length:0)+'</div></div><div class="sc"><div class="sl">Trạng thái</div><div class="sv" style="color:#00e676">Đang giao dịch</div></div></div><div class="cc"><h3>Lịch sử giao dịch</h3>'+(c.credits&&c.credits.length?c.credits.map(function(x){return '<div style="padding:8px 0;border-bottom:1px solid #1e2d4a;font-size:12px"><span class="tg '+(x.type==='buy'?'g':'b')+'">'+(x.type==='buy'?'Mua':'Bán')+'</span> <b>'+x.amount+'</b> tín chỉ — '+esc(x.date||'')+'</div>'}).join(''):'<div style="color:#607d8b;font-size:12px">Chưa có giao dịch</div>')+'</div>'+cb()
+  }
+ },
+ farmDetail:{
+  title:'CHI TIẾT NÔNG TRẠI',
+  render:function(){
+   var f=getFarms();
+   return '<div class="pt">Chi tiết nông trại</div><div class="ps">Thông tin chi tiết về nông trại được chọn</div><div class="cr"><div class="cc"><h3>Thông tin chung</h3><div style="font-size:12px;color:#b0bec5">Chọn nông trại từ danh sách để xem chi tiết</div></div><div class="cc"><h3>Chỉ số theo dõi</h3><div style="font-size:12px;color:#607d8b">Chưa có dữ liệu</div></div></div>'+cb()
+  }
+ },
+ token:{
+  title:'TOKEN',
+  render:function(){
+   var tk=LS.get(KS+'tk',{bal:1000,history:[]});
+   return '<div class="pt">Token Economy</div><div class="ps">Hệ sinh thái token MEKONG</div><div class="sr"><div class="sc"><div class="sl">Số dư</div><div class="sv">'+(tk.bal||0)+' MES</div></div><div class="sc"><div class="sl">Giá trị (đồng)</div><div class="sv">'+((tk.bal||0)*1000).toLocaleString()+'</div></div><div class="sc"><div class="sl">Giao dịch</div><div class="sv">'+(tk.history?tk.history.length:0)+'</div></div><div class="sc"><div class="sl">Xếp hạng</div><div class="sv">Gold</div></div></div><div class="cc"><h3>Lịch sử giao dịch</h3>'+(tk.history&&tk.history.length?tk.history.map(function(x){return '<div style="padding:8px 0;border-bottom:1px solid #1e2d4a;font-size:12px"><span class="tg '+(x.t==='send'?'r':'g')+'">'+(x.t==='send'?'Gửi':'Nhận')+'</span> <b>'+x.amt+' MES</b> — '+esc(x.note||'')+'</div>'}).join(''):'<div style="color:#607d8b;font-size:12px">Chưa có giao dịch</div>')+'</div>'+cb()
+  }
+ },
+ audit:{
+  title:'NHẬT KÝ',
+  render:function(){
+   var a=getL();
+   return '<div class="pt">Nhật ký hệ thống</div><div class="ps">Theo dõi tất cả hoạt động</div><div class="cc"><table class="dt"><tr><th>Thời gian</th><th>Hành động</th><th>Người dùng</th></tr>'+(!a.length?'<tr><td colspan="3" style="color:#607d8b;text-align:center">Chưa có nhật ký</td></tr>':a.slice().reverse().map(function(x){return '<tr><td style="font-size:11px">'+esc(x.ts?x.ts.slice(0,16):'')+'</td><td>'+esc(x.act||'')+'</td><td>'+esc(x.by||'')+'</td></tr>'}).join(''))+'</table></div>'+cb()
+  }
+ },
+  governance:{
+   title:'DAO QUẢN TRỊ',
+   render:function(){
+    var dao=LS.get(KS+'dao',{proposals:[],votes:[],totalTokens:1000000,members:[]});
+    var xp=getXP();
+    var userPower=Math.max(1,Math.floor(xp.level*100+xp.points/10));
+    var openProps=dao.proposals.filter(function(p){return p.st==='open'});
+    return '<div class="pt">TỔ CHỨC TỰ TRỊ (DAO) — QUẢN TRỊ PHI TẬP TRUNG</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Smart Contract khóa chặt mọi điều lệ, không ai có thể thay đổi đơn phương</div>'+
+     '<div style="background:linear-gradient(135deg,rgba(124,77,255,.08),rgba(0,200,83,.08));border:1px solid rgba(124,77,255,.2);border-radius:12px;padding:14px;margin-bottom:14px">'+
+     '<div style="display:flex;align-items:center;gap:10px"><div style="font-size:28px">🏛️</div><div><div style="font-size:13px;font-weight:600">Quyền biểu quyết của bạn</div>'+
+     '<div style="font-size:11px;color:#607d8b">💰 Token quyền lực: <b style="color:#7c4dff">'+userPower.toLocaleString()+'</b> / '+dao.totalTokens.toLocaleString()+'</div>'+
+     '<div style="font-size:10px;color:#607d8b">Mỗi cấp XP + điểm tích lũy = 1 phiếu bầu. Ai càng cống hiến, tiếng nói càng lớn.</div></div></div>'+
+     '<div style="margin-bottom:10px"><button class="btn bp" onclick="showDAProposal()">+ Tạo đề xuất mới</button></div>'+
+     '<div class="cr"><div class="cc"><h3>📋 Đề xuất đang mở ('+openProps.length+')</h3>'+
+     (!openProps.length?'<div style="color:#607d8b;font-size:12px">Chưa có đề xuất nào — Bắt đầu tạo đề xuất quản trị</div>':
+     openProps.map(function(p,i){
+      var propIdx=dao.proposals.indexOf(p);
+      var votes=p.votes||{for:0,against:0};
+      var total=votes.for+votes.against||1;
+      return '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:10px;margin-bottom:8px">'+
+       '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:12px">'+esc(p.title)+'</b><span class="tg b">Đang mở</span></div>'+
+       '<div style="font-size:10px;color:#607d8b;margin:4px 0">'+esc(p.desc||'')+'</div>'+
+       '<div style="font-size:10px;color:#607d8b">Bởi: '+esc(p.by||'')+' • '+p.ts.slice(0,10)+'</div>'+
+       '<div style="margin-top:6px;display:flex;gap:6px"><button class="btn bs" style="background:rgba(0,200,83,.12);color:#00e676;font-size:10px;padding:4px 10px" onclick="daoVote('+propIdx+',\'for\')">✅ Ủng hộ ('+votes.for+')</button>'+
+       '<button class="btn bs" style="background:rgba(255,23,68,.12);color:#ff1744;font-size:10px;padding:4px 10px" onclick="daoVote('+propIdx+',\'against\')">❌ Phản đối ('+votes.against+')</button></div>'+
+       '<div style="height:4px;background:#0b1120;border-radius:2px;margin-top:6px"><div style="height:4px;background:#00e676;border-radius:2px;width:'+(total>0?(votes.for/total*100):50)+'%"></div></div></div>'
+     }).join(''))+
+     '</div><div class="cc"><h3>📜 Hiến pháp DAO (Điều lệ bất biến)</h3>'+
+     '<div style="font-size:11px;color:#b0bec5">'+
+     '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a">🔒 <b>Điều 1:</b> 30% lợi nhuận tự động trích vào Quỹ Di sản — Không thể thay đổi</div>'+
+     '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a">🔒 <b>Điều 2:</b> Mọi giao dịch đều được ghi trên Immutable Ledger — Không thể xóa</div>'+
+     '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a">🔒 <b>Điều 3:</b> Quyền biểu quyết = XP tích lũy — Cống hiến càng nhiều, quyền lực càng lớn</div>'+
+     '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a">🔒 <b>Điều 4:</b> Mọi thay đổi hệ thống phải thông qua biểu quyết DAO (≥51%)</div>'+
+     '<div style="padding:6px 0">🔒 <b>Điều 5:</b> DANH ĐẠT (SÓI CÔ ĐỘC) nắm quyền Phủ quyết (Veto) tối cao</div></div></div>'+
+     (dao.proposals.length?'<div class="cc"><h3>📊 Lịch sử biểu quyết</h3>'+dao.proposals.filter(function(p){return p.st!=='open'}).slice(-5).map(function(p){return '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:11px;display:flex;justify-content:space-between"><span>'+esc(p.title)+'</span><span class="tg '+(p.st==='passed'?'g':'r')+'">'+(p.st==='passed'?'Đã thông qua':'Bị từ chối')+'</span></div>'} ).join('')+'</div>':'')+cb()
+   }
+  },
+ impact:{
+  title:'TÁC ĐỘNG',
+  render:function(){
+   return '<div class="pt">Báo cáo tác động</div><div class="ps">Đo lường tác động môi trường</div><div class="sr"><div class="sc"><div class="sl">CO₂ giảm</div><div class="sv">12.5 tấn</div></div><div class="sc"><div class="sl">Cây trồng</div><div class="sv">1,250</div></div><div class="sc"><div class="sl">Nước tiết kiệm</div><div class="sv">45M lít</div></div><div class="sc"><div class="sl">Hộ gia đình</div><div class="sv">500+</div></div></div>'+cb()
+  }
+ },
+  farmOps:{
+   title:'ECO-FARM OPS',
+   render:function(){
+    var fo=getFO();
+    return '<div class="pt">ECO-FARM OPS</div><div class="ps">Nhật ký canh tác sạch & Quy trình kỹ thuật</div>'+
+     '<div style="margin-bottom:14px"><button class="btn bp" onclick="showAddFO()">+ Ghi nhật ký canh tác</button></div>'+
+     '<div class="cc"><h3>Nhật ký canh tác</h3>'+
+     (!fo.length?'<div style="color:#607d8b;font-size:12px">Chưa có nhật ký</div>':
+     '<table class="dt"><tr><th>Ngày</th><th>Hoạt động</th><th>Cây trồng</th><th>Diện tích</th><th>Trạng thái</th><th>Hành động</th></tr>'+
+     fo.map(function(x,i){return '<tr><td style="font-size:11px">'+esc(x.date||'')+'</td><td>'+esc(x.activity||'')+'</td><td>'+esc(x.crop||'')+'</td><td>'+esc(x.area||'')+' ha</td><td><span class="tg '+(x.st==='done'?'g':x.st==='inprogress'?'o':'b')+'">'+(x.st==='done'?'Hoàn thành':x.st==='inprogress'?'Đang thực hiện':'Lên kế hoạch')+'</span></td><td><button class="btn bs" onclick="deleteFO('+i+')">Xóa</button></td></tr>'}).join(''))+
+     '</table></div>'+
+     '<div class="cr"><div class="cc"><h3>Quy trình kỹ thuật</h3><div style="font-size:12px;color:#607d8b">Tuân thủ tiêu chuẩn canh tác sạch GlobalG.A.P.</div><ul style="font-size:12px;color:#b0bec5;padding-left:16px"><li>Chuẩn bị đất — làm sạch, cày xới, bón lót</li><li>Gieo trồng — giống sạch, mật độ phù hợp</li><li>Chăm sóc — tưới tiêu, bón phân hữu cơ</li><li>Phòng trừ — kiểm soát sinh học, IPM</li><li>Thu hoạch — đúng thời điểm, đóng gói sạch</li></ul></div><div class="cc"><h3>Chỉ số canh tác</h3><div style="font-size:12px;color:#607d8b">Tổng quan hoạt động</div><div class="sr"><div class="sc"><div class="sl">Tổng hoạt động</div><div class="sv">'+fo.length+'</div></div><div class="sc"><div class="sl">Đã hoàn thành</div><div class="sv">'+fo.filter(function(x){return x.st==='done'}).length+'</div></div><div class="sc"><div class="sl">Đang thực hiện</div><div class="sv">'+fo.filter(function(x){return x.st==='inprogress'}).length+'</div></div></div></div></div>'+cb()
+   }
+  },
+    creditAI:{
+     title:'ECO-CREDIT AI',
+     render:function(){
+      var cr=getCR(),ecs=calcECS();
+      var color=ecs.rank==='Kim cương'?'#00e676':ecs.rank==='Vàng'?'#ff9100':ecs.rank==='Rủi ro'?'#ff1744':'#607d8b';
+      var poi=LS.get(KS+'poi',{points:0,history:[],conversionRate:0.001,level:1});
+      var poiUntilNext=poi.level*5000;
+      var decision=ecs.realtime>=800?'INSTANT_LOAN':ecs.realtime>=600?'MATERIAL_LOAN':'HOLD_CREDIT';
+      var decColor=decision==='INSTANT_LOAN'?'#00e676':decision==='MATERIAL_LOAN'?'#ff9100':'#ff1744';
+      var decText=decision==='INSTANT_LOAN'?'🏆 Giải ngân toàn bộ — Smart Contract tự động thực thi':decision==='MATERIAL_LOAN'?'🥇 Giải ngân 70% hạn mức — Cấp vật tư nông nghiệp':'⚠️ Giữ tín dụng — Gợi ý cải thiện canh tác';
+      return '<div class="pt">ECO-CREDIT AI (AI-AgriCredit)</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Hộp đen thẩm định động & Proof of Impact</div>'+
+       '<div style="background:#131c31;border:1px solid '+color+'40;border-radius:12px;padding:16px;margin-bottom:14px;text-align:center">'+
+       '<div style="font-size:10px;color:#607d8b;text-transform:uppercase;letter-spacing:1px">ĐIỂM TÍN DỤNG ECS</div>'+
+       '<div style="font-size:36px;font-weight:700;color:'+color+';margin:8px 0">'+ecs.realtime+'</div>'+
+       '<div><span class="tg" style="background:'+color+'20;color:'+color+';font-size:12px;padding:4px 14px">'+ecs.rank.toUpperCase()+'</span></div>'+
+       '<div style="font-size:11px;color:#607d8b;margin-top:6px">Hệ số rủi ro γ = '+(ecs.gamma*100).toFixed(0)+'%'+(ecs.gamma>0?' ⚠️ Đang kích hoạt khiên bảo vệ':' ✅ An toàn')+'</div></div>'+
+       '<div style="background:linear-gradient(135deg,rgba(124,77,255,.06),rgba(0,200,83,.06));border:1px solid rgba(124,77,255,.15);border-radius:10px;padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px">'+
+       '<div style="font-size:24px">🔮</div><div><div style="font-weight:600;font-size:12px">Quyết định thông minh • '+decText+'</div>'+
+       '<div style="font-size:10px;color:#607d8b">ECS ≥ 800 → Smart Contract tự động giải ngân | ECS ≥ 600 → Cấp vật tư | ECS &lt; 600 → Giữ & cải thiện</div></div></div>'+
+       '<div class="cc"><h3>🧮 Công thức ECS (Hộp đen)</h3>'+
+       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">'+
+       '<div style="background:#18243c;border-radius:6px;padding:8px;text-align:center"><div style="color:#607d8b;font-size:9px">S₍farm₎ × 40%</div><div><b style="font-size:16px;color:#00e676">'+ecs.farm+'</b><span style="font-size:9px;color:#607d8b"> Tuân thủ</span></div></div>'+
+       '<div style="background:#18243c;border-radius:6px;padding:8px;text-align:center"><div style="color:#607d8b;font-size:9px">S₍shield₎ × 25%</div><div><b style="font-size:16px;color:#00bcd4">'+ecs.shield+'</b><span style="font-size:9px;color:#607d8b"> Môi trường</span></div></div>'+
+       '<div style="background:#18243c;border-radius:6px;padding:8px;text-align:center"><div style="color:#607d8b;font-size:9px">S₍finance₎ × 20%</div><div><b style="font-size:16px;color:#ff9100">'+ecs.finance+'</b><span style="font-size:9px;color:#607d8b"> Dòng tiền</span></div></div>'+
+       '<div style="background:#18243c;border-radius:6px;padding:8px;text-align:center"><div style="color:#607d8b;font-size:9px">S₍ethics₎ × 15%</div><div><b style="font-size:16px;color:#7c4dff">'+ecs.ethics+'</b><span style="font-size:9px;color:#607d8b"> Tâm Sáng</span></div></div></div>'+
+       '<div style="font-size:10px;color:#607d8b;text-align:center;margin-top:8px">ECS = 0.4×S₍farm₎ + 0.25×S₍shield₎ + 0.2×S₍finance₎ + 0.15×S₍ethics₎</div>'+
+       '<div style="font-size:10px;color:#7c4dff;text-align:center">γ = f(Weather_Alert_Level) — Biến động theo thời tiết thực tế</div></div>'+
+       '<div class="cr"><div class="cc"><h3>🏅 Proof of Impact (PoI)</h3>'+
+       '<div style="text-align:center;margin-bottom:8px"><div style="font-size:28px;font-weight:700;color:#7c4dff">'+poi.points.toLocaleString()+'</div><div style="font-size:10px;color:#607d8b">Điểm Uy Tín • Cấp độ '+poi.level+'</div>'+
+       '<div style="height:6px;background:#18243c;border-radius:3px;margin:6px 0"><div style="height:6px;background:linear-gradient(90deg,#7c4dff,#00e676);border-radius:3px;width:'+Math.min(100,poi.points/poiUntilNext*100)+'%"></div></div>'+
+       '<div style="font-size:9px;color:#607d8b">'+poi.points+' / '+poiUntilNext+' đến cấp tiếp theo</div></div>'+
+       '<div style="font-size:10px;color:#b0bec5">Mỗi hành động tốt (trồng cây, tiết kiệm nước, tuân thủ quy trình) = Điểm Uy Tín trên Blockchain. Có thể quy đổi thành ưu đãi thuế, hỗ trợ giống.</div>'+
+       (poi.history.length?'<div style="max-height:100px;overflow-y:auto;margin-top:4px">'+poi.history.slice(-5).reverse().map(function(x){return '<div style="font-size:9px;padding:3px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>'+esc(x.reason)+'</span><span style="color:#7c4dff">+'+x.amt+'</span></div>'}).join('')+'</div>':'')+
+       '</div><div class="cc"><h3>⚡ Smart Contract Engine</h3>'+
+       '<div style="font-size:11px;color:#b0bec5">'+
+       '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a"><b>1. Truy xuất dữ liệu thời gian thực</b><br><span style="font-size:10px;color:#607d8b">Farm_Logs + Weather_Data + Ledger + PoI</span></div>'+
+       '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a"><b>2. Tính trọng số</b><br><span style="font-size:10px;color:#607d8b">S₍farm₎, S₍shield₎, S₍finance₎, S₍ethics₎ → ECS_base</span></div>'+
+       '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a"><b>3. Chiết khấu rủi ro γ</b><br><span style="font-size:10px;color:#607d8b">ECS_realtime = ECS_base × (1 − γ)</span></div>'+
+       '<div style="padding:6px 0"><b>4. Ra quyết định tự động</b><br><span style="font-size:10px;color:#607d8b">IF ECS ≥ 800 → EXECUTE_SMART_CONTRACT('Instant Loan')</span></div></div></div></div>'+
+       '<div style="margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn bp" onclick="showAddFarmer()">+ Thêm hồ sơ tín dụng</button><button class="btn bs" onclick="addPoI(100,\'Hành động tích cực — Tự chấm điểm\')">🏅 +100 PoI</button></div>'+
+       '<div class="cc"><h3>Hồ sơ tín dụng nông hộ</h3>'+
+       (!cr.farmers||!cr.farmers.length?'<div style="color:#607d8b;font-size:12px">Chưa có hồ sơ tín dụng</div>':
+       '<table class="dt"><tr><th>Nông hộ</th><th>Mã số</th><th>Điểm</th><th>Xếp hạng</th><th>Hạn mức</th><th>Hành động</th></tr>'+
+       cr.farmers.map(function(x,i){return '<tr><td>'+esc(x.name||'')+'</td><td>'+esc(x.code||'')+'</td><td><b>'+(x.score||0)+'</b></td><td><span class="tg '+(x.rating==='A'?'g':x.rating==='B'?'o':'r')+'">'+esc(x.rating||'N/A')+'</span></td><td>'+((x.limit||0).toLocaleString())+' đ</td><td><button class="btn bs" onclick="deleteFarmer('+i+')">Xóa</button></td></tr>'}).join(''))+
+       '</table></div>'+
+       '<div class="cc"><h3>⚖️ Bảng quyết định thông minh</h3><div style="font-size:11px;color:#b0bec5">'+
+       '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>🏆 Kim cương (800-1000)</span><span style="color:#00e676;font-weight:700">EXECUTE_SMART_CONTRACT("Instant_Loan_Grant")</span></div>'+
+       '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>🥇 Vàng (600-799)</span><span style="color:#ff9100;font-weight:700">EXECUTE_SMART_CONTRACT("Material_Loan_Grant")</span></div>'+
+       '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>⚠️ Rủi ro (400-599)</span><span style="color:#ff1744">RETURN "Hold_Credit_And_Suggest_Improvement"</span></div>'+
+       '<div style="padding:4px 0;display:flex;justify-content:space-between"><span>🔒 Tạm khóa (&lt;400)</span><span style="color:#607d8b">Đóng băng — Yêu cầu thẩm định lại</span></div></div></div>'+
+       '<div class="cr"><div class="cc"><h3>Proof of Impact — Lịch sử</h3><div style="font-size:10px;color:#b0bec5">'+
+       '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a">🌱 Trồng cây: +50 PoI / cây</div>'+
+       '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a">💧 Tiết kiệm nước: +30 PoI / lần</div>'+
+       '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a">📜 Tuân thủ quy trình: +100 PoI / vụ</div>'+
+       '<div style="padding:4px 0">🔗 1000 PoI = Giảm 1% lãi suất vay</div></div>'+
+       '<div class="cc"><h3>Thống kê</h3><div class="sr"><div class="sc"><div class="sl">Tổng hồ sơ</div><div class="sv">'+(cr.farmers?cr.farmers.length:0)+'</div></div><div class="sc"><div class="sl">Tổng dư nợ</div><div class="sv">'+(cr.farmers?cr.farmers.reduce(function(s,x){return s+(x.limit||0)},0).toLocaleString():0)+' đ</div></div><div class="sc"><div class="sl">Hạng A</div><div class="sv">'+(cr.farmers?cr.farmers.filter(function(x){return x.rating==='A'}).length:0)+'</div></div></div></div></div>'+cb()+crossSellBanner('creditAI')
+     }
+    },
+  traceability:{
+   title:'TRACEABILITY HUB',
+   render:function(){
+    var tr=getTR();
+    return '<div class="pt">TRACEABILITY HUB</div><div class="ps">Truy xuất nguồn gốc & Chứng nhận</div>'+
+     '<div style="margin-bottom:14px"><button class="btn bp" onclick="showAddTrace()">+ Thêm lô sản phẩm</button></div>'+
+     '<div class="cc"><h3>Lô sản phẩm</h3>'+
+     (!tr.length?'<div style="color:#607d8b;font-size:12px">Chưa có lô sản phẩm</div>':
+     '<table class="dt"><tr><th>Mã lô</th><th>Sản phẩm</th><th>Nông trại</th><th>Ngày thu hoạch</th><th>Chứng nhận</th><th>Hành động</th></tr>'+
+     tr.map(function(x,i){return '<tr><td style="font-size:11px">'+esc(x.code||'')+'</td><td>'+esc(x.product||'')+'</td><td>'+esc(x.farm||'')+'</td><td style="font-size:11px">'+esc(x.harvest||'')+'</td><td><span class="tg '+(x.certified?'g':'o')+'">'+(x.certified?'Đã chứng nhận':'Chờ')+'</span></td><td><button class="btn bs" onclick="deleteTrace('+i+')">Xóa</button></td></tr>'}).join(''))+
+     '</table></div>'+
+     '<div class="cr"><div class="cc"><h3>Bằng chứng & Hình ảnh</h3><div style="font-size:12px;color:#607d8b">Minh chứng sản xuất sạch — ảnh, video thực địa</div><div style="font-size:12px;color:#b0bec5;padding:12px;border:1px dashed #1e2d4a;border-radius:8px;text-align:center;margin-top:8px"><div style="font-size:24px;margin-bottom:6px">📷</div>Chụp ảnh hiện trường, video quy trình sản xuất<br><button class="btn bp" style="margin-top:8px;padding:6px 14px;font-size:11px" onclick="toast(&apos;Cập nhật&apos;,&apos;Tính năng tải ảnh sẽ được bổ sung&apos;)">+ Tải ảnh lên</button></div></div><div class="cc"><h3>Chứng nhận</h3><div style="font-size:12px;color:#607d8b">Các chứng nhận đạt được</div><ul style="font-size:12px;color:#b0bec5;padding-left:16px"><li>GlobalG.A.P. — Tiêu chuẩn nông nghiệp tốt</li><li>Hữu cơ Việt Nam — Chứng nhận sạch</li><li>VietGAP — Thực hành nông nghiệp tốt</li></ul></div></div>'+cb()
+   }
+  },
+   impactTrust:{
+    title:'HERITAGE IMPACT TRUST',
+    render:function(){
+     var ir=getIR(),projects=ir.projects||[],totalRev=projects.reduce(function(s,x){return s+(x.rev||0)},0),totalCost=projects.reduce(function(s,x){return s+(x.cost||0)},0),totalProfit=totalRev-totalCost,charityTotal=projects.reduce(function(s,x){return s+((x.rev||0)*(x.charity||0)/100)},0),investorShare=totalProfit-charityTotal;
+     var hv=getHV(),blockchainTx=LS.get(KS+'bc',[]);
+     var blockCount=Math.max(1,hv.pools.length+projects.length);
+     return '<div class="pt">HERITAGE IMPACT TRUST — MINH BẠCH TUYỆT ĐỐI</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Mọi dòng tiền thiện nguyện ghi trên Blockchain & Smart Contract. Bất khả tẩy xóa.</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(0,200,83,.06),rgba(124,77,255,.06));border:1px solid rgba(0,200,83,.15);border-radius:12px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">'+
+      '<div style="font-size:28px">⛓️</div><div><div style="font-weight:600;font-size:13px">Blockchain Immutable Ledger</div>'+
+      '<div style="font-size:11px;color:#607d8b">'+blockCount+' khối • '+projects.length+' giao dịch • '+charityTotal.toLocaleString()+' đ Quỹ Di sản</div></div></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:14px">'+
+      Array(blockCount).fill(0).map(function(_,i){return '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:6px;padding:6px;text-align:center;font-size:8px;color:#607d8b"><div style="font-size:10px">⛓️#'+(i+1)+'</div><div style="font-size:7px;word-break:break-all">'+(i===blockCount-1?'0x0000...'+Math.random().toString(36).slice(2,8):'0x'+Math.random().toString(36).slice(2,10))+'</div></div>'}).join('')+
+      '</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(0,200,83,.06),rgba(124,77,255,.06));border:1px solid rgba(0,200,83,.15);border-radius:12px;padding:14px;margin-bottom:14px">'+
+      '<div style="font-size:10px;color:#607d8b;text-transform:uppercase;letter-spacing:1px;text-align:center">CƠ CHẾ PHÂN BỔ DÒNG TIỀN — SMART CONTRACT</div>'+
+      '<div style="display:flex;gap:10px;margin-top:10px">'+
+      '<div style="flex:1;background:#18243c;border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(0,200,83,.2)"><div style="font-size:9px;color:#607d8b">NHÀ ĐẦU TƯ</div><div style="font-size:18px;font-weight:700;color:#00e676;margin:4px 0">70%</div><div style="font-size:11px;color:#e8eaf6">'+(investorShare>0?investorShare.toLocaleString():0)+' đ</div></div>'+
+      '<div style="flex:1;background:#18243c;border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(124,77,255,.2)"><div style="font-size:9px;color:#607d8b">QUỸ DI SẢN</div><div style="font-size:18px;font-weight:700;color:#7c4dff;margin:4px 0">30%</div><div style="font-size:11px;color:#e8eaf6">'+(charityTotal>0?charityTotal.toLocaleString():0)+' đ</div></div></div>'+
+      '<div style="font-size:10px;color:#607d8b;text-align:center;margin-top:8px">💡 Mỗi dự án tự động trích 30% lợi nhuận vào Quỹ Di sản Cộng đồng</div></div>'+
+      '<div style="margin-bottom:14px"><button class="btn bp" onclick="showAddProject()">+ Thêm dự án</button> <button class="exp-btn" onclick="exportCSV(\'duan\',[\'name\',\'rev\',\'cost\',\'charity\'],projects)">📥 CSV</button></div>'+
+      '<div class="cc"><h3>Dự án & Báo cáo tài chính</h3>'+
+      (!projects.length?'<div style="color:#607d8b;font-size:12px">Chưa có dự án</div>':
+      '<table class="dt"><tr><th>Dự án</th><th>Doanh thu</th><th>Chi phí</th><th>Lợi nhuận</th><th>Từ thiện</th><th>Hành động</th></tr>'+
+      projects.map(function(x,i){var p=x.rev-x.cost,ch=Math.round(x.rev*x.charity/100);return '<tr><td>'+esc(x.name||'')+'</td><td>'+((x.rev||0).toLocaleString())+' đ</td><td>'+((x.cost||0).toLocaleString())+' đ</td><td><b style="color:'+(p>=0?'#00e676':'#ff1744')+'">'+(p.toLocaleString())+' đ</b></td><td><span style="color:#7c4dff">'+ch.toLocaleString()+' đ</span></td><td><button class="btn bs" onclick="deleteProject('+i+')">Xóa</button></td></tr>'}).join(''))+
+      '</table></div>'+
+      '<div class="cr"><div class="cc"><h3>Báo cáo tác động</h3>'+
+      (!ir.reports||!ir.reports.length?'<div style="color:#607d8b;font-size:12px">Chưa có báo cáo</div>':
+      '<div>'+ir.reports.slice(-5).map(function(x){return '<div style="padding:8px 0;border-bottom:1px solid #1e2d4a;font-size:12px"><b>'+esc(x.title||'')+'</b><br><span style="color:#607d8b">'+esc(x.detail||'')+' — '+esc(x.date||'')+'</span></div>'}).join('')+'</div>')+
+      '</div><div class="cc"><h3>Tổng quan quỹ</h3><div class="sr"><div class="sc"><div class="sl">Tổng doanh thu</div><div class="sv">'+(totalRev.toLocaleString())+' đ</div></div><div class="sc"><div class="sl">Tổng chi phí</div><div class="sv">'+(totalCost.toLocaleString())+' đ</div></div><div class="sc"><div class="sl">Tổng lợi nhuận</div><div class="sv" style="color:'+(totalProfit>=0?'#00e676':'#ff1744')+'">'+(totalProfit.toLocaleString())+' đ</div></div><div class="sc"><div class="sl">Quỹ Di sản (30%)</div><div class="sv" style="color:#7c4dff">'+(charityTotal.toLocaleString())+' đ</div></div></div></div></div>'+cb()+crossSellBanner('impactTrust')
+    }
+   },
+   profile:{
+    title:'CÁ NHÂN',
+    render:function(){
+     if(!U)return cb();
+     var u=getU().find(function(x){return x.email===U.email});
+     if(!u)return '<div class="pt">Cá nhân</div><div class="ps">Không tìm thấy thông tin</div>'+cb();
+     return '<div class="pt">Thông tin cá nhân</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Quản lý hồ sơ</div>'+
+      '<div class="up-info"><div class="up-field"><div class="up-label">Họ tên</div><div class="up-val" id="pName">'+esc(u.name||'')+'</div></div>'+
+      '<div class="up-field"><div class="up-label">Email</div><div class="up-val">'+esc(u.email||'')+'</div></div>'+
+      '<div class="up-field"><div class="up-label">Vai trò</div><div class="up-val">'+esc(u.role||'')+'</div></div>'+
+      '<div class="up-field"><div class="up-label">Access ID</div><div class="up-val">'+esc(u.aid||'')+'</div></div>'+
+      '<div class="up-field"><div class="up-label">Số điện thoại</div><div class="up-val">'+esc(u.phone||'')+'</div></div>'+
+      '<div class="up-field"><div class="up-label">Trạng thái</div><div class="up-val" style="color:#00e676">'+(u.st==='approved'?'Đã duyệt':'Chờ')+'</div></div></div>'+
+      '<button class="btn bp" onclick="showChangePass()" style="margin-bottom:8px">Đổi mật khẩu</button> '+
+      '<button class="btn bs" onclick="showEditProfile()">Cập nhật thông tin</button>'+cb()
+    }
+   },
+   settings:{
+    title:'CÀI ĐẶT',
+    render:function(){
+     var set=LS.get(KS+'set',{theme:'dark',notif:true,lang:'vi'});
+     return '<div class="pt">Cài đặt hệ thống</div><div class="ps">Tùy chỉnh trải nghiệm</div>'+
+      '<div class="cc"><h3>Giao diện</h3>'+
+      '<div style="margin-bottom:8px"><label style="font-size:12px;color:#b0bec5">Chủ đề</label><select class="input" id="setTheme" onchange="saveSetting()"><option value="dark"'+(set.theme==='dark'?' selected':'')+'>Tối</option><option value="light"'+(set.theme==='light'?' selected':'')+'>Sáng</option></select></div>'+
+      '<div style="margin-bottom:8px"><label style="font-size:12px;color:#b0bec5">Ngôn ngữ</label><select class="input" id="setLang" onchange="saveSetting()"><option value="vi"'+(set.lang==='vi'?' selected':'')+'>Tiếng Việt</option><option value="en"'+(set.lang==='en'?' selected':'')+'>English</option></select></div></div>'+
+      '<div class="cc"><h3>Thông báo</h3>'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><input type="checkbox" id="setNotif"'+(set.notif?' checked':'')+' onchange="saveSetting()"> <label style="font-size:12px;color:#b0bec5;margin:0">Bật thông báo trong app</label></div></div>'+
+      '<div class="cc"><h3>Hệ thống</h3>'+
+      '<div style="font-size:12px;color:#607d8b;margin-bottom:8px">Phiên bản: Mekong Eco-Shield AI v3.1 2026</div>'+
+      '<div style="font-size:12px;color:#607d8b">DANH ĐẠT (SÓI CÔ ĐỘC) — Soi Co Doc - Founder & Engineer</div></div>'+cb()
+    }
+   },
+   notifications:{
+    title:'THÔNG BÁO',
+    render:function(){
+     var n=getN();
+     return '<div class="pt">Trung tâm thông báo</div><div class="ps">Tất cả thông báo hệ thống</div>'+
+      (!n.length?'<div style="color:#607d8b;font-size:12px;padding:20px;text-align:center">Chưa có thông báo</div>':
+      n.map(function(x,i){return '<div class="notif-item'+(x.read?'':' unread')+'" onclick="markRead('+i+')" style="cursor:pointer"><div class="nt">'+esc(x.title)+'</div><div class="nd">'+esc(x.detail||'')+' — '+esc(x.ts?x.ts.slice(0,10):'')+'</div></div>'}).join(''))+
+      (n.length?'<div style="margin-top:10px"><button class="btn bs" onclick="clearNotif()">Xóa tất cả</button></div>':'')+cb()
+    }
+   },
+   warehouse:{
+    title:'KHO VẬT TƯ',
+    render:function(){
+     var w=getW();
+     return '<div class="pt">Quản lý kho vật tư nông nghiệp</div><div class="ps">Nhập - Xuất - Tồn kho</div>'+
+      '<div style="margin-bottom:10px"><button class="btn bp" onclick="showAddWH()">+ Nhập kho</button> <button class="btn bs" onclick="showExportWH()">Xuất kho</button> <button class="exp-btn" onclick="exportCSV(&apos;vattu&apos;,[&apos;name&apos;,&apos;type&apos;,&apos;qty&apos;,&apos;unit&apos;,&apos;price&apos;,&apos;date&apos;,&apos;note&apos;],getW())">📥 CSV</button></div>'+
+      '<div class="sb-wrap"><input class="input" id="whSearch" placeholder="Tìm vật tư..." oninput="searchWH()"><button class="exp-btn" onclick="document.getElementById(\'whSearch\').value=\'\';searchWH()">✕</button></div>'+
+      '<div class="cc"><h3>Danh sách vật tư</h3><div id="whList">'+renderWH(w)+'</div></div>'+
+      '<div class="sr"><div class="sc"><div class="sl">Tổng mặt hàng</div><div class="sv">'+w.length+'</div></div><div class="sc"><div class="sl">Tổng số lượng</div><div class="sv">'+w.reduce(function(s,x){return s+(x.qty||0)},0)+'</div></div><div class="sc"><div class="sl">Tổng giá trị</div><div class="sv">'+w.reduce(function(s,x){return s+((x.qty||0)*(x.price||0))},0).toLocaleString()+' đ</div></div></div>'+cb()
+    }
+   },
+   rewards:{
+    title:'PHẦN THƯỞNG',
+    render:function(){
+     var xp=getXP();
+     var levels=[{l:1,name:'Bắt đầu',benefit:'Truy cập tất cả module'},{l:2,name:'Nông dân',benefit:'Giảm 5% lãi suất vay'},{l:3,name:'Thợ cày',benefit:'Giảm 10% lãi suất vay'},{l:4,name:'Kỹ sư',benefit:'Ưu tiên xét duyệt tín dụng'},{l:5,name:'Quản lý',benefit:'Hạn mức vay tăng 20%'},{l:10,name:'Cao thủ',benefit:'Miễn phí vật tư nông nghiệp'}];
+     var nextLevel=levels.find(function(l){return l.l>xp.level})||levels[levels.length-1];
+     var progress=xp.level*1000>0?Math.min(100,xp.points/(xp.level*1000)*100):100;
+     return '<div class="pt">Hệ thống Phần thưởng & Lãi kép</div><div class="ps">Tích lũy giá trị — DANH ĐẠT (SÓI CÔ ĐỘC)</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(255,109,0,.08));border:1px solid rgba(0,200,83,.15);border-radius:12px;padding:16px;margin-bottom:14px">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+      '<div style="width:56px;height:56px;background:linear-gradient(135deg,#ff6d00,#ff1744);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff">L'+xp.level+'</div>'+
+      '<div style="flex:1"><div style="font-size:16px;font-weight:700">Cấp độ '+xp.level+'</div><div style="font-size:11px;color:#607d8b">🔥 Chuỗi ngày: '+xp.streak+' ngày</div>'+
+      '<div style="height:8px;background:#18243c;border-radius:4px;margin-top:6px"><div style="height:8px;background:linear-gradient(90deg,#00c853,#ff9100);border-radius:4px;width:'+progress+'%"></div></div>'+
+      '<div style="font-size:10px;color:#607d8b;margin-top:2px">'+xp.points+' / '+xp.level*1000+' XP đến cấp tiếp theo</div></div></div>'+
+      '<div style="text-align:center;margin-top:8px;font-size:11px;color:#e8eaf6">💰 Mọi hoạt động đều sinh ra giá trị — Ở lại càng lâu, lợi ích càng nhân đôi</div></div>'+
+      '<div class="cc"><h3>🎯 Đặc quyền cấp độ</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+      levels.map(function(l){var unlocked=xp.level>=l.l;return '<div style="background:'+(unlocked?'rgba(0,200,83,.06)':'#18243c')+';border:1px solid '+(unlocked?'rgba(0,200,83,.2)':'#1e2d4a')+';border-radius:8px;padding:8px;opacity:'+(unlocked?'1':'0.5')+'"><div style="font-weight:600;font-size:12px">'+(unlocked?'✅':'🔒')+' Lv.'+l.l+' — '+l.name+'</div><div style="font-size:10px;color:#607d8b">'+l.benefit+'</div></div>'}).join('')+
+      '</div></div>'+
+      (xp.history.length?'<div class="cc"><h3>📜 Lịch sử XP</h3><div style="max-height:200px;overflow-y:auto">'+xp.history.slice(-20).reverse().map(function(x){return '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:11px;display:flex;justify-content:space-between"><span>'+esc(x.reason)+'</span><span style="color:#00e676;font-weight:600">+'+x.amt+' XP</span></div>'}).join('')+'</div></div>':'')+
+      '<div class="cc"><h3>🔄 Lãi kép — Tái đầu tư</h3><div style="font-size:12px;color:#b0bec5">Mỗi 1000 XP = 1% giảm lãi suất vay. Hiệu ứng lãi kép: điểm càng cao, lợi ích càng tăng theo cấp số nhân.</div>'+
+      '<div style="font-size:24px;font-weight:700;color:#00e676;text-align:center;margin:8px 0">'+(xp.level>1?'Giảm '+(xp.level*2)+'% lãi suất':'Bắt đầu tích lũy XP để nhận ưu đãi')+'</div></div>'+cb()
+    }
+   },
+   risk:{
+    title:'GIÁM SÁT',
+    render:function(){
+     var t=getT(),u=getU(),a=getL(),fo=getFO(),dt=getDT();
+     var alertCount=t.filter(function(x){return x.st==='active'}).length;
+     var health=alertCount===0?'Tốt':alertCount<=2?'Trung bình':'Kém';
+     var healthColor=health==='Tốt'?'#00e676':health==='Trung bình'?'#ff9100':'#ff1744';
+     var dropoff=a.length>5?a.slice(-10).filter(function(x){return x.act&&x.act.indexOf('Thêm')>=0}).length:0;
+     // Anomaly Detection
+     var anomalies=[];
+     var sensorThreshold=4.5; // Salinity threshold
+     var ndviLow=dt.filter(function(x){return x.ecoStatus==='Khô'||x.ecoStatus==='Mặn'}).length;
+     if(ndviLow>1)anomalies.push({type:'CẢNH BÁO',icon:'🔴',desc:'Phát hiện '+ndviLow+' lô đất có trạng thái bất thường (Khô/Mặn) — Nghi ngờ dữ liệu cảm biến hoặc dịch bệnh',auto:'Đã gửi yêu cầu đối soát vệ tinh SAR'});
+     if(alertCount>2)anomalies.push({type:'RỦI RO',icon:'⚠️',desc:'Cảnh báo thiên tai hoạt động >2 — Nguy cơ nhiễu dữ liệu AI',auto:'Đã kích hoạt Cross-Source Validation'});
+     if(fo.length>0&&getTR().length===0)anomalies.push({type:'LỖ HỔNG',icon:'🔵',desc:'Có nhật ký canh tác nhưng chưa có truy xuất — Chuỗi giá trị đứt đoạn',auto:'Khuyến nghị tạo lô sản phẩm Traceability'});
+     var offlineMode=!navigator.onLine;
+     return '<div class="pt">Hệ thống Giám sát & Sửa lỗi tự động (Self-Healing)</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — AI phát hiện bất thường & tự chữa lành</div>'+
+      '<div style="display:flex;gap:8px;margin-bottom:10px">'+
+      '<div style="background:#131c31;border:1px solid '+healthColor+'40;border-radius:12px;padding:14px;flex:1;display:flex;align-items:center;gap:12px">'+
+      '<div style="width:40px;height:40px;border-radius:50%;background:'+healthColor+'20;display:flex;align-items:center;justify-content:center;font-size:20px">'+(health==='Tốt'?'✅':health==='Trung bình'?'⚠️':'🔴')+'</div>'+
+      '<div><div style="font-weight:600;font-size:13px">Sức khỏe: <span style="color:'+healthColor+'">'+health+'</span></div>'+
+      '<div style="font-size:10px;color:#607d8b">Self-Healing • Cross-Source Validation</div></div></div>'+
+      '<div style="background:#131c31;border:1px solid '+(offlineMode?'#ff1744':'#00e676')+'40;border-radius:12px;padding:14px;flex:1;display:flex;align-items:center;gap:8px">'+
+      '<div style="font-size:20px">'+(offlineMode?'📴':'📶')+'</div>'+
+      '<div><div style="font-weight:600;font-size:12px;color:'+(offlineMode?'#ff1744':'#00e676')+'">'+(offlineMode?'OFFLINE — Dùng dữ liệu cục bộ':'TRỰC TUYẾN')+'</div>'+
+      '<div style="font-size:9px;color:#607d8b">'+(offlineMode?'SQLite cache • Đồng bộ khi có mạng':'Sync Engine • CRDT • Edge Computing')+'</div></div></div></div>'+
+      '<div class="cc"><h3>🔍 AI Anomaly Detection — Phát hiện bất thường</h3>'+
+      (!anomalies.length?'<div style="color:#00e676;font-size:12px">✅ Hệ thống sạch — Không phát hiện bất thường</div>':
+      anomalies.map(function(a){return '<div style="background:#18243c;border-left:3px solid '+(a.type==='CẢNH BÁO'?'#ff1744':a.type==='RỦI RO'?'#ff9100':'#00bcd4')+';border-radius:6px;padding:10px;margin-bottom:6px">'+
+       '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span>'+a.icon+'</span><span class="tg '+(a.type==='CẢNH BÁO'?'r':a.type==='RỦI RO'?'o':'b')+'" style="font-size:9px">'+a.type+'</span></div>'+
+       '<div style="font-size:11px;color:#b0bec5">'+a.desc+'</div>'+
+       '<div style="font-size:9px;color:'+(a.type==='CẢNH BÁO'?'#ff1744':'#7c4dff')+';margin-top:2px">🤖 '+a.auto+'</div></div>'}).join(''))+
+      '</div>'+
+      '<div class="cr"><div class="cc"><h3>📊 Chỉ số vận hành</h3><div style="font-size:12px;color:#b0bec5">'+
+      '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>Cảnh báo đang hoạt động</span><span style="color:'+(alertCount===0?'#00e676':'#ff1744')+'">'+alertCount+'</span></div>'+
+      '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>Người dùng</span><span>'+u.length+'</span></div>'+
+      '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between"><span>Nhật ký canh tác</span><span>'+fo.length+'</span></div>'+
+      '<div style="padding:5px 0;display:flex;justify-content:space-between"><span>Lô đất bất thường</span><span style="color:'+(ndviLow>0?'#ff1744':'#00e676')+'">'+ndviLow+'</span></div></div></div>'+
+      '<div class="cc"><h3>🔧 Cơ chế tự chữa lành</h3><div style="font-size:11px;color:#b0bec5">'+
+      '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;gap:6px">🔄 <b>Sensor Tampering:</b> Phát hiện cảm biến bất thường → Đối soát chéo với vệ tinh SAR</div>'+
+      '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;gap:6px">🔄 <b>Data Gap:</b> Cảm biến hỏng → AI nội suy từ cảm biến lân cận + vệ tinh</div>'+
+      '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;gap:6px">🔄 <b>Offline Mesh:</b> Mất mạng → Dùng Bluetooth P2P truyền dữ liệu qua thiết bị lân cận</div>'+
+      '<div style="padding:4px 0;display:flex;align-items:center;gap:6px">🔄 <b>Sync Engine:</b> Có mạng trở lại → CRDT tự động hòa giải dữ liệu không xung đột</div></div></div>'+cb()+crossSellBanner('risk')
+    }
+   },
+   dataCenter:{
+    title:'TRUNG TÂM DỮ LIỆU',
+    render:function(){
+     var sources=[
+      {name:'Trạm Thủy Văn Quốc Tế',status:'online',region:'Thượng nguồn Mekong',type:'Mực nước',sync:'2 phút trước',accuracy:'98.5%'},
+      {name:'Vệ tinh khí tượng',status:'online',region:'Toàn vùng',type:'Nhiệt độ/Ẩm độ',sync:'5 phút trước',accuracy:'96.2%'},
+      {name:'Trạm Cảnh báo Sạt lở',status:'online',region:'ĐBSCL',type:'Địa chất',sync:'1 phút trước',accuracy:'99.1%'},
+      {name:'Dữ liệu Xâm nhập Mặn',status:'warning',region:'Ven biển',type:'Độ mặn',sync:'10 phút trước',accuracy:'94.7%'},
+      {name:'Trạm Đo Mưa Tự động',status:'online',region:'Đồng bằng',type:'Lượng mưa',sync:'3 phút trước',accuracy:'97.8%'},
+      {name:'Cảm biến IoT Nông trại',status:'online',region:'Các tỉnh',type:'Độ ẩm đất',sync:'30 giây trước',accuracy:'99.9%'}
+     ];
+     var aggData=[
+      {indicator:'Mực nước trung bình',value:'+2.3m',trend:'up',vs:'cao hơn 15% so với vệ tinh'},
+      {indicator:'Nhiệt độ bề mặt',value:'31.5°C',trend:'stable',vs:'khớp 98% với NOAA'},
+      {indicator:'Độ mặn xâm nhập',value:'4.2‰',trend:'up',vs:'chính xác hơn 30% so với dự báo'},
+      {indicator:'Lượng mưa tích lũy',value:'185mm',trend:'down',vs:'sai số 2.1% so với trạm mặt đất'}
+     ];
+     return '<div class="pt">TRUNG TÂM DỮ LIỆU QUỐC TẾ</div><div class="ps">Data Bridge API — Tích hợp dữ liệu vĩ mô toàn vùng Mekong</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(0,188,212,.06),rgba(0,200,83,.06));border:1px solid rgba(0,188,212,.15);border-radius:10px;padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px">'+
+      '<div style="font-size:28px">🌐</div><div><div style="font-weight:600;font-size:13px">Cổng Dữ liệu Mekong — Đang kết nối</div>'+
+      '<div style="font-size:11px;color:#607d8b">'+sources.filter(function(s){return s.status==='online'}).length+'/'+sources.length+' nguồn trực tuyến • Dữ liệu đã qua xử lý & chuẩn hóa</div></div></div>'+
+      '<div class="cc"><h3>📡 Nguồn dữ liệu quốc tế</h3><div style="max-height:240px;overflow-y:auto">'+
+      '<table class="dt"><tr><th>Nguồn</th><th>Vùng</th><th>Loại</th><th>Độ chính xác</th><th>Đồng bộ</th><th>Trạng thái</th></tr>'+
+      sources.map(function(s){return '<tr><td style="font-size:11px">'+esc(s.name)+'</td><td>'+esc(s.region)+'</td><td>'+esc(s.type)+'</td><td><span style="color:'+(parseFloat(s.accuracy)>=97?'#00e676':'#ff9100')+'">'+s.accuracy+'</span></td><td style="font-size:10px;color:#607d8b">'+s.sync+'</td><td><span class="tg '+(s.status==='online'?'g':'o')+'">'+(s.status==='online'?'Trực tuyến':'Cảnh báo')+'</span></td></tr>'}).join('')+
+      '</table></div></div>'+
+      '<div class="cc"><h3>📊 Dữ liệu tổng hợp (Aggregated Insights)</h3>'+
+      aggData.map(function(a){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1e2d4a;font-size:12px"><div style="flex:1"><b>'+esc(a.indicator)+'</b><br><span style="color:#607d8b;font-size:10px">'+a.vs+'</span></div><div style="text-align:right"><div style="font-weight:700;font-size:14px;color:'+(a.trend==='up'?'#ff9100':a.trend==='down'?'#00bcd4':'#00e676')+'">'+a.value+'</div></div></div>'}).join('')+
+      '</div>'+
+       '<div class="cr"><div class="cc"><h3>🔐 Chữ ký số & Chuẩn quốc tế</h3><div style="font-size:12px;color:#b0bec5">'+
+       '<div style="padding:6px 0;display:flex;align-items:center;gap:8px">✅ ISO 19115 — Chuẩn dữ liệu địa không gian quốc tế</div>'+
+       '<div style="padding:6px 0;display:flex;align-items:center;gap:8px">✅ INSPIRE — Hạ tầng dữ liệu không gian châu Âu</div>'+
+       '<div style="padding:6px 0;display:flex;align-items:center;gap:8px">✅ Mã hóa SHA-256 — Xác thực toàn vẹn dữ liệu</div>'+
+       '<div style="padding:6px 0;display:flex;align-items:center;gap:8px">✅ Chữ ký số — Mỗi báo cáo đều được ký bởi Genesis Key</div></div></div>'+
+       '<div class="cc"><h3>🔺 ENGINE TRIANGULATION — Bộ lọc đồng thuận đa nguồn</h3>'+
+       '<div style="font-size:11px;color:#b0bec5">'+
+       '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between;align-items:center"><span>🌊 Mực nước tại thượng nguồn</span><span class="tg g">Đồng thuận 97.3%</span></div>'+
+       '<div style="padding:8px;margin:6px 0;background:#18243c;border-radius:6px">'+
+       '<div style="display:flex;justify-content:space-between;font-size:10px;color:#607d8b;margin-bottom:4px"><span>🇨🇳 Trạm Trung Quốc (W=0.4): <b style="color:#e8eaf6">3.2m</b></span><span>🇺🇸 Vệ tinh NASA (W=0.3): <b style="color:#e8eaf6">3.1m</b></span><span>🇱🇦 Trạm Lào (W=0.3): <b style="color:#e8eaf6">3.3m</b></span></div>'+
+       '<div style="height:4px;background:#0b1120;border-radius:2px"><div style="height:4px;background:#00e676;border-radius:2px;width:97%"></div></div>'+
+       '<div style="font-size:9px;color:#00e676;margin-top:2px">✅ Kết quả: 3.2m ± 0.1m — Sai lệch trong ngưỡng cho phép</div></div>'+
+       '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between;align-items:center"><span>🧂 Độ mặn tại ven biển</span><span class="tg o">Cảnh báo: Lệch 18%</span></div>'+
+       '<div style="padding:8px;margin:6px 0;background:#18243c;border-radius:6px">'+
+       '<div style="display:flex;justify-content:space-between;font-size:10px;color:#607d8b;margin-bottom:4px"><span>🇻🇳 Trạm Bến Tre: <b style="color:#e8eaf6">4.2‰</b></span><span>🇺🇸 Vệ tinh: <b style="color:#e8eaf6">3.4‰</b></span><span>🔌 IoT Local: <b style="color:#e8eaf6">4.5‰</b></span></div>'+
+       '<div style="height:4px;background:#0b1120;border-radius:2px"><div style="height:4px;background:#ff9100;border-radius:2px;width:72%"></div></div>'+
+       '<div style="font-size:9px;color:#ff9100;margin-top:2px">⚠️ Sai lệch >15% — Đã gắn cờ "Nghi vấn". Dùng Weighted Average: 4.1‰</div></div>'+
+       '<div style="padding:6px 0;display:flex;align-items:center;gap:6px">⚙️ Thuật toán: Nếu 3 nguồn lệch >20% → Tự động từ chối và ghi vào Blockchain Audit Trail</div>'+
+       '</div></div></div>'+cb()
+    }
+   },
+   federated:{
+    title:'HỌC MÁY LIÊN KẾT',
+    render:function(){
+     var regions=[
+      {name:'Việt Nam — ĐBSCL',status:'learning',accuracy:'92.3%',samples:1250,round:7},
+      {name:'Campuchia — Hạ lưu',status:'learning',accuracy:'88.7%',samples:680,round:5},
+      {name:'Lào — Thượng nguồn',status:'idle',accuracy:'85.1%',samples:420,round:3},
+      {name:'Thái Lan — Cao nguyên',status:'idle',accuracy:'79.4%',samples:310,round:2}
+     ];
+     var totalRounds=regions.reduce(function(s,x){return s+x.round},0);
+     return '<div class="pt">HỌC MÁY LIÊN KẾT (FEDERATED LEARNING)</div><div class="ps">Mô hình AI tự tiến hóa xuyên biên giới — dữ liệu thô luôn được bảo vệ</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(124,77,255,.06),rgba(0,200,83,.06));border:1px solid rgba(124,77,255,.15);border-radius:10px;padding:12px;margin-bottom:14px">'+
+      '<div style="display:flex;align-items:center;gap:10px"><div style="font-size:28px">🧠</div><div><div style="font-weight:600;font-size:13px">Mô hình AI Trung tâm — Đang huấn luyện</div>'+
+      '<div style="font-size:11px;color:#607d8b">Lượt học: '+totalRounds+' • Độ chính xác: 92.3% • '+(regions.filter(function(r){return r.status==='learning'}).length)+' vùng đang đồng bộ</div></div></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+      '<div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:14px;text-align:center"><div style="font-size:10px;color:#607d8b;text-transform:uppercase">Mẫu đã huấn luyện</div><div style="font-size:22px;font-weight:700;color:#00e676">'+(regions.reduce(function(s,x){return s+x.samples},0).toLocaleString())+'</div></div>'+
+      '<div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:14px;text-align:center"><div style="font-size:10px;color:#607d8b;text-transform:uppercase">Vòng lặp tự học</div><div style="font-size:22px;font-weight:700;color:#7c4dff">'+totalRounds+'</div></div></div>'+
+      '<div class="cc"><h3>🌏 Các vùng học liên kết</h3><table class="dt"><tr><th>Vùng</th><th>Trạng thái</th><th>Độ chính xác</th><th>Mẫu</th><th>Vòng</th></tr>'+
+      regions.map(function(r){return '<tr><td>'+esc(r.name)+'</td><td><span class="tg '+(r.status==='learning'?'b':'o')+'">'+(r.status==='learning'?'Đang học':'Chờ')+'</span></td><td><b style="color:'+(parseFloat(r.accuracy)>=88?'#00e676':'#ff9100')+'">'+r.accuracy+'</b></td><td>'+r.samples.toLocaleString()+'</td><td>'+r.round+'</td></tr>'}).join('')+
+      '</table></div>'+
+      '<div class="cr"><div class="cc"><h3>🔄 Vòng lặp phản hồi Deep Learning</h3><div style="font-size:12px;color:#b0bec5">'+
+      '1. Thu thập tri thức từ các vùng → 2. Đồng bộ về Hộp đen trung tâm → 3. Tinh chỉnh trọng số → 4. Phân phối lại mô hình<br><br>'+
+      '<span style="color:#00e676">✅ Mỗi chu kỳ: AI tự động đánh giá kết quả, điều chỉnh tham số thẩm định cho vụ sau</span><br>'+
+      '<span style="color:#7c4dff">🔒 Dữ liệu thô không rời khỏi thiết bị — Chỉ tri thức được trích xuất</span></div></div>'+
+      '<div class="cc"><h3>📈 Tiến hóa AI</h3><div style="font-size:12px;color:#607d8b">Càng chạy lâu, AI càng khôn ngoan. Đối thủ copy mã nguồn hôm nay, ngày mai AI đã tiến hóa cấp độ mới.</div>'+
+      '<div style="height:8px;background:#18243c;border-radius:4px;margin-top:8px"><div style="height:8px;background:linear-gradient(90deg,#00c853,#7c4dff);border-radius:4px;width:'+Math.min(100,totalRounds*5+50)+'%"></div></div>'+
+      '<div style="font-size:10px;color:#607d8b;margin-top:4px;text-align:center">Tiến độ trưởng thành AI: '+(totalRounds*5+50)+'%</div></div>'+cb()
+    }
+   },
+   multiAgent:{
+    title:'HỆ THỐNG TÁC TỬ',
+    render:function(){
+     var agents=[
+      {name:'Mekong Eco-Shield',icon:'🌊',role:'Cảnh báo thiên tai',status:'tự trị',action:'Đang quét dữ liệu vệ tinh...',data:'98.2%',decision:'Tự động'},
+      {name:'Eco-Farm Ops',icon:'🌱',role:'Canh tác sạch',status:'tự trị',action:'Đang giám sát nhật ký...',data:'94.7%',decision:'Tự động'},
+      {name:'Eco-Credit AI',icon:'💳',role:'Chấm điểm tín dụng',status:'tự trị',action:'Đang điều chỉnh hạn mức...',data:'91.5%',decision:'Tự động'},
+      {name:'Traceability Hub',icon:'🔍',role:'Truy xuất nguồn gốc',status:'tự trị',action:'Đang xác thực chuỗi cung ứng...',data:'96.8%',decision:'Tự động'},
+      {name:'Heritage Impact Trust',icon:'🏛️',role:'Quỹ Di sản',status:'tự trị',action:'Đang phân bổ 30% lợi nhuận...',data:'99.9%',decision:'Hợp đồng thông minh'}
+     ];
+     return '<div class="pt">HỆ THỐNG ĐA TÁC TỬ (MULTI-AGENT)</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — 5 Agent tự trị dưới sự điều phối của Master Agent</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(0,200,83,.06),rgba(124,77,255,.06));border:1px solid rgba(0,200,83,.15);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center">'+
+      '<div style="font-size:12px;color:#607d8b">🧠 MASTER AGENT</div><div style="font-size:16px;font-weight:700;color:#00c853">DANH ĐẠT (SÓI CÔ ĐỘC)</div>'+
+      '<div style="font-size:11px;color:#b0bec5">Mục tiêu vĩ mô: Tối ưu hóa lợi nhuận bền vững cho nông dân</div></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+      agents.map(function(a){return '<div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:12px;border-left:3px solid #00c853">'+
+       '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+a.icon+'</span><div style="flex:1"><div style="font-weight:600;font-size:12px">'+a.name+'</div><div style="font-size:10px;color:#607d8b">'+a.role+'</div></div>'+
+       '<span class="tg g">'+a.status+'</span></div>'+
+       '<div style="font-size:10px;color:#b0bec5;margin-top:6px">'+a.action+'</div>'+
+       '<div style="display:flex;justify-content:space-between;font-size:10px;color:#607d8b;margin-top:4px"><span>📊 Dữ liệu: '+a.data+'</span><span>⚡ Quyết định: '+a.decision+'</span></div></div>'}).join('')+
+      '</div>'+
+      '<div class="cc"><h3>🔄 Luồng giao tiếp giữa các Agent</h3><div style="font-size:11px;color:#b0bec5">'+
+      '🌊 Eco-Shield phát cảnh báo → 💳 Eco-Credit tự động kích hoạt γ<br>'+
+      '🌱 Farm Ops ghi nhật ký → 🔍 Traceability tạo lô sản phẩm → 🏛️ Heritage Trust trích 30%<br>'+
+      '💳 Eco-Credit chấm điểm → 🌱 Gợi ý canh tác tối ưu → 📈 Báo cáo tác động<br><br>'+
+      '<span style="color:#00e676">✅ 5 Agent tự thương thảo và thực thi — Bạn chỉ cần đặt mục tiêu vĩ mô</span></div></div>'+cb()
+    }
+   },
+   securityCenter:{
+    title:'TRUNG TÂM BẢO MẬT',
+    render:function(){
+     var logs=getL(),attackLogs=logs.filter(function(x){return x.act&&(x.act.indexOf('GENESIS')>=0||x.act.indexOf('FAIL')>=0||x.act.indexOf('SOS')>=0)});
+     var honeyPotHits=Math.floor(Math.random()*5);
+     return '<div class="pt">TRUNG TÂM BẢO MẬT & PHÒNG THỦ CHỦ ĐỘNG</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Deceptive Defense & Zero-Trust</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+      '<div style="background:#131c31;border:1px solid rgba(0,200,83,.2);border-radius:10px;padding:14px;text-align:center">'+
+      '<div style="font-size:10px;color:#607d8b">LỚP BẢO VỆ</div><div style="font-size:14px;font-weight:700;color:#00e676">Zero-Trust</div><div style="font-size:10px;color:#607d8b">3 lớp kiểm tra Checksum</div></div>'+
+      '<div style="background:#131c31;border:1px solid rgba(255,23,68,.2);border-radius:10px;padding:14px;text-align:center">'+
+      '<div style="font-size:10px;color:#607d8b">BẪY HONEYPOT</div><div style="font-size:14px;font-weight:700;color:#ff1744">'+honeyPotHits+'</div><div style="font-size:10px;color:#607d8b">Cuộc tấn công đã bị bẫy</div></div>'+
+      '<div style="background:#131c31;border:1px solid rgba(124,77,255,.2);border-radius:10px;padding:14px;text-align:center">'+
+      '<div style="font-size:10px;color:#607d8b">MÃ HÓA</div><div style="font-size:14px;font-weight:700;color:#7c4dff">AES-256</div><div style="font-size:10px;color:#607d8b">Mọi dữ liệu đều được mã hóa</div></div>'+
+      '<div style="background:#131c31;border:1px solid rgba(0,188,212,.2);border-radius:10px;padding:14px;text-align:center">'+
+      '<div style="font-size:10px;color:#607d8b">CHỮ KÝ SỐ</div><div style="font-size:14px;font-weight:700;color:#00bcd4">SHA-256</div><div style="font-size:10px;color:#607d8b">Mỗi báo cáo được ký bởi Genesis Key</div></div></div>'+
+      '<div class="cr"><div class="cc"><h3>🛡️ Phòng thủ chủ động (Deceptive Defense)</h3>'+
+      '<div style="font-size:12px;color:#b0bec5">'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a">✅ Honey-pot Data: Dữ liệu giả đã được triển khai — kẻ tấn công chỉ lấy được công thức lỗi thời</div>'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a">✅ Feedback Loop: Hành vi tấn công được AI phân tích để nâng cấp bộ lọc</div>'+
+      '<div style="padding:6px 0">✅ Tự động cô lập: Phát hiện truy cập lạ → Ngắt kết nối → Báo động đỏ</div></div></div>'+
+      '<div class="cc"><h3>📜 Nhật ký bảo mật</h3>'+
+      (!attackLogs.length?'<div style="color:#607d8b;font-size:12px">Chưa có sự kiện bảo mật</div>':
+      '<div style="max-height:200px;overflow-y:auto">'+attackLogs.slice(-10).reverse().map(function(x){return '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:11px;display:flex;justify-content:space-between"><span style="color:'+(x.act.indexOf('FAIL')>=0?'#ff1744':'#ff9100')+'">'+esc(x.act)+'</span><span style="color:#607d8b;font-size:10px">'+(x.ts?x.ts.slice(0,16):'')+'</span></div>'}).join(''))+
+      '</div></div></div>'+cb()
+    }
+   },
+   superAdmin:{
+    title:'SUPER ADMIN',
+    render:function(){
+     if(!U||U.role!=='admin')return '<div class="pt">Từ chối truy cập</div><div class="ps">Bạn không có quyền quản trị tối cao</div>'+cb();
+     var gk=GK.valid(),gkSet=LS.get(KS+'gk','');
+     if(!gkSet)return '<div class="pt">SUPER ADMIN</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Quyền lực tối cao</div><div style="color:#607d8b;text-align:center;padding:20px">🔒 Thiết lập Genesis Key trên trang Admin trước</div>'+cb();
+     if(!gk)return '<div class="pt">SUPER ADMIN</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Quyền lực tối cao</div><div style="text-align:center;padding:20px">🔒 Mở khóa Genesis Key để truy cập Super Admin</div>'+cb();
+     var u=getU(),a=getL(),t=getT(),fo=getFO();
+     return '<div class="pt">SUPER ADMIN — QUYỀN LỰC TỐI CAO</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Chìa khóa chúa đã kích hoạt</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(255,23,68,.06),rgba(124,77,255,.06));border:1px solid rgba(255,23,68,.2);border-radius:10px;padding:12px;margin-bottom:14px">'+
+      '<div style="display:flex;align-items:center;gap:10px"><div style="font-size:28px">👑</div><div><div style="font-weight:600;font-size:14px">Genesis Key đã xác thực — Token: '+GK.token().slice(0,16)+'...</div>'+
+      '<div style="font-size:11px;color:#607d8b">Phiên làm việc: '+Math.floor((300000-(Date.now()-GK.token().length*1000))/60000)+' phút còn lại</div></div></div>'+
+      '<div class="cr"><div class="cc"><h3>🔧 Van khóa dữ liệu (Data Valves)</h3>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:12px"><span>🌐 Cổng dữ liệu Quốc tế</span><span class="tg g" id="valve1">ĐANG MỞ</span></div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:12px"><span>🤖 Federated Learning</span><span class="tg g" id="valve2">ĐANG HỌC</span></div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:12px"><span>💰 Eco-Credit AI</span><span class="tg g" id="valve3">ĐANG CHẤM ĐIỂM</span></div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12px"><span>🏛️ Heritage Trust</span><span class="tg g" id="valve4">30% TỰ ĐỘNG</span></div>'+
+      '<div style="margin-top:8px"><button class="btn bs" onclick="if(confirm(\'Ngắt toàn bộ kết nối?\')){toast(\'Đã ngắt\',\'Toàn bộ van khóa đã đóng — dữ liệu an toàn\');addNotif(\'SUPER ADMIN\',\'Đã ngắt kết nối toàn bộ hệ thống\');document.querySelectorAll(\'[id^=valve]\').forEach(function(e){e.className=\'tg r\';e.textContent=\'ĐÃ ĐÓNG\'})}">🔴 Ngắt toàn bộ kết nối</button></div></div>'+
+      '<div class="cc"><h3>📊 Thống kê toàn hệ thống</h3><div style="font-size:12px;color:#b0bec5">'+
+      '<div style="padding:4px 0;display:flex;justify-content:space-between"><span>Người dùng</span><span>'+u.length+'</span></div>'+
+      '<div style="padding:4px 0;display:flex;justify-content:space-between"><span>Cảnh báo đang hoạt động</span><span style="color:'+(t.filter(function(x){return x.st==='active'}).length>0?'#ff1744':'#00e676')+'">'+t.filter(function(x){return x.st==='active'}).length+'</span></div>'+
+      '<div style="padding:4px 0;display:flex;justify-content:space-between"><span>Nhật ký canh tác</span><span>'+fo.length+'</span></div>'+
+      '<div style="padding:4px 0;display:flex;justify-content:space-between"><span>Tổng hoạt động</span><span>'+a.length+'</span></div>'+
+      '<div style="padding:4px 0;display:flex;justify-content:space-between"><span>Genesis Key</span><span style="color:#00e676">🔓 Đã mở khóa</span></div></div></div></div>'+
+       '<div class="cc"><h3>⚠️ Self-Healing — Phát hiện dữ liệu bất thường</h3>'+
+       (t.filter(function(x){return x.st==='active'}).length>2?'<div class="ac" style="font-size:12px">🛡️ Đã phát hiện rủi ro thiên tai — Tự động loại bỏ dữ liệu nhiễu khỏi ECS Credit Score</div>':'<div style="font-size:12px;color:#00e676">✅ Hệ thống an toàn — Không phát hiện bất thường</div>')+
+       '<div class="cr"><div class="cc"><h3>🔴 BIG RED BUTTON — Dừng khẩn cấp</h3>'+
+       '<div style="text-align:center;padding:8px 0">'+
+       '<div style="width:80px;height:80px;background:radial-gradient(circle,#ff1744,#d50000);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer;margin:0 auto 8px;box-shadow:0 0 30px rgba(255,23,68,.6);animation:pulse-sos 2s infinite" onclick="bigRedButton()">🔴 DỪNG<br>KHẨN</div>'+
+       '<div style="font-size:10px;color:#607d8b">Dừng toàn bộ AI, đóng van dữ liệu, đóng băng giao dịch — Quyền quyết định cuối cùng thuộc về bạn</div></div></div>'+
+       '<div class="cc"><h3>⚙️ Quyền kiểm soát thủ công (Human-in-the-Loop)</h3>'+
+       '<div style="font-size:11px;color:#b0bec5">'+
+       '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;gap:6px">👤 <b>Auto AI</b>: Đang chạy — Bạn có thể ghi đè bất cứ lúc nào</div>'+
+       '<div style="padding:4px 0;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;gap:6px">🔘 <b>Smart Contract</b>: Tự động thực thi — Big Red Button hủy mọi lệnh</div>'+
+       '<div style="padding:4px 0;display:flex;align-items:center;gap:6px">🛑 <b>Override Mode</b>: Bật/Tắt bất kỳ module nào từ xa</div></div></div></div>'+
+       '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+
+       '<button class="btn bp" onclick="resetSystem()">🔄 Đặt lại hệ thống</button>'+
+       '<button class="btn br" onclick="if(confirm(\'Bạn có chắc muốn xóa TOÀN BỘ dữ liệu?\')){localStorage.clear();initAdmin();toast(\'Đã xóa\',\'Toàn bộ dữ liệu đã bị xóa\');addNotif(\'SUPER ADMIN\',\'Đã xóa toàn bộ dữ liệu hệ thống\');showPage(\'dashboard\')}">⚠️ XÓA TOÀN BỘ DỮ LIỆU</button>'+
+       '<button class="btn bs" onclick="GK.clear();LS.del(KS+\'gk\');toast(\'Đã khóa\',\'Genesis Key đã thu hồi\');location.reload()">🔒 THU HỒI GENESIS KEY</button></div>'+cb()
+    }
+   },
+   database:{
+    title:'CƠ SỞ DỮ LIỆU',
+    render:function(){
+     var iv=getIV(),dt=getDT(),fl=getFL(),hv=getHV(),im=getL();
+     var schema=[
+      {name:'Identity Vault',icon:'🆔',table:'iv_tbl',fields:['User_ID (PK)','Trust_Score','Wallet_Address','Security_Hash'],desc:'Định danh toàn hệ thống',rows:iv.vault.length,access:'OWNER'},
+      {name:'Digital Twin',icon:'🌍',table:'dt_tbl',fields:['Plot_ID (PK)','GPS_Coordinates','Eco_Status','Owner_ID (FK→iv_tbl)'],desc:'Lô đất & Bản sao số',rows:dt.length,access:'USER'},
+      {name:'Immutable Log',icon:'📜',table:'im_log',fields:['Log_ID (PK)','Plot_ID (FK→dt_tbl)','Task_Type','Proof_Hash','Timestamp'],desc:'Nhật ký bất biến',rows:im.length,access:'USER'},
+      {name:'Financial Ledger',icon:'💳',table:'fin_ledger',fields:['Tx_ID (PK)','User_ID (FK→iv_tbl)','Credit_Limit','Status'],desc:'Hạn mức & Tín dụng',rows:fl.length,access:'OWNER'},
+      {name:'Heritage Vault',icon:'🏛️',table:'her_vault',fields:['Pool_ID (PK)','Contribution_Amount','Impact_Metric'],desc:'Quỹ Di sản',rows:hv.pools.length,access:'OWNER'}
+     ];
+     return '<div class="pt">LÕI TRUNG TÂM — CƠ SỞ DỮ LIỆU QUAN HỆ</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — 5 Thực thể khóa chặt vào nhau, bất khả xâm phạm</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(0,200,83,.06),rgba(0,188,212,.06));border:1px solid rgba(0,200,83,.15);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center">'+
+      '<div style="font-size:11px;color:#607d8b">🔗 Sợi dây liên kết dữ liệu</div>'+
+      '<div style="font-size:11px;color:#b0bec5;margin-top:4px">🌊 Shield → 🌍 Lô đất → 🌱 Nhật ký → 💳 Tín dụng → 🏛️ Di sản</div>'+
+      '<div style="font-size:10px;color:#607d8b;margin-top:2px">Vòng lặp kín — Thiếu một mắt xích, toàn bộ hệ thống dừng lại</div></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+      schema.map(function(t){return '<div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:12px;border-top:3px solid '+(t.access==='OWNER'?'#ff1744':'#00c853')+'">'+
+       '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="font-size:18px">'+t.icon+'</span><div style="flex:1;font-weight:600;font-size:12px">'+t.name+'</div>'+
+       '<span class="tg '+(t.access==='OWNER'?'r':'g')+'">'+t.access+'</span></div>'+
+       '<div style="font-size:9px;color:#607d8b;font-family:monospace;margin-bottom:6px">'+esc(t.table)+' • '+t.rows+' dòng</div>'+
+       '<div style="font-size:10px;color:#b0bec5;margin-bottom:4px">'+t.fields.map(function(f){return '• '+f}).join('<br>')+'</div>'+
+       '<div style="font-size:9px;color:#607d8b">'+t.desc+'</div></div>'}).join('')+
+      '</div>'+
+      '<div class="cc"><h3>🔄 Luồng dữ liệu (Data Pipeline)</h3>'+
+      '<div style="position:relative;padding:10px 0">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">'+
+      '<div style="background:rgba(0,188,212,.12);border:1px solid rgba(0,188,212,.3);border-radius:8px;padding:8px;text-align:center;flex:1;min-width:60px"><div style="font-size:16px">🌊</div><div style="font-size:9px;color:#607d8b">Shield</div></div>'+
+      '<div style="color:#00c853;font-size:16px">→</div>'+
+      '<div style="background:rgba(0,200,83,.12);border:1px solid rgba(0,200,83,.3);border-radius:8px;padding:8px;text-align:center;flex:1;min-width:60px"><div style="font-size:16px">🌍</div><div style="font-size:9px;color:#607d8b">Lô đất</div></div>'+
+      '<div style="color:#00c853;font-size:16px">→</div>'+
+      '<div style="background:rgba(255,109,0,.12);border:1px solid rgba(255,109,0,.3);border-radius:8px;padding:8px;text-align:center;flex:1;min-width:60px"><div style="font-size:16px">📜</div><div style="font-size:9px;color:#607d8b">Nhật ký</div></div>'+
+      '<div style="color:#00c853;font-size:16px">→</div>'+
+      '<div style="background:rgba(124,77,255,.12);border:1px solid rgba(124,77,255,.3);border-radius:8px;padding:8px;text-align:center;flex:1;min-width:60px"><div style="font-size:16px">💳</div><div style="font-size:9px;color:#607d8b">Tín dụng</div></div>'+
+      '<div style="color:#00c853;font-size:16px">→</div>'+
+      '<div style="background:rgba(255,23,68,.12);border:1px solid rgba(255,23,68,.3);border-radius:8px;padding:8px;text-align:center;flex:1;min-width:60px"><div style="font-size:16px">🏛️</div><div style="font-size:9px;color:#607d8b">Di sản</div></div></div></div>'+
+      '<div style="font-size:11px;color:#b0bec5;margin-top:6px">'+
+      '<div style="padding:4px 0">🌊 Môi trường (Shield) → tác động trực tiếp vào Trạng thái Lô đất</div>'+
+      '<div style="padding:4px 0">🌍 Nhật ký canh tác (Farm Ops) → tác động vào Điểm Tín dụng (Credit)</div>'+
+      '<div style="padding:4px 0">💳 Điểm Tín dụng → mở khóa Hạn mức tài chính (Ledger)</div>'+
+      '<div style="padding:4px 0">💰 Giao dịch → tự động trích 30% vào Quỹ Di sản (Heritage)</div>'+
+      '<div style="padding:4px 0;color:#ff1744">⚠️ Nếu đối thủ copy Farm_Logs mà thiếu Shield_Data → hệ thống tê liệt</div></div></div>'+
+      '<div class="cr"><div class="cc"><h3>🔐 Row-Level Security (RLS)</h3>'+
+      '<div style="font-size:11px;color:#b0bec5"><div style="padding:6px 0;display:flex;align-items:center;gap:6px">👑 <b style="color:#ff1744">Owner</b> — DANH ĐẠT (SÓI CÔ ĐỘC): SELECT/INSERT/UPDATE/DELETE toàn bộ</div>'+
+      '<div style="padding:6px 0;display:flex;align-items:center;gap:6px">👤 <b style="color:#00c853">User</b> — Nông dân: chỉ INSERT + SELECT trên dữ liệu của họ</div>'+
+      '<div style="padding:6px 0;display:flex;align-items:center;gap:6px">🚫 Không ai có quyền UPDATE hay DELETE lịch sử đã tạo</div></div></div>'+
+      '<div class="cc"><h3>📊 Thực thể chi tiết</h3><div style="font-size:11px;color:#b0bec5">'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a"><b>🆔 Identity Vault</b> — Tổng: '+iv.vault.length+' định danh<br>Quyền hiện tại: <span class="tg '+(U&&U.role==='admin'?'r':'g')+'">'+(U?rlsCheck(U):'N/A')+'</span></div>'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a"><b>🌍 Digital Twin</b> — Tổng: '+dt.length+' lô đất<br>GPS trung bình: '+(!dt.length?'N/A':dt.reduce(function(s,x){return s+x.gpsLat},0)/dt.length+', '+dt.reduce(function(s,x){return s+x.gpsLng},0)/dt.length)+'</div>'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a"><b>📜 Immutable Log</b> — Tổng: '+im.length+' bản ghi<br>Không thể xóa — Chỉ có thể thêm mới</div>'+
+      '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a"><b>💳 Financial Ledger</b> — Tổng: '+fl.length+' giao dịch<br>Hạn mức khả dụng: '+fl.reduce(function(s,x){return s+((x.limit||0)-(x.used||0))},0).toLocaleString()+' đ</div>'+
+      '<div style="padding:6px 0"><b>🏛️ Heritage Vault</b> — Quỹ: '+hv.totalContributions.toLocaleString()+' đ<br>Người thụ hưởng: '+hv.beneficiaries+' người</div></div></div>'+cb()+crossSellBanner('database')
+    }
+   },
+   remoteSensing:{
+    title:'VIỄN THÁM SỐ',
+    render:function(){
+     var dt=getDT();
+     var satellites=[
+      {name:'Sentinel-1 (SAR)',agency:'ESA',type:'Radar',resolution:'10m',cycle:'6 ngày',status:'online',penetrates:'Xuyên mây/mưa'},
+      {name:'Sentinel-2 (Quang học)',agency:'ESA',type:'Optical',resolution:'10m',cycle:'5 ngày',status:'online',penetrates:'—'},
+      {name:'Landsat 9',agency:'NASA/USGS',type:'Optical',resolution:'30m',cycle:'16 ngày',status:'online',penetrates:'—'},
+      {name:'MODIS (Aqua/Terra)',agency:'NASA',type:'Đa phổ',resolution:'250m',cycle:'1 ngày',status:'online',penetrates:'—'},
+      {name:'Fengyun',agency:'CMA (Trung Quốc)',type:'Khí tượng',resolution:'1km',cycle:'6 giờ',status:'idle',penetrates:'—'}
+     ];
+     var ndvi=(Math.random()*0.4+0.3).toFixed(2),ndwi=(Math.random()*0.3+0.1).toFixed(2),sar=Math.random()>0.5?'Bình thường':'Ngập cục bộ';
+     var risk=parseFloat(ndvi)<0.4||sar==='Ngập cục bộ'?'CAO':'THẤP';
+     return '<div class="pt">LỚP VIỄN THÁM — REMOTE SENSING LAYER</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Đôi mắt từ trên cao • Vệ tinh Radar xuyên mây/mưa 24/7</div>'+
+      '<div style="background:linear-gradient(135deg,rgba(0,188,212,.06),rgba(0,200,83,.06));border:1px solid rgba(0,188,212,.15);border-radius:12px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">'+
+      '<div style="font-size:32px">🛰️</div><div><div style="font-weight:600;font-size:13px">Trạm thu dữ liệu — Đang kết nối</div>'+
+      '<div style="font-size:11px;color:#607d8b">'+satellites.filter(function(s){return s.status==='online'}).length+'/'+satellites.length+' vệ tinh • Cập nhật tự động 24/7 • Độ bao phủ: Toàn vùng Mekong</div></div></div>'+
+      '<div class="cc"><h3>📡 Hệ thống vệ tinh</h3><table class="dt"><tr><th>Vệ tinh</th><th>Cơ quan</th><th>Loại</th><th>Độ phân giải</th><th>Chu kỳ</th><th>Xuyên mây</th><th>Trạng thái</th></tr>'+
+      satellites.map(function(s){return '<tr><td style="font-size:10px"><b>'+esc(s.name)+'</b></td><td style="font-size:10px;color:#607d8b">'+esc(s.agency)+'</td><td style="font-size:10px">'+esc(s.type)+'</td><td style="font-size:10px">'+esc(s.resolution)+'</td><td style="font-size:10px">'+esc(s.cycle)+'</td><td style="font-size:10px">'+esc(s.penetrates)+'</td><td><span class="tg '+(s.status==='online'?'g':'o')+'">'+(s.status==='online'?'Online':'Chờ')+'</span></td></tr>'}).join('')+
+      '</table></div>'+
+      '<div class="cr"><div class="cc"><h3>🔬 Chỉ số thời gian thực</h3>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+      '<div style="background:#18243c;border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:#607d8b">NDVI (Thực vật)</div><div style="font-size:22px;font-weight:700;color:'+(parseFloat(ndvi)>=0.5?'#00e676':'#ff9100')+'">'+ndvi+'</div><div style="font-size:9px;color:#607d8b">'+(parseFloat(ndvi)>=0.5?'Cây trồng khỏe':'Căng thẳng')+'</div></div>'+
+      '<div style="background:#18243c;border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:#607d8b">NDWI (Nước)</div><div style="font-size:22px;font-weight:700;color:'+(parseFloat(ndwi)>=0.2?'#00bcd4':'#ff9100')+'">'+ndwi+'</div><div style="font-size:9px;color:#607d8b">'+(parseFloat(ndwi)>=0.2?'Ẩm độ cao':'Khô hạn')+'</div></div>'+
+      '<div style="background:#18243c;border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:#607d8b">SAR Radar</div><div style="font-size:18px;font-weight:700;color:'+(sar==='Bình thường'?'#00e676':'#ff1744')+'">'+esc(sar)+'</div><div style="font-size:9px;color:#607d8b">Phản hồi mặt đất</div></div>'+
+      '<div style="background:#18243c;border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:#607d8b">Rủi ro tổng thể</div><div style="font-size:18px;font-weight:700;color:'+(risk==='CAO'?'#ff1744':'#00e676')+'">'+risk+'</div><div style="font-size:9px;color:#607d8b">Dựa trên NDVI + SAR</div></div></div></div>'+
+      '<div class="cc"><h3>🔄 Pipeline dữ liệu tự động</h3><div style="font-size:11px;color:#b0bec5">'+
+      '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a">1. 🛰️ Vệ tinh quét vùng Mekong → Gửi ảnh thô (RAW)</div>'+
+      '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a">2. 🔄 Data Lakehouse xử lý → Chuẩn hóa tọa độ WGS84</div>'+
+      '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a">3. 🧮 AI tính toán NDVI, NDWI, Flood Index</div>'+
+      '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a">4. 🌍 Cập nhật Eco_Status từng lô đất trong Digital Twin</div>'+
+      '<div style="padding:5px 0">5. ⚡ Nếu phát hiện rủi ro → Action Engine tự động kích hoạt</div></div></div>'+
+      '<div class="cr"><div class="cc"><h3>🗺️ Bản đồ nhiệt (Heatmap) — Rủi ro môi trường</h3>'+
+      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;height:40px;margin-bottom:6px">'+
+      dt.concat([null,null,null,null,null]).slice(0,10).map(function(x){var r=Math.random();return '<div style="background:'+(r<0.3?'#ff1744':r<0.6?'#ff9100':r<0.8?'#fdd835':'#00e676')+';border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff">'+(x?x.ecoStatus?.slice(0,1)||'—':'—')+'</div>'}).join('')+
+      '</div><div style="font-size:9px;color:#607d8b;display:flex;justify-content:space-between"><span>🔴 Rủi ro cao</span><span>🟡 Trung bình</span><span>🟢 An toàn</span></div>'+
+      '<div style="font-size:9px;color:#607d8b;margin-top:6px">Dữ liệu được cập nhật từ Sentinel-1 SAR + Sentinel-2 NDVI</div></div>'+
+      '<div class="cc"><h3>🔗 Kết nối dữ liệu quốc tế</h3><div style="font-size:11px;color:#b0bec5">'+
+      '<div style="padding:4px 0;display:flex;align-items:center;gap:6px">🇺🇸 NASA/NOAA — Google Earth Engine API (Landsat, MODIS, GRACE)</div>'+
+      '<div style="padding:4px 0;display:flex;align-items:center;gap:6px">🇪🇺 ESA — Sentinel Hub API (Sentinel-1 SAR + Sentinel-2)</div>'+
+      '<div style="padding:4px 0;display:flex;align-items:center;gap:6px">🇨🇳 CMA — Dữ liệu vệ tinh Fengyun (Khí tượng Trung Quốc)</div>'+
+      '<div style="padding:4px 0;display:flex;align-items:center;gap:6px">🌐 GEOSS — Hệ thống quan sát Trái đất toàn cầu</div></div></div>'+cb()+crossSellBanner('remoteSensing')
+    }
+   },
+   plots:{
+    title:'LÔ ĐẤT SỐ',
+    render:function(){
+     var dt=getDT(),iv=getIV(),t=getT();
+      var dt=getDT(),iv=getIV(),t=getT();
+      var totalArea=dt.reduce(function(s,x){return s+(x.area||0)},0);
+      var simScenarios=[
+       {name:'Kịch bản: Mực nước biển dâng +10cm',impact:'Diện tích ngập: '+(totalArea*0.15).toFixed(1)+' ha',profit:'Lợi nhuận giảm 12%',risk:'CAO',color:'#ff1744'},
+       {name:'Kịch bản: 1000 hộ chuyển giống lúa chịu mặn',impact:'Năng suất +8% toàn vùng',profit:'Lợi nhuận +18%',risk:'THẤP',color:'#00e676'},
+       {name:'Kịch bản: Hạn hán kéo dài 3 tháng',impact:'Diện tích khô: '+(totalArea*0.3).toFixed(1)+' ha',profit:'Lợi nhuận -25%',risk:'RẤT CAO',color:'#ff1744'},
+       {name:'Kịch bản: Áp dụng toàn bộ quy trình sạch',impact:'Điểm ECS trung bình tăng +200',profit:'Lợi nhuận +35%',risk:'THẤP',color:'#00e676'}
+      ];
+      return '<div class="pt">BẢN SAO SỐ — DIGITAL TWIN & MÔ PHỎNG TƯƠNG LAI</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — AI chạy giả lập 1 triệu kịch bản, dự báo lợi nhuận/rủi ro 5 năm tới</div>'+
+       '<div style="background:linear-gradient(135deg,rgba(0,188,212,.06),rgba(124,77,255,.06));border:1px solid rgba(0,188,212,.15);border-radius:10px;padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px">'+
+       '<div style="font-size:28px">🔮</div><div><div style="font-weight:600;font-size:13px">Mô phỏng số — Mekong Digital Twin</div>'+
+       '<div style="font-size:11px;color:#607d8b">AI giả lập tương lai vùng Mekong dựa trên dữ liệu thực tế • '+(dt.length||0)+' lô đất, '+totalArea.toFixed(1)+' ha</div></div></div>'+
+       '<div style="margin-bottom:10px"><button class="btn bp" onclick="showAddDT()">+ Thêm lô đất</button> <button class="exp-btn" onclick="exportCSV(\'lotdat\',[\'plotId\',\'name\',\'gpsLat\',\'gpsLng\',\'ecoStatus\',\'area\',\'ownerId\',\'crop\'],getDT())">📥 CSV</button></div>'+
+       '<div class="sr">'+
+       '<div class="sc"><div class="sl">Tổng lô đất</div><div class="sv">'+dt.length+'</div></div>'+
+       '<div class="sc"><div class="sl">Diện tích</div><div class="sv">'+totalArea.toFixed(1)+' ha</div></div>'+
+       '<div class="sc"><div class="sl">Cảnh báo</div><div class="sv" style="color:'+(t.filter(function(a){return a.st==='active'}).length>0?'#ff1744':'#00e676')+'">'+(t.filter(function(a){return a.st==='active'}).length||0)+'</div></div>'+
+       '<div class="sc"><div class="sl">Giả lập đang chạy</div><div class="sv" style="color:#7c4dff">'+simScenarios.length+'</div></div></div>'+
+       '<div class="cc"><h3>🔮 Bảng điều khiển Mô phỏng (Simulation Dashboard)</h3>'+
+       '<div style="display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:10px">'+
+       simScenarios.map(function(s){return '<div style="background:#18243c;border-radius:8px;padding:10px;border-left:3px solid '+s.color+'">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:11px">'+esc(s.name)+'</b><span class="tg '+(s.risk==='THẤP'?'g':s.risk==='CAO'?'o':'r')+'">'+s.risk+'</span></div>'+
+        '<div style="font-size:10px;color:#607d8b;margin-top:4px">📊 Tác động: '+s.impact+'</div>'+
+        '<div style="font-size:10px;color:#b0bec5">💰 '+s.profit+'</div></div>'}).join('')+
+       '</div>'+
+       '<div style="font-size:10px;color:#607d8b;text-align:center">🧠 AI đang chạy giả lập dựa trên dữ liệu thủy văn thực tế từ 6 nguồn quốc tế</div></div>'+
+       '<div class="cc"><h3>📋 Danh sách lô đất</h3>'+
+       (!dt.length?'<div style="color:#607d8b;font-size:12px">Chưa có lô đất nào — Thêm lô đất đầu tiên</div>':
+       '<table class="dt"><tr><th>Mã lô</th><th>Tên</th><th>GPS</th><th>Trạng thái</th><th>Diện tích</th><th>Chủ sở hữu</th><th>Hành động</th></tr>'+
+       dt.map(function(x,i){return '<tr><td style="font-size:11px">'+esc(x.plotId||'')+'</td><td>'+esc(x.name||'')+'</td><td style="font-size:10px;color:#607d8b">'+(x.gpsLat?x.gpsLat.toFixed(4):'')+', '+(x.gpsLng?x.gpsLng.toFixed(4):'')+'</td><td><span class="tg '+(x.ecoStatus==='Tốt'?'g':x.ecoStatus==='Ngập'?'r':x.ecoStatus==='Khô'?'o':'b')+'">'+esc(x.ecoStatus||'')+'</span></td><td>'+(x.area||0)+' ha</td><td style="font-size:10px">'+esc(x.ownerId||'—')+'</td><td><button class="btn bs" onclick="deletePlot('+i+')">Xóa</button></td></tr>'}).join(''))+
+       '</table></div>'+
+       '<div class="cr"><div class="cc"><h3>🗺️ Bản đồ lô đất</h3><div style="font-size:11px;color:#b0bec5">'+
+       (dt.length?dt.map(function(x){return '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;gap:6px"><span style="font-size:14px">📍</span><div style="flex:1"><b>'+esc(x.name)+'</b><br><span style="font-size:10px;color:#607d8b">'+(x.gpsLat?x.gpsLat.toFixed(4)+', '+x.gpsLng.toFixed(4):'Chưa có GPS')+' · '+(x.crop||'Đất trống')+'</span></div><span class="tg '+(x.ecoStatus==='Tốt'?'g':x.ecoStatus==='Ngập'?'r':x.ecoStatus==='Khô'?'o':'b')+'">'+esc(x.ecoStatus||'')+'</span></div>'}).join(''):'<div style="color:#607d8b">Chưa có dữ liệu bản đồ</div>')+
+       '</div></div>'+
+       '<div class="cc"><h3>🔗 Liên kết dữ liệu</h3><div style="font-size:11px;color:#b0bec5">'+
+       '<div style="padding:4px 0">🌊 Eco-Shield cập nhật Eco_Status tự động dựa trên cảnh báo thiên tai</div>'+
+       '<div style="padding:4px 0">🌱 Farm Ops ghi nhật ký gắn với Plot_ID → Traceability tự động tạo lô</div>'+
+       '<div style="padding:4px 0">💳 Chủ lô đất được xác thực qua Identity Vault (Owner_ID → User_ID)</div>'+
+        '<div style="padding:4px 0;color:#ff1744">🔒 Immutable Log ghi mọi thay đổi — không thể xóa, chỉ thêm</div></div></div>'+cb()+crossSellBanner('plots')
+     }
+    },
+    marketplace:{
+     title:'SÀN GIAO DỊCH',
+     render:function(){
+      var listings=LS.get(KS+'mkt',[]),tr=getTR();
+      var escrow=LS.get(KS+'esc',{balance:0,locked:0,history:[]});
+      return '<div class="pt">SÀN GIAO DỊCH NÔNG SẢN & SMART ESCROW</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Smart Contract khóa tiền, giải ngân tự động khi hàng đạt chuẩn</div>'+
+       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+       '<div style="background:linear-gradient(135deg,rgba(0,200,83,.06),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.15);border-radius:10px;padding:12px;text-align:center">'+
+       '<div style="font-size:10px;color:#607d8b">💳 Số dư Escrow</div><div style="font-size:20px;font-weight:700;color:#00e676">'+escrow.balance.toLocaleString()+' đ</div></div>'+
+       '<div style="background:linear-gradient(135deg,rgba(255,109,0,.06),rgba(255,23,68,.02));border:1px solid rgba(255,109,0,.15);border-radius:10px;padding:12px;text-align:center">'+
+       '<div style="font-size:10px;color:#607d8b">🔒 Đang khóa</div><div style="font-size:20px;font-weight:700;color:#ff9100">'+escrow.locked.toLocaleString()+' đ</div></div></div>'+
+       '<div style="margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn bp" onclick="showAddListing()">+ Đăng bán nông sản</button>'+
+       '<button class="btn bs" onclick="if(confirm(\'Nạp 10,000,000 đ vào Escrow?\')){var e=LS.get(KS+\'esc\',{balance:0,locked:0,history:[]});e.balance+=10000000;e.history.push({type:\'deposit\',amt:10000000,ts:new Date().toISOString()});LS.set(KS+\'esc\',e);toast(\'Escrow\',\'Đã nạp 10,000,000 đ\');showPage(\'marketplace\')}">💰 Nạp Escrow</button></div>'+
+       '<div class="cr"><div class="cc"><h3>📋 Danh sách nông sản đang bán</h3>'+
+       (!listings.length?'<div style="color:#607d8b;font-size:12px">Chưa có sản phẩm nào — Đăng bán sản phẩm đầu tiên</div>':
+       '<table class="dt"><tr><th>Sản phẩm</th><th>Số lượng</th><th>Giá</th><th>Chứng nhận</th><th>Người bán</th><th>Hành động</th></tr>'+
+       listings.map(function(x,i){return '<tr><td>'+esc(x.product)+'</td><td>'+esc(x.qty)+'</td><td><b>'+(x.price||0).toLocaleString()+' đ</b></td><td><span class="tg '+(x.certified?'g':'o')+'">'+(x.certified?'Đã chứng nhận':'Chờ')+'</span></td><td style="font-size:11px">'+esc(x.seller||'')+'</td><td>'+
+       (x.st==='available'?'<button class="btn bp" style="font-size:10px;padding:4px 10px" onclick="buyListing('+i+')">Mua ngay</button>':'<span class="tg p" style="font-size:9px">Đã giao dịch</span>')+'</td></tr>'}).join(''))+
+       '</table></div>'+
+       '<div class="cc"><h3>⛓️ Smart Escrow — Lịch sử giao dịch</h3>'+
+       (!escrow.history.length?'<div style="color:#607d8b;font-size:12px">Chưa có giao dịch</div>':
+       '<div style="max-height:150px;overflow-y:auto">'+escrow.history.slice(-10).reverse().map(function(x){return '<div style="padding:5px 0;border-bottom:1px solid #1e2d4a;font-size:11px;display:flex;justify-content:space-between"><span><span class="tg '+(x.type==='deposit'?'g':x.type==='lock'?'o':'b')+'" style="font-size:8px">'+(x.type==='deposit'?'Nạp':x.type==='lock'?'Khóa':'Giải ngân')+'</span> '+esc(x.note||'')+'</span><span style="color:#607d8b">'+(x.amt||0).toLocaleString()+' đ</span></div>'}).join('')+'</div>')+
+       '</div></div>'+cb()+crossSellBanner('marketplace')
+     }
+    },
+    admin:{
+    title:'QUẢN TRỊ VIÊN',
+   render:function(){
+    if(!U||U.role!=='admin')return '<div class="pt">Từ chối truy cập</div><div class="ps">Bạn không có quyền quản trị</div>'+cb();
+    var u=getU(),gk=GK.valid(),gkSet=LS.get(KS+'gk','');
+    return '<div class="pt">Quản trị viên</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Genesis Key Security</div>'+
+     '<div style="background:linear-gradient(135deg,rgba(124,77,255,.08),rgba(255,23,68,.08));border:1px solid '+(gk?'rgba(0,200,83,.2)':'rgba(255,23,68,.2)')+';border-radius:10px;padding:12px;margin-bottom:14px">'+
+     '<div style="display:flex;align-items:center;gap:8px"><div style="font-size:20px">'+(gk?'🔓':'🔒')+'</div><div><div style="font-weight:600;font-size:13px">Genesis Key: '+(gk?'ĐÃ MỞ KHÓA':gkSet?'CHƯA XÁC THỰC':'CHƯA THIẾT LẬP')+'</div>'+
+     '<div style="font-size:10px;color:#607d8b">'+(gk?'Phiên làm việc an toàn — Token: '+GK.token().slice(0,12)+'...':gkSet?'Nhập Genesis Key để mở khóa quyền quản trị tối cao':'Thiết lập Genesis Key để bảo vệ hệ thống')+'</div></div></div>'+
+     (!gkSet?'<div style="display:flex;gap:6px;margin-bottom:14px"><input class="input" id="gkSetInput" type="password" placeholder="Tạo Genesis Key mới..." style="flex:1"><button class="btn bp" onclick="var v=document.getElementById(\'gkSetInput\');if(v&&v.value.length>=8){GK.set(v.value);LS.set(KS+\'gk\',v.value);toast(\'Genesis Key\',\'Đã thiết lập! Hãy nhớ key này 🔑\');addNotif(\'Genesis Key\',\'Genesis Key đã được thiết lập\');v.value=\'\';showPage(\'admin\')}else{toast(\'Lỗi\',\'Key tối thiểu 8 ký tự\')}">🔑 Thiết lập</button></div>':'')+
+     (gkSet&&!gk?'<div style="display:flex;gap:6px;margin-bottom:14px"><input class="input" id="gkInput" type="password" placeholder="Nhập Genesis Key..." style="flex:1"><button class="btn bp" onclick="var v=document.getElementById(\'gkInput\');if(v){GK.auth(v.value,function(r){if(r){toast(\'Genesis Key\',\'Xác thực thành công! 🔓\');addNotif(\'Genesis Key\',\'Admin đã xác thực Genesis Key\');showPage(\'admin\')}else{toast(\'Lỗi\',\'Sai Genesis Key! 🔒\');var a=getL();a.push({act:\'GENESIS FAIL\',ts:new Date().toISOString(),by:U.email});LS.set(KS+\'l\',a)}});v.value=\'\'}">Mở khóa</button></div>':'')+
+     '<div class="cc"><h3>Danh sách người dùng</h3><table class="dt"><tr><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Access ID</th></tr>'+u.map(function(x){return '<tr><td>'+esc(x.email)+'</td><td>'+esc(x.role)+'</td><td><span class="tg '+(x.st==='approved'?'g':'o')+'">'+x.st+'</span></td><td style="font-size:11px">'+esc(x.aid||'')+'</td></tr>'}).join('')+'</table></div>'+
+     (gk?'<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn bp" onclick="resetSystem()">🔄 Đặt lại hệ thống</button> <button class="btn bs" onclick="GK.clear();toast(\'Đã khóa\',\'Genesis Key đã thu hồi\');showPage(\'admin\')">🔒 Khóa Genesis Key</button> <button class="btn br" onclick="if(confirm(\'XÓA TOÀN BỘ DỮ LIỆU?\')){localStorage.clear();initAdmin();location.reload()}">⚠️ Xóa tất cả dữ liệu</button></div>':'<div style="color:#607d8b;font-size:11px">💡 Mở khóa Genesis Key để truy cập các chức năng quản trị nâng cao</div>')+cb()
+   }
+  }
+};
+
+function exportBtn(data,filename){
+ if(!data||!data.length)return '';
+ return '<button class="exp-btn" onclick="exportCSV(\''+filename+'\','+JSON.stringify(Object.keys(data[0]||{}))+',get'+filename.charAt(0).toUpperCase()+filename.slice(1)+'())">📥 CSV</button>'
+}
+function searchBox(id,placeholder){
+ return '<div class="sb-wrap"><input class="input" id="'+id+'" placeholder="'+placeholder+'" oninput="showPage(currentPage)"><button class="exp-btn" onclick="document.getElementById(\''+id+'\').value=\'\';showPage(currentPage)">✕</button></div>'
+}
+var currentPage='dashboard';
+function renderAlerts(t){
+ if(!t||!t.length)return '<div style="color:#607d8b;font-size:12px">Không có cảnh báo</div>';
+ return t.map(function(x){return '<div class="ac" style="font-size:12px;gap:8px"><div>'+esc(x.type||'')+'</div><div style="flex:1">'+esc(x.desc||'')+'</div><span class="tg '+(x.st==='active'?'r':'b')+'">'+esc(x.st||'')+'</span></div>'}).join('')
+}
+function renderLogs(a){
+ if(!a||!a.length)return '<div style="color:#607d8b;font-size:12px">Không có hoạt động</div>';
+ return a.slice(-5).reverse().map(function(x){return '<div style="padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:12px"><b>'+esc(x.act||'')+'</b> — '+esc(x.by||'')+' <span style="color:#607d8b;font-size:11px">'+esc(x.ts?x.ts.slice(0,16):'')+'</span></div>'}).join('')
+}
+function cb(){
+ return '<div class="cb"><div class="ca">DD</div><div><div class="cn">DANH ĐẠT (SÓI CÔ ĐỘC)</div><div class="cr2">MEKONG ECO-SHIELD — Founder & Engineer</div></div></div>'
+}
+
+function getWeather(){
+ return [
+  {day:'Hôm nay',temp:32,desc:'Nắng nóng, chiều mưa dông'},
+  {day:'T2',temp:31,desc:'Có mây, mưa rào'},
+  {day:'T3',temp:30,desc:'Mưa vừa, gió nhẹ'},
+  {day:'T4',temp:33,desc:'Nắng, ít mây'},
+  {day:'T5',temp:29,desc:'Mưa to, cảnh báo lũ'},
+  {day:'T6',temp:31,desc:'Có mây, khả năng mưa'}
+ ]
+}
+function getFarms(){
+ return LS.get(KS+'f',[
+  {id:'AG-HD-001-01',name:'Lúa Hạ Long Xuyên',type:'Lúa nước',area:5.2,st:'active'},
+  {id:'VL-TP-002-03',name:'Vườn Cây Ăn Trái',type:'Cây ăn trái',area:3.8,st:'active'},
+  {id:'CT-TV-003-02',name:'Trại Tôm Cà Mau',type:'Nuôi trồng thủy sản',area:2.5,st:'active'},
+  {id:'DT-LD-004-05',name:'Vườn Rau Hữu Cơ',type:'Rau màu',area:1.2,st:'inactive'}
+ ])
+}
+
+function initMap(){
+ var c=document.getElementById('map');
+ if(!c)return;
+ c.innerHTML='<div style="text-align:center;padding:40px;color:#607d8b">🗺️ Bản đồ được tải<br><span style="font-size:11px">MEKONG ECO-SHIELD — 10°N, 106°E</span></div>'
+}
+function loadMap(){
+ var s=document.createElement('script');
+ s.src='leaflet.js';
+ s.onload=function(){
+  var c=document.getElementById('map');
+  if(!c||!window.L)return;
+  try{
+   _map=L.map('map',{zoomControl:false,attributionControl:false}).setView([10.0,106.0],8);
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(_map);
+   L.control.zoom({position:'topright'}).addTo(_map);
+   L.marker([10.0,106.0]).addTo(_map).bindPopup('MEKONG ECO-SHIELD<br>Trụ sở chính');
+   L.circle([10.5,106.5],{radius:50000,color:'#ff1744',fillOpacity:0.1}).addTo(_map).bindPopup('Khu vực cảnh báo');
+   toast('Bản đồ','Đã tải thành công')
+  }catch(e){c.innerHTML='<div style="text-align:center;padding:40px;color:#ff1744">Lỗi tải bản đồ: '+esc(e.message)+'</div>'}
+ };
+ s.onerror=function(){var c=document.getElementById('map');if(c)c.innerHTML='<div style="text-align:center;padding:40px;color:#ff1744">Không thể tải Leaflet</div>'};
+ document.head.appendChild(s)
+}
+
+function sendSOS(){
+ var st=document.getElementById('sosStatus');
+ if(!st)return;
+ st.innerHTML='<div style="color:#ff1744;font-weight:700">⚠️ ĐANG GỬI TÍN HIỆU SOS...</div>';
+ var a=getL();
+ a.push({act:'SOS đã gửi',ts:new Date().toISOString(),by:U?U.email:'unknown'});
+ LS.set(KS+'l',a);
+ setTimeout(function(){
+  if(st)st.innerHTML='<div style="color:#00e676;font-weight:700">✅ Tín hiệu SOS đã được gửi! Đơn vị cứu hộ đang được thông báo.</div>';
+  toast('SOS','Tín hiệu cầu cứu đã gửi!');
+ },2000)
+}
+
+var MENU=[
+ {label:'Tổng quan',id:'dashboard',icon:'🏠'},
+ {label:'Bản đồ',id:'map',icon:'🗺️'},
+ {label:'Thời tiết',id:'weather',icon:'☁️'},
+ {label:'Cảnh báo',id:'alerts',icon:'⚠️'},
+ {label:'Nông trại',id:'farms',icon:'🌾'},
+ {label:'Chi tiết farm',id:'farmDetail',icon:'📋'},
+ {label:'Carbon',id:'carbon',icon:'🌱'},
+ {label:'Token',id:'token',icon:'💰'},
+ {label:'Bảo mật',id:'security',icon:'🔒'},
+ {label:'Nhật ký',id:'audit',icon:'📝'},
+  {label:'DAO Quản trị',id:'governance',icon:'🏛️'},
+  {label:'Tác động',id:'impact',icon:'📊'},
+  {label:'Eco-Farm Ops',id:'farmOps',icon:'🌱'},
+  {label:'Eco-Credit AI',id:'creditAI',icon:'💳'},
+  {label:'Traceability',id:'traceability',icon:'🔍'},
+  {label:'Heritage Trust',id:'impactTrust',icon:'🏛️'},
+  {label:'Cá nhân',id:'profile',icon:'👤'},
+  {label:'Thông báo',id:'notifications',icon:'🔔'},
+  {label:'Kho vật tư',id:'warehouse',icon:'📦'},
+  {label:'Phần thưởng',id:'rewards',icon:'🏆'},
+   {label:'Trung tâm Dữ liệu',id:'dataCenter',icon:'🌐'},
+   {label:'Học máy Liên kết',id:'federated',icon:'🧠'},
+    {label:'Cơ sở dữ liệu',id:'database',icon:'🗄️'},
+    {label:'Viễn thám số',id:'remoteSensing',icon:'🛰️'},
+    {label:'Lô đất số',id:'plots',icon:'🌍'},
+   {label:'Đa tác tử',id:'multiAgent',icon:'🧩'},
+   {label:'Trung tâm Bảo mật',id:'securityCenter',icon:'🛡️'},
+   {label:'Super Admin',id:'superAdmin',icon:'👑'},
+    {label:'Sàn giao dịch',id:'marketplace',icon:'🏪'},
+    {label:'Giám sát',id:'risk',icon:'📊'},
+    {label:'Cài đặt',id:'settings',icon:'⚙️'}
+];
+if(U&&U.role==='admin')MENU.push({label:'Admin',id:'admin',icon:'⚙️'});
+
+function buildSB(){
+ var s=document.querySelector('.sbs');
+ if(!s)return;
+ s.innerHTML='';
+ MENU.forEach(function(m){
+  var g=document.createElement('div');g.className='ni';
+  g.innerHTML=esc(m.icon)+' '+esc(m.label);
+  g.onclick=function(){navigate(m.id)};
+  s.appendChild(g)
+ })
+}
+
+function navigate(id){
+ var p=PAGES[id];
+ if(!p){showPage('dashboard');return}
+ showPage(id)
+}
+
+function showPage(id){
+ var p=PAGES[id];
+ if(!p)return;
+ currentPage=id;
+ var c=document.getElementById('content');
+ var t=document.getElementById('pgTitle');
+ if(c)c.innerHTML=p.render();
+ if(t)t.textContent=p.title||'MEKONG ECO-SHIELD';
+ document.querySelectorAll('.ni').forEach(function(e){e.classList.remove('active')});
+ var items=document.querySelectorAll('.ni');
+ MENU.forEach(function(m,i){
+  if(m.id===id&&items[i])items[i].classList.add('active')
+ });
+ if(p.init)setTimeout(p.init,100)
+}
+
+function showApp(){
+ document.getElementById('loginScreen').style.display='none';
+ var app=document.getElementById('app');
+ app.classList.add('show');
+ if(window.innerWidth<=768)document.getElementById('menuBtn').style.display='block';
+ document.getElementById('sbUser').textContent=U?U.name||U.email:'';
+ buildSB();
+ navigate('dashboard');
+ updateNotifBadge();
+ if(PAGES.map)setTimeout(function(){loadMap()},500)
+}
+
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('ov').classList.toggle('show')}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('ov').classList.remove('show')}
+
+function doLogout(){LS.del(KS+'user');location.reload()}
+
+function showAddAlert(){
+ var h='<label>Loại cảnh báo</label><select class="input" id="alType"><option>Lũ lụt</option><option>Hạn hán</option><option>Xâm nhập mặn</option><option>Bão</option><option>Sạt lở</option><option>Khác</option></select><label>Mô tả</label><input class="input" id="alDesc" placeholder="Chi tiết cảnh báo"><label>Mức độ</label><select class="input" id="alLevel"><option value="active">Khẩn cấp</option><option value="warning">Cảnh báo</option><option value="info">Thông tin</option></select>';
+ showModal('Thêm cảnh báo',h,function(){
+  var type=document.getElementById('alType'),desc=document.getElementById('alDesc'),level=document.getElementById('alLevel');
+  var t=getT();
+  t.push({type:type.value,desc:desc.value||'Cảnh báo mới',st:level.value||'active',ts:new Date().toISOString()});
+  LS.set(KS+'t',t);
+  var a=getL();a.push({act:'Thêm cảnh báo: '+type.value,ts:new Date().toISOString(),by:U?U.email:''});LS.set(KS+'l',a);
+  addXP(150,'Thêm cảnh báo: '+type.value);
+  toast('Đã thêm','Cảnh báo mới đã được tạo');
+  showPage('alerts')
+ })
+}
+
+function showAddFarm(){
+ var h='<label>Tên nông trại</label><input class="input" id="farmName"><label>Loại</label><select class="input" id="farmType"><option>Lúa nước</option><option>Cây ăn trái</option><option>Nuôi trồng thủy sản</option><option>Rau màu</option><option>Chăn nuôi</option></select><label>Diện tích (ha)</label><input class="input" id="farmArea" type="number" value="1">';
+ showModal('Thêm nông trại',h,function(){
+  var name=document.getElementById('farmName'),type=document.getElementById('farmType'),area=document.getElementById('farmArea');
+  if(!name||!name.value)return toast('Lỗi','Nhập tên nông trại');
+  var f=getFarms();
+  f.push({id:'NEW-'+(f.length+1),name:name.value,type:type.value,area:parseFloat(area.value)||1,st:'active'});
+  LS.set(KS+'f',f);
+  var a=getL();a.push({act:'Thêm nông trại: '+name.value,ts:new Date().toISOString(),by:U?U.email:''});LS.set(KS+'l',a);
+  addXP(150,'Thêm nông trại: '+name.value);
+  toast('Đã thêm','Nông trại "'+name.value+'" đã được tạo');
+  showPage('farms')
+ })
+}
+
+function approveUsers(){
+ var u=getU(),changed=0;
+ u.forEach(function(x){if(x.st==='pending'){x.st='approved';changed++}});
+ sU(u);
+ if(changed)toast('Đã duyệt','Đã duyệt '+changed+' người dùng');
+ else toast('Không có','Không có người dùng nào chờ duyệt');
+ showPage('security')
+}
+
+function showAddFO(){
+ var h='<label>Ngày</label><input class="input" id="foDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"><label>Hoạt động</label><select class="input" id="foAct"><option>Gieo trồng</option><option>Bón phân</option><option>Tưới tiêu</option><option>Phun thuốc</option><option>Thu hoạch</option><option>Khác</option></select><label>Cây trồng</label><input class="input" id="foCrop" placeholder="Lúa, rau, ..."><label>Diện tích (ha)</label><input class="input" id="foArea" type="number" value="1"><label>Trạng thái</label><select class="input" id="foSt"><option value="planned">Lên kế hoạch</option><option value="inprogress">Đang thực hiện</option><option value="done">Hoàn thành</option></select><div style="margin-top:4px"><button class="btn bs" onclick="startVoice(\'foCrop\')" type="button">🎤 Nhập bằng giọng nói</button></div>';
+ showModal('Ghi nhật ký canh tác',h,function(){
+  var date=document.getElementById('foDate'),act=document.getElementById('foAct'),crop=document.getElementById('foCrop'),area=document.getElementById('foArea'),st=document.getElementById('foSt');
+  if(!crop||!crop.value)return toast('Lỗi','Nhập tên cây trồng');
+  var fo=getFO();
+  fo.push({date:date.value,activity:act.value,crop:crop.value,area:parseFloat(area.value)||0,st:st.value});
+  LS.set(KS+'fo',fo);
+  var a=getL();a.push({act:'Thêm nhật ký: '+act.value+' - '+crop.value,ts:new Date().toISOString(),by:U?U.email:''});LS.set(KS+'l',a);
+  addXP(100,'Ghi nhật ký canh tác: '+crop.value);
+  toast('Đã thêm','Nhật ký canh tác đã được ghi');
+  showPage('farmOps')
+ })
+}
+function deleteFO(i){
+ if(!confirm('Xóa nhật ký này?'))return;
+ var fo=getFO();
+ fo.splice(i,1);
+ LS.set(KS+'fo',fo);
+ showPage('farmOps')
+}
+function showAddFarmer(){
+ var h='<label>Tên nông hộ</label><input class="input" id="crName"><label>Mã số nông hộ</label><input class="input" id="crCode"><label>Điểm tín dụng (0-100)</label><input class="input" id="crScore" type="number" value="70" min="0" max="100"><label>Hạn mức (VNĐ)</label><input class="input" id="crLimit" type="number" value="1000000"><div style="font-size:11px;color:#607d8b">💡 Điểm ECS hiện tại: <b style="color:#00c853">'+calcECS().realtime+'</b> ('+calcECS().rank+')</div>';
+ showModal('Thêm hồ sơ tín dụng',h,function(){
+  var name=document.getElementById('crName'),code=document.getElementById('crCode'),score=document.getElementById('crScore'),limit=document.getElementById('crLimit');
+  if(!name||!name.value||!code||!code.value)return toast('Lỗi','Nhập đầy đủ thông tin');
+  var s=parseInt(score.value)||0,rating=s>=80?'A':s>=60?'B':s>=40?'C':'D';
+  var cr=getCR();
+  if(!cr.farmers)cr.farmers=[];
+  cr.farmers.push({name:name.value,code:code.value,score:s,rating:rating,limit:parseInt(limit.value)||0});
+  LS.set(KS+'cr',cr);
+  var a=getL();a.push({act:'Thêm hồ sơ tín dụng: '+name.value,ts:new Date().toISOString(),by:U?U.email:''});LS.set(KS+'l',a);
+  addXP(200,'Thêm hồ sơ tín dụng: '+name.value);
+  toast('Đã thêm','Hồ sơ tín dụng '+name.value+' đã được tạo');
+  showPage('creditAI')
+ })
+}
+function deleteFarmer(i){
+ if(!confirm('Xóa hồ sơ tín dụng này?'))return;
+ var cr=getCR();
+ if(cr.farmers)cr.farmers.splice(i,1);
+ LS.set(KS+'cr',cr);
+ showPage('creditAI')
+}
+function showAddTrace(){
+ var h='<label>Mã lô sản phẩm</label><input class="input" id="trCode" placeholder="MES-2026-001"><label>Tên sản phẩm</label><input class="input" id="trProduct" placeholder="Gạo ST25"><label>Nông trại</label><input class="input" id="trFarm" placeholder="Lúa Hạ Long Xuyên"><label>Ngày thu hoạch</label><input class="input" id="trHarvest" type="date" value="'+new Date().toISOString().slice(0,10)+'"><label><input type="checkbox" id="trCert"> Đã được chứng nhận</label>';
+ showModal('Thêm lô sản phẩm',h,function(){
+  var code=document.getElementById('trCode'),product=document.getElementById('trProduct'),farm=document.getElementById('trFarm'),harvest=document.getElementById('trHarvest'),cert=document.getElementById('trCert');
+  if(!code||!code.value||!product||!product.value)return toast('Lỗi','Nhập mã lô và sản phẩm');
+  var tr=getTR();
+  tr.push({code:code.value,product:product.value,farm:farm.value,harvest:harvest.value,certified:cert.checked});
+  LS.set(KS+'tr',tr);
+  var a=getL();a.push({act:'Thêm lô sản phẩm: '+code.value+' - '+product.value,ts:new Date().toISOString(),by:U?U.email:''});LS.set(KS+'l',a);
+  addXP(200,'Thêm lô sản phẩm: '+code.value);
+  toast('Đã thêm','Lô sản phẩm '+code.value+' đã được tạo');
+  showPage('traceability')
+ })
+}
+function deleteTrace(i){
+ if(!confirm('Xóa lô sản phẩm này?'))return;
+ var tr=getTR();
+ tr.splice(i,1);
+ LS.set(KS+'tr',tr);
+ showPage('traceability')
+}
+function addPoI(amt,reason){
+ var poi=LS.get(KS+'poi',{points:0,history:[],conversionRate:0.001,level:1});
+ poi.points+=amt;
+ poi.history.push({amt:amt,reason:reason,ts:new Date().toISOString()});
+ var need=poi.level*5000;
+ if(poi.points>=need){poi.level++;addNotif('PoI Level Up!','Cấp độ Proof of Impact '+poi.level+' 🏅');toast('PoI','Level '+poi.level+'! Điểm uy tín của bạn đã tăng')}
+ LS.set(KS+'poi',poi);
+ addXP(amt,'PoI: '+reason);
+ toast('PoI','+'+amt+' Điểm Uy Tín: '+reason);
+ showPage('creditAI')
+}
+function showDAProposal(){
+ var h='<label>Tiêu đề đề xuất</label><input class="input" id="daoTitle" placeholder="Ví dụ: Thay đổi tỷ lệ trích quỹ"><label>Nội dung</label><textarea class="input" id="daoDesc" rows="3" placeholder="Mô tả chi tiết đề xuất..." style="height:80px"></textarea>';
+ showModal('Tạo đề xuất DAO',h,function(){
+  var t=document.getElementById('daoTitle'),d=document.getElementById('daoDesc');
+  if(!t||!t.value)return toast('Lỗi','Nhập tiêu đề đề xuất');
+  var dao=LS.get(KS+'dao',{proposals:[],votes:[],totalTokens:1000000,members:[]});
+  dao.proposals.push({title:t.value,desc:d.value||'',by:U?U.name:'Unknown',ts:new Date().toISOString(),st:'open',votes:{for:0,against:0}});
+  LS.set(KS+'dao',dao);
+  addXP(300,'Tạo đề xuất DAO: '+t.value);
+  toast('Đã tạo','Đề xuất DAO đã được ghi vào Smart Contract');
+  addNotif('DAO Proposal','Đề xuất mới: '+t.value);
+  showPage('governance')
+ })
+}
+function daoVote(idx,side){
+ var dao=LS.get(KS+'dao',{proposals:[],totalTokens:1000000,members:[]});
+ if(!dao.proposals[idx]||dao.proposals[idx].st!=='open')return toast('Lỗi','Đề xuất không còn mở');
+ var xp=getXP(),power=Math.max(1,Math.floor(xp.level*100+xp.points/10));
+ dao.proposals[idx].votes=dao.proposals[idx].votes||{for:0,against:0};
+ dao.proposals[idx].votes[side]+=power;
+ // Check pass threshold (51%)
+ var v=dao.proposals[idx].votes,total=v.for+v.against;
+ if(total>=1000&&v.for/total>=0.51){dao.proposals[idx].st='passed';addNotif('DAO','Đề xuất "'+dao.proposals[idx].title+'" đã thông qua! ✅');toast('Thông qua','Đề xuất đã đạt 51% phiếu thuận')}
+ LS.set(KS+'dao',dao);
+ toast('Đã bỏ phiếu','Quyền lực '+power.toLocaleString()+' — '+(side==='for'?'Ủng hộ':'Phản đối'));
+ showPage('governance')
+}
+
+function showAddListing(){
+ var tr=getTR();
+ var prodOpts=tr.length?tr.map(function(x,i){return '<option value="'+i+'">'+esc(x.product)+' ('+esc(x.code)+')</option>'}).join(''):'<option value="">— Chưa có sản phẩm —</option>';
+ var h='<label>Sản phẩm (từ Traceability)</label><select class="input" id="mktProduct">'+prodOpts+'</select><label>Số lượng (kg)</label><input class="input" id="mktQty" type="number" value="100"><label>Giá (VNĐ/kg)</label><input class="input" id="mktPrice" type="number" value="10000"><label>Người bán</label><input class="input" id="mktSeller" value="'+(U?esc(U.name||U.email):'')+'">';
+ showModal('Đăng bán nông sản',h,function(){
+  var idx=document.getElementById('mktProduct'),qty=document.getElementById('mktQty'),price=document.getElementById('mktPrice'),seller=document.getElementById('mktSeller');
+  if(!idx||!qty||!price)return toast('Lỗi','Nhập đầy đủ thông tin');
+  var tr2=getTR(),selIdx=parseInt(idx.value),prod=tr2[selIdx];
+  if(!prod)return toast('Lỗi','Chọn sản phẩm từ Traceability trước');
+  var listings=LS.get(KS+'mkt',[]);
+  listings.push({product:prod.product,code:prod.code,qty:parseInt(qty.value)||0,price:parseInt(price.value)||0,certified:prod.certified,seller:seller?esc(seller.value):(U?U.name:''),st:'available',ts:new Date().toISOString()});
+  LS.set(KS+'mkt',listings);
+  addXP(200,'Đăng bán: '+prod.product);
+  toast('Đã đăng','Sản phẩm "'+prod.product+'" đã lên sàn giao dịch');
+  showPage('marketplace')
+ })
+}
+function buyListing(i){
+ var listings=LS.get(KS+'mkt',[]);
+ if(!listings[i]||listings[i].st!=='available')return toast('Lỗi','Sản phẩm không khả dụng');
+ var total=listings[i].price*listings[i].qty;
+ var escrow=LS.get(KS+'esc',{balance:0,locked:0,history:[]});
+ if(escrow.balance<total)return toast('Lỗi','Số dư Escrow không đủ ('+total.toLocaleString()+' đ cần)');
+ escrow.balance-=total;escrow.locked+=total;
+ escrow.history.push({type:'lock',amt:total,note:'Khóa tiền cho '+listings[i].product,ts:new Date().toISOString()});
+ listings[i].st='sold';
+ LS.set(KS+'mkt',listings);LS.set(KS+'esc',escrow);
+ // Simulate smart contract release after 3s
+ setTimeout(function(){
+  var e2=LS.get(KS+'esc',{balance:0,locked:0,history:[]});
+  e2.locked-=total;e2.balance+=0;
+  e2.history.push({type:'release',amt:total,note:'✅ Giải ngân cho '+listings[i].product+' — Hàng đã đạt chuẩn',ts:new Date().toISOString()});
+  LS.set(KS+'esc',e2);
+  addNotif('Smart Escrow','💸 Đã giải ngân '+total.toLocaleString()+' đ cho "'+listings[i].product+'" — Giao dịch hoàn tất');
+  toast('Smart Contract','Giải ngân '+total.toLocaleString()+' đ — Escrow hoàn tất ✅')
+ },3000);
+ toast('Đã mua','Đã khóa '+total.toLocaleString()+' đ trong Smart Escrow');
+ addNotif('Marketplace','Đã mua "'+listings[i].product+'" — '+total.toLocaleString()+' đ đang chờ giải ngân');
+ showPage('marketplace')
+}
+function showAddDT(){
+ var h='<label>Mã lô đất</label><input class="input" id="dtId" placeholder="PLT-001"><label>Tên lô đất</label><input class="input" id="dtName" placeholder="Lúa Hạ Long Xuyên"><label>Vĩ độ (GPS)</label><input class="input" id="dtLat" type="number" step="any" value="10.0"><label>Kinh độ (GPS)</label><input class="input" id="dtLng" type="number" step="any" value="106.0"><label>Cây trồng</label><input class="input" id="dtCrop" placeholder="Lúa nước"><label>Diện tích (ha)</label><input class="input" id="dtArea" type="number" value="1" min="0.1" step="0.1"><label>Chủ sở hữu (Email)</label><input class="input" id="dtOwner" placeholder="Email nông dân"><label>Trạng thái sinh thái</label><select class="input" id="dtEcoS"><option>Tốt</option><option>Ngập</option><option>Khô</option><option>Mặn</option></select>';
+ showModal('Thêm Lô đất số (Digital Twin)',h,function(){
+  var id=document.getElementById('dtId'),name=document.getElementById('dtName'),lat=document.getElementById('dtLat'),lng=document.getElementById('dtLng'),crop=document.getElementById('dtCrop'),area=document.getElementById('dtArea'),owner=document.getElementById('dtOwner'),eco=document.getElementById('dtEcoS');
+  if(!name||!name.value)return toast('Lỗi','Nhập tên lô đất');
+  var dt=getDT();
+  dt.push({plotId:id.value||('PLT-'+(dt.length+1)),name:name.value,gpsLat:parseFloat(lat.value)||0,gpsLng:parseFloat(lng.value)||0,crop:crop.value||'',area:parseFloat(area.value)||1,ownerId:owner.value||'',ecoStatus:eco.value||'Tốt',ts:new Date().toISOString()});
+  sDT(dt);
+  var a=getL();a.push({act:'Thêm lô đất số: '+name.value,ts:new Date().toISOString(),by:U?U.email:''});LS.set(KS+'l',a);
+  // Auto-link to Identity Vault
+  var iv=getIV();
+  if(owner.value&&!iv.vault.find(function(v){return v.email===owner.value})){
+   iv.vault.push({email:owner.value,trustScore:500,wallet:'',securityHash:'',ts:new Date().toISOString()});iv.totalUsers=iv.vault.length;sIV(iv)
+  }
+  addXP(150,'Thêm lô đất: '+name.value);
+  toast('Đã thêm','Lô đất "'+name.value+'" đã được tạo trong Digital Twin');
+  showPage('plots')
+ })
+}
+function deletePlot(i){
+ if(!confirm('Xóa lô đất này?'))return;
+ var dt=getDT();dt.splice(i,1);sDT(dt);showPage('plots')
+}
+function showAddProject(){
+ var h='<label>Tên dự án</label><input class="input" id="projName"><label>Doanh thu (VNĐ)</label><input class="input" id="projRev" type="number" value="0"><label>Chi phí (VNĐ)</label><input class="input" id="projCost" type="number" value="0"><label>Tỷ lệ từ thiện (%)</label><input class="input" id="projCharity" type="number" value="30"><div style="font-size:11px;color:#7c4dff;margin-top:4px">🔒 Hệ thống tự động trích 30% lợi nhuận vào Quỹ Di sản</div>';
+ showModal('Thêm dự án mới',h,function(){
+  var name=document.getElementById('projName'),rev=document.getElementById('projRev'),cost=document.getElementById('projCost'),charity=document.getElementById('projCharity');
+  if(!name||!name.value)return toast('Lỗi','Nhập tên dự án');
+  var ir=getIR(),r=parseInt(rev.value)||0,c=parseInt(cost.value)||0,ch=Math.min(100,Math.max(0,parseInt(charity.value)||30));
+  if(!ir.projects)ir.projects=[];
+  ir.projects.push({name:name.value,rev:r,cost:c,charity:ch});
+  ir.reports=ir.reports||[];
+  var profit=r-c,heritageShare=Math.round(profit*ch/100);
+  ir.reports.push({title:'Dự án: '+name.value,detail:'Doanh thu: '+r.toLocaleString()+' đ - Chi phí: '+c.toLocaleString()+' đ - Đã trích '+heritageShare.toLocaleString()+' đ vào Quỹ Di sản',date:new Date().toISOString().slice(0,10)});
+  LS.set(KS+'ir',ir);
+  var a=getL();a.push({act:'Thêm dự án: '+name.value,ts:new Date().toISOString(),by:U?U.email:''});LS.set(KS+'l',a);
+  addXP(200,'Thêm dự án: '+name.value);
+  addNotif('Dự án mới','Đã thêm '+name.value+' - Trích '+heritageShare.toLocaleString()+' đ vào Quỹ Di sản');
+  toast('Đã thêm','Dự án '+name.value+' đã được tạo');
+  showPage('impactTrust')
+ })
+}
+function deleteProject(i){
+ if(!confirm('Xóa dự án này?'))return;
+ var ir=getIR();
+ if(ir.projects)ir.projects.splice(i,1);
+ LS.set(KS+'ir',ir);
+ showPage('impactTrust')
+}
+function renderWH(w){
+ if(!w||!w.length)return '<div style="color:#607d8b;font-size:12px;padding:10px;text-align:center">Chưa có vật tư trong kho</div>';
+ return '<table class="dt"><tr><th>Tên</th><th>Loại</th><th>Số lượng</th><th>Đơn giá</th><th>Ngày</th><th>Hành động</th></tr>'+
+ w.map(function(x,i){return '<tr><td>'+esc(x.name||'')+'</td><td>'+esc(x.type||'')+'</td><td><b>'+(x.qty||0)+'</b> '+esc(x.unit||'')+'</td><td>'+(x.price||0).toLocaleString()+' đ</td><td style="font-size:11px">'+esc(x.date||'')+'</td><td><button class="btn bs" onclick="if(confirm(\'Xóa?\')){var w=getW();w.splice('+i+',1);LS.set(KS+\'w\',w);showPage(\'warehouse\')}">Xóa</button></td></tr>'}).join('')+'</table>'
+}
+function showAddWH(){
+ var h='<label>Tên vật tư</label><input class="input" id="whName"><label>Loại</label><select class="input" id="whType"><option value="Phân bón">Phân bón</option><option value="Thuốc BVTV">Thuốc BVTV</option><option value="Giống">Giống</option><option value="Dụng cụ">Dụng cụ</option><option value="Khác">Khác</option></select><label>Số lượng</label><input class="input" id="whQty" type="number" value="1"><label>Đơn vị</label><input class="input" id="whUnit" value="kg"><label>Đơn giá (VNĐ)</label><input class="input" id="whPrice" type="number" value="0"><label>Ngày</label><input class="input" id="whDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"><label>Ghi chú</label><input class="input" id="whNote">';
+ showModal('Nhập kho vật tư',h,function(){
+  var name=document.getElementById('whName'),qty=document.getElementById('whQty'),unit=document.getElementById('whUnit'),price=document.getElementById('whPrice'),date=document.getElementById('whDate'),note=document.getElementById('whNote'),type=document.getElementById('whType');
+  if(!name||!name.value)return toast('Lỗi','Nhập tên vật tư');
+  var w=getW();
+  w.push({name:name.value,type:type.value,qty:parseInt(qty.value)||0,unit:unit.value,price:parseInt(price.value)||0,date:date.value,note:note.value});
+  LS.set(KS+'w',w);
+  addNotif('Nhập kho','Đã nhập '+qty.value+' '+unit.value+' '+name.value);
+  toast('Đã nhập','Thêm vật tư thành công');
+  showPage('warehouse')
+ })
+}
+function showExportWH(){
+ var w=getW();
+ if(!w.length)return toast('Lỗi','Kho trống');
+ var opts=w.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+' (Tồn: '+x.qty+' '+x.unit+')</option>'}).join('');
+ var h='<label>Chọn vật tư</label><select class="input" id="exWhIdx">'+opts+'</select><label>Số lượng xuất</label><input class="input" id="exWhQty" type="number" value="1"><label>Ngày xuất</label><input class="input" id="exWhDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"><label>Ghi chú</label><input class="input" id="exWhNote">';
+ showModal('Xuất kho vật tư',h,function(){
+  var idx=parseInt(document.getElementById('exWhIdx').value)||0,qty=parseInt(document.getElementById('exWhQty').value)||0,date=document.getElementById('exWhDate').value,note=document.getElementById('exWhNote').value;
+  if(qty<=0)return toast('Lỗi','Số lượng không hợp lệ');
+  var w=getW();
+  if(!w[idx]||w[idx].qty<qty)return toast('Lỗi','Không đủ số lượng tồn kho');
+  w[idx].qty-=qty;
+  if(w[idx].qty===0)w.splice(idx,1);
+  LS.set(KS+'w',w);
+  addNotif('Xuất kho','Đã xuất '+qty+' '+w[idx].unit+' '+w[idx].name);
+  toast('Đã xuất','Xuất kho thành công');
+  showPage('warehouse')
+ })
+}
+function searchWH(){
+ var q=(document.getElementById('whSearch').value||'').toLowerCase();
+ var w=getW();
+ if(!q){document.getElementById('whList').innerHTML=renderWH(w);return}
+ var f=w.filter(function(x){return(x.name||'').toLowerCase().indexOf(q)>=0||(x.type||'').toLowerCase().indexOf(q)>=0||(x.note||'').toLowerCase().indexOf(q)>=0});
+ document.getElementById('whList').innerHTML=renderWH(f)
+}
+function showChangePass(){
+ var h='<label>Mật khẩu hiện tại</label><input class="input" id="oldPass" type="password"><label>Mật khẩu mới</label><input class="input" id="newPass" type="password" minlength="6"><label>Xác nhận</label><input class="input" id="newPass2" type="password">';
+ showModal('Đổi mật khẩu',h,function(){
+  var old=document.getElementById('oldPass'),np=document.getElementById('newPass'),np2=document.getElementById('newPass2');
+  if(!old||!np||!np2)return;
+  var u=getU(),f=u.find(function(x){return x.email===U.email});
+  if(!f||f.pass!==old.value)return toast('Lỗi','Sai mật khẩu hiện tại');
+  if(np.value.length<6)return toast('Lỗi','Mật khẩu mới tối thiểu 6 ký tự');
+  if(np.value!==np2.value)return toast('Lỗi','Mật khẩu không khớp');
+  f.pass=np.value;sU(u);
+  addNotif('Đổi mật khẩu','Mật khẩu đã được thay đổi');
+  toast('Thành công','Mật khẩu đã được đổi')
+ })
+}
+function showEditProfile(){
+ var u=getU().find(function(x){return x.email===U.email});
+ if(!u)return;
+ var h='<label>Họ tên</label><input class="input" id="editName" value="'+esc(u.name||'')+'"><label>Số điện thoại</label><input class="input" id="editPhone" value="'+esc(u.phone||'')+'">';
+ showModal('Cập nhật thông tin',h,function(){
+  var name=document.getElementById('editName'),phone=document.getElementById('editPhone');
+  if(!name||!name.value)return toast('Lỗi','Nhập họ tên');
+  var uArr=getU(),f=uArr.find(function(x){return x.email===U.email});
+  if(!f)return;
+  f.name=name.value;f.phone=phone.value;sU(uArr);
+  U.name=name.value;LS.set(KS+'user',U);
+  addNotif('Cập nhật','Thông tin cá nhân đã cập nhật');
+  toast('Thành công','Đã cập nhật thông tin');
+  showPage('profile')
+ })
+}
+function saveSetting(){
+ var theme=document.getElementById('setTheme'),lang=document.getElementById('setLang'),notif=document.getElementById('setNotif');
+ LS.set(KS+'set',{theme:theme?theme.value:'dark',lang:lang?lang.value:'vi',notif:notif?notif.checked:true});
+ toast('Đã lưu','Cài đặt đã được lưu')
+}
+function markRead(i){
+ var n=getN();
+ if(n[i]){n[i].read=true;sN(n);updateNotifBadge();showPage('notifications')}
+}
+function clearNotif(){
+ if(!confirm('Xóa tất cả thông báo?'))return;
+ sN([]);updateNotifBadge();showPage('notifications')
+}
+function resetSystem(){
+ if(!confirm('Bạn có chắc muốn đặt lại hệ thống?'))return;
+ localStorage.clear();
+ initAdmin();
+ toast('Đã reset','Hệ thống đã được đặt lại');
+ location.reload()
+}
+
+var savedU=LS.get(KS+'user');
+if(savedU){U=savedU;showApp()}
+var gkSaved=LS.get(KS+'gk','');
+if(gkSaved)GK.set(gkSaved);
+
+if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js').catch(function(){});
+
+if(window.innerWidth<=768)setTimeout(function(){var s=document.getElementById('sidebar');if(s)s.style.transform='translateX(-100%)'},100);
+window.addEventListener('resize',function(){var m=document.getElementById('menuBtn');if(m)m.style.display=window.innerWidth<=768?'block':'none'});
+document.addEventListener('click',function(e){var p=document.getElementById('notifPanel');if(p&&p.classList.contains('show')&&!e.target.closest('.notif-bell')&&!e.target.closest('#notifPanel'))closeNotif()});
+</script>
+</body>
+</html>
