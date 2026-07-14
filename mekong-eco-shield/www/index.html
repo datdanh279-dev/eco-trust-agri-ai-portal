@@ -144,7 +144,7 @@ a{text-decoration:none;color:inherit}
 <div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:20px">
 <h3 style="font-size:14px;font-weight:600;margin-bottom:16px">ĐĂNG NHẬP</h3>
 <div style="margin-bottom:12px"><label style="font-size:12px;color:#b0bec5">Email</label><input class="input" id="le" type="email" autocomplete="email" style="margin-top:4px" value="datdanh279@gmail.com"></div>
-<div style="margin-bottom:12px"><label style="font-size:12px;color:#b0bec5">Mật khẩu</label><input class="input" id="lp" type="password" autocomplete="current-password" style="margin-top:4px"></div>
+<div style="margin-bottom:12px"><label style="font-size:12px;color:#b0bec5">Mật khẩu</label><input class="input" id="lp" type="password" autocomplete="current-password" style="margin-top:4px" value="Mek0ng@Sh13ld!Pr0#2026Dat08"></div>
 <div id="le2" style="color:#ff1744;font-size:12px;margin-bottom:10px"></div>
 <button class="btn bp" style="width:100%;padding:12px;font-size:14px;font-weight:700" onclick="tryLogin()">ĐĂNG NHẬP</button>
 <div style="text-align:center;margin-top:12px;font-size:12px;color:#607d8b">Chưa có tài khoản? <span style="color:#00c853;cursor:pointer;font-weight:600" onclick="showReg()">Đăng ký</span></div>
@@ -489,21 +489,27 @@ function toast(t,d){
 }
 
 function tryLogin(){
- var e=document.getElementById('le'),p=document.getElementById('lp'),er=document.getElementById('le2');
- if(!e||!p||!er)return;
- var em=e.value,pw=p.value;
- if(!em||!pw){er.textContent='Vui lòng nhập email và mật khẩu';return}
- var u=getU(),f=u.find(function(x){return x.email===em&&x.pass===pw});
+ try{
+  initAdmin();
+  var e=document.getElementById('le'),p=document.getElementById('lp'),er=document.getElementById('le2');
+  if(!e||!p||!er){console.log('Login elements missing');return}
+  var em=e.value.trim(),pw=p.value.trim();
+  if(!em||!pw){er.textContent='Vui lòng nhập email và mật khẩu';return}
+  var u=getU();
+  if(!u||!u.length){er.textContent='Chưa có tài khoản! Vui lòng đăng ký.';return}
+  var f=u.find(function(x){return x.email===em&&x.pass===pw});
   if(f&&f.st==='approved'){
-   var r=getR();
-   U={email:f.email,name:f.name,role:f.role,aid:r[f.email]?r[f.email].aid:''};
+   var r=getR()||{};
+   U={email:f.email,name:f.name,role:f.role,aid:r&&r[f.email]?r[f.email].aid:''};
    LS.set(KS+'user',U);
-   // Sync Identity Vault
-   var iv=getIV();
-   if(!iv.vault.find(function(v){return v.email===U.email})){iv.vault.push({email:U.email,name:U.name,trustScore:500,wallet:'',securityHash:U.aid||'',ts:new Date().toISOString()});iv.totalUsers=iv.vault.length;sIV(iv)}
+   try{
+    var iv=getIV();
+    if(iv&&!iv.vault.find(function(v){return v.email===U.email})){iv.vault.push({email:U.email,name:U.name,trustScore:500,wallet:'',securityHash:U.aid||'',ts:new Date().toISOString()});iv.totalUsers=iv.vault.length;sIV(iv)}
+   }catch(e){}
    showApp();return
   }
- er.textContent=f&&f.st==='pending'?'Tài khoản đang chờ!':'Sai email hoặc mật khẩu!'
+  er.textContent=f&&f.st==='pending'?'Tài khoản đang chờ!':'Sai email hoặc mật khẩu!'
+ }catch(e){console.log('Login error:',e);var er=document.getElementById('le2');if(er)er.textContent='Lỗi: '+e.message}
 }
 
 function showLoginModuleInfo(i){
