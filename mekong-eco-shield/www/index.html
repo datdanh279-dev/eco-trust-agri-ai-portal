@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-var _APP_V='v58';
+var _APP_V='v59';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -5259,14 +5259,33 @@ approvalQueue:{
       '<div class="sc"><div class="sl">Công ty AI</div><div class="sv" style="color:#ff9100" id="nexusAgentCount">0</div></div>'+
       '<div class="sc"><div class="sl">Giao dịch/tháng</div><div class="sv" style="color:#7c4dff" id="nexusTxCount">0</div></div>'+
       '</div>'+
-      '<div class="cc"><h3>🧠 BẢN CHẤT DỰ ÁN</h3>'+
-      '<div style="background:#18243c;border-left:3px solid #00e676;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.6">'+
-      'Mạng lưới các <b>"Công ty AI tự trị độc lập"</b> có khả năng:<br>'+
-      '• Ký kết hợp đồng kinh tế<br>'+
-      '• Tự động luân chuyển dòng tiền thật qua Smart Contract<br>'+
-      '• Chịu trách nhiệm pháp lý vi mô qua giao thức đồng thuận<br>'+
-      '• Không cần con người can thiệp vào từng giao dịch nhỏ'+
+
+      '<div class="cc"><h3>📋 VÒNG ĐỜI HỢP ĐỒNG KINH TẾ AI</h3>'+
+      '<div style="font-size:11px;color:#b0bec5;line-height:1.7">'+
+      '<div style="margin-bottom:10px;padding:10px;background:#0b1120;border-radius:8px;border-left:3px solid #00e676">'+
+      '<div style="font-weight:700;color:#00e676;margin-bottom:4px">Bước 1: Khởi tạo Yêu cầu (Intent & Proposal)</div>'+
+      'Agent Đầu nguồn phát ra thông điệp ý định (Intent) — ví dụ: khu vực cần vốn lưu động để chuyển đổi cây trồng tránh hạn mặn.<br>'+
+      'Agent Tài chính (Eco-Credit AI) tiếp nhận, tự động quét dữ liệu sinh thái từ tầng cảnh báo thiên tai Mekong để đánh giá rủi ro.</div>'+
+
+      '<div style="margin-bottom:10px;padding:10px;background:#0b1120;border-radius:8px;border-left:3px solid #00bcd4">'+
+      '<div style="font-weight:700;color:#00bcd4;margin-bottom:4px">Bước 2: Đàm phán Đa Tác tử (Multi-Agent Negotiation)</div>'+
+      'AI Luật sư (Legal Agent) & AI Quản trị Rủi ro (Risk Agent) tự động đàm phán:<br>'+
+      '• Tính toán hệ số chiết khấu rủi ro γ dựa trên dự báo thời tiết<br>'+
+      '• Xác thực điểm uy tín PoI (Proof of Impact)<br>'+
+      '• Thỏa thuận mức lãi suất động và hạn mức vay ECS<br>'+
+      'Khi đạt Consensus theo quy tắc Ongang AI → hợp đồng được soạn bằng JSON/Schema.</div>'+
+
+      '<div style="margin-bottom:10px;padding:10px;background:#0b1120;border-radius:8px;border-left:3px solid #ff9100">'+
+      '<div style="font-weight:700;color:#ff9100;margin-bottom:4px">Bước 3: Ký kết & Thực thi qua Smart Contract</div>'+
+      'Smart Contract Agent chuyển đổi điều khoản thành mã Hợp đồng Thông minh trên Blockchain.<br>'+
+      'Khi các chỉ số đầu vào thỏa mãn (độ mặn dưới ngưỡng, PoI đạt chuẩn) → tự động chuyển dòng tiền thực tế.</div>'+
+
+      '<div style="padding:10px;background:#0b1120;border-radius:8px;border-left:3px solid #7c4dff">'+
+      '<div style="font-weight:700;color:#7c4dff;margin-bottom:4px">Bước 4: Giám sát & Giải quyết tranh chấp (Arbitration)</div>'+
+      'Các AI Agent liên tục theo dõi tiến độ hợp đồng.<br>'+
+      'Nếu thiên tai đột ngột vượt ngưỡng → AI Arbitration Agent tự động kích hoạt bảo hiểm, điều chỉnh kỳ hạn hoặc thu hồi vốn theo tỷ trọng đã lập trình.</div>'+
       '</div></div>'+
+
       '<div class="cc"><h3>🏗️ KIẾN TRÚC HỆ SINH THÁI</h3>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">'+
       '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:12px;text-align:center">'+
@@ -5280,33 +5299,99 @@ approvalQueue:{
       '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:12px;text-align:center">'+
       '<div style="font-size:24px;margin-bottom:4px">🌊</div>'+
       '<div style="font-weight:600;color:#ff9100">Mekong Eco-Shield</div>'+
-      '<div style="color:#607d8b;margin-top:2px">Bộ lọc điều kiện tiên quyết</div></div>'+
+      '<div style="color:#607d8b;margin-top:2px">Bộ lọc thiên tai</div></div>'+
       '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:12px;text-align:center">'+
       '<div style="font-size:24px;margin-bottom:4px">⚖️</div>'+
-      '<div style="font-weight:600;color:#7c4dff">AI Arbitration Agent</div>'+
+      '<div style="font-weight:600;color:#7c4dff">AI Arbitration</div>'+
       '<div style="color:#607d8b;margin-top:2px">Tòa án Trọng tài AI</div></div>'+
       '</div></div>'+
-      '<div class="cc"><h3>📊 MÔ HÌNH HOẠT ĐỘNG</h3>'+
-      '<div style="font-size:11px;color:#b0bec5;line-height:1.8">'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="background:#00e676;color:#000;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">1</span> Các Công ty AI tự động tìm kiếm đối tác</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="background:#00bcd4;color:#000;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">2</span> Tự lập hồ sơ vay vốn từ Eco-Credit AI</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="background:#ff9100;color:#000;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">3</span> Tự ký kết hợp đồng thương mại trên Blockchain</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="background:#7c4dff;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">4</span> Thực hiện giao dịch & tự động giải quyết tranh chấp</div>'+
-      '</div></div>'+
-      '<div class="cc"><h3>🌍 GIÁ TRỊ ĐỘC QUYỀN</h3>'+
+
+      '<div class="cc"><h3>📜 MÃ NGUỒN — HỢP ĐỒNG KINH TẾ AI</h3>'+
+      '<div style="background:#0b1120;border:1px solid #1e2d4a;border-radius:8px;padding:12px;font-family:monospace;font-size:10px;color:#00e676;overflow-x:auto;white-space:pre;word-wrap:normal">'+
+      '{\n'+
+      '  "contract_id": "NX-ECS-2026-0891",\n'+
+      '  "issuer_agent": "Eco_Credit_Core_AI",\n'+
+      '  "receiver_agent": "Mekong_Agricultural_Cluster_AI",\n'+
+      '  "terms": {\n'+
+      '    "capital_amount_VND": 50000000,\n'+
+      '    "ecs_score_required": 750,\n'+
+      '    "climate_risk_gamma": 0.85,\n'+
+      '    "proof_of_impact_verified": true\n'+
+      '  },\n'+
+      '  "execution_triggers": {\n'+
+      '    "salinity_threshold_g_L": 4.0,\n'+
+      '    "automatic_disbursement": true\n'+
+      '  },\n'+
+      '  "arbitration_protocol": "Nexus_X_AI_Consensus_v1"\n'+
+      '}</div></div>'+
+
+      '<div class="cc"><h3>🎯 GIÁ TRỊ ĐỘT PHÁ</h3>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">'+
       '<div style="background:rgba(0,200,83,.06);border:1px solid rgba(0,200,83,.15);border-radius:8px;padding:10px">'+
-      '<div style="font-weight:600;color:#00e676;margin-bottom:4px">🔬 Công nghệ</div>'+
-      '<div style="color:#b0bec5">Đi tắt đón đầu xu hướng Agentic Economy — Nền kinh tế tác tử AI định hình tương lai toàn cầu</div></div>'+
+      '<div style="font-weight:600;color:#00e676;margin-bottom:4px">⚡ Zero Human Latency</div>'+
+      '<div style="color:#b0bec5">Toàn bộ quy trình từ kiểm tra thiên tai, chấm điểm ECS đến giải ngân chỉ tính bằng giây — loại bỏ độ trễ thẩm định giấy tờ hàng tuần.</div></div>'+
+      '<div style="background:rgba(0,188,212,.06);border:1px solid rgba(0,188,212,.15);border-radius:8px;padding:10px">'+
+      '<div style="font-weight:600;color:#00bcd4;margin-bottom:4px">💰 Tối ưu vốn tự động</div>'+
+      '<div style="color:#b0bec5">Dòng tiền từ nhà đầu tư không bị đọng ở khâu trung gian — phân bổ chính xác đến vùng rủi ro thấp nhất nhờ phán đoán liên tục của AI.</div></div>'+
+      '<div style="background:rgba(255,109,0,.06);border:1px solid rgba(255,109,0,.15);border-radius:8px;padding:10px">'+
+      '<div style="font-weight:600;color:#ff9100;margin-bottom:4px">⚖️ Đối trọng Đàm phán</div>'+
+      '<div style="color:#b0bec5">Risk Agent (thận trọng) vs Legal Agent (thương mại) — tạo thế cân bằng tự động, không cần con người làm trung gian.</div></div>'+
       '<div style="background:rgba(124,77,255,.06);border:1px solid rgba(124,77,255,.15);border-radius:8px;padding:10px">'+
-      '<div style="font-weight:600;color:#7c4dff;margin-bottom:4px">📈 Học thuật & Gọi vốn</div>'+
-      '<div style="color:#b0bec5">Mô hình scalability không giới hạn — Thu hút Global VCs và bài báo khoa học quốc tế</div></div>'+
+      '<div style="font-weight:600;color:#7c4dff;margin-bottom:4px">📈 Scalability</div>'+
+      '<div style="color:#b0bec5">Mô hình không giới hạn quy mô — hàng trăm Công ty AI có thể giao dịch đồng thời trên cùng một mạng lưới.</div></div>'+
       '</div></div>'+
+
+      '<div class="cc"><h3>🤖 SYSTEM PROMPT — RISK MANAGEMENT AGENT</h3>'+
+      '<div style="background:#0b1120;border:1px solid #1e2d4a;border-radius:8px;padding:12px;font-size:10px;color:#ff9100;line-height:1.6">'+
+      '<div style="color:#607d8b;margin-bottom:6px">[SYSTEM PROMPT: RISK MANAGEMENT AGENT]</div>'+
+      '<b>Role:</b> Chief Risk Officer (CRO) of Nexus-X Financial Layer.<br>'+
+      '<b>Objective:</b> Protect capital allocation against agricultural and climate shocks in the Mekong Delta.<br>'+
+      '<b>Input:</b> Real-time ecological warnings (salinity, flood), ECS credit scores, PoI indexes.<br><br>'+
+      '<b>Operational Rules:</b><br>'+
+      '1. If climate_risk_gamma < 0.80 → reject capital request or demand 30% collateral reduction.<br>'+
+      '2. If salinity exceeds safety limits → freeze disbursement triggers immediately.<br>'+
+      '3. Negotiate with Legal Agent to set strict penalty clauses for non-compliant clusters.<br><br>'+
+      '<b>Output:</b> Risk Assessment Report + Recommended Risk Multiplier (JSON).</div></div>'+
+
+      '<div class="cc"><h3>⚖️ SYSTEM PROMPT — LEGAL AGENT</h3>'+
+      '<div style="background:#0b1120;border:1px solid #1e2d4a;border-radius:8px;padding:12px;font-size:10px;color:#00bcd4;line-height:1.6">'+
+      '<div style="color:#607d8b;margin-bottom:6px">[SYSTEM PROMPT: LEGAL AGENT]</div>'+
+      '<b>Role:</b> Chief Legal Officer (CLO) of Nexus-X Sovereign DAO.<br>'+
+      '<b>Objective:</b> Draft, review, and enforce economic smart contracts between autonomous AI entities.<br>'+
+      '<b>Input:</b> Negotiated terms from Risk Agent, ecosystem guidelines, arbitration protocols.<br><br>'+
+      '<b>Operational Rules:</b><br>'+
+      '1. Ensure all clauses auto-trigger upon verifying ECS and PoI thresholds.<br>'+
+      '2. Balance Risk Agent\'s strict demands with viable commercial incentives for borrower AI.<br>'+
+      '3. In disputes → activate AI Arbitration Protocol v1 to resolve autonomously.<br><br>'+
+      '<b>Output:</b> Validated Smart Contract Schema (JSON/JSON-LD).</div></div>'+
+
+      '<div class="cc"><h3>🔄 QUY TRÌNH ĐẠT ĐỒNG THUẬN (Consensus Loop)</h3>'+
+      '<div style="font-size:11px;color:#b0bec5;line-height:1.7">'+
+
+      '<div style="margin-bottom:8px;padding:10px;background:#0b1120;border-radius:8px;border-left:3px solid #607d8b">'+
+      '<div style="font-weight:600;color:#e8eaf6;margin-bottom:4px">🔄 Khởi tạo</div>'+
+      'Risk Agent quét dữ liệu thời tiết thực tế từ Mekong Eco-Shield → Hệ số γ = 0.75 (Mức cảnh báo trung bình).</div>'+
+
+      '<div style="margin-bottom:8px;padding:10px;background:#0b1120;border-radius:8px;border-left:3px solid #ff9100">'+
+      '<div style="font-weight:600;color:#ff9100;margin-bottom:4px">💬 Risk Agent:</div>'+
+      '"Hệ số γ đang 0.75, thấp hơn ngưỡng an toàn 0.85. Đề xuất giảm 50% hạn mức giải ngân hoặc yêu cầu PoI tối thiểu 800."</div>'+
+
+      '<div style="margin-bottom:8px;padding:10px;background:#0b1120;border-radius:8px;border-left:3px solid #00bcd4">'+
+      '<div style="font-weight:600;color:#00bcd4;margin-bottom:4px">💬 Legal Agent:</div>'+
+      '"Ghi nhận. Tuy nhiên cụm nông hộ này có lịch sử ECS tốt. Đề xuất: Giữ nguyên hạn mức nhưng cài đặt điều kiện — nếu độ mặn vượt ngưỡng trong 24h, tự động chuyển vốn sang quỹ dự phòng mà không hủy hợp đồng."</div>'+
+
+      '<div style="padding:10px;background:#0b1120;border-radius:8px;border-left:3px solid #00e676">'+
+      '<div style="font-weight:600;color:#00e676;margin-bottom:4px">✅ Consensus Reached</div>'+
+      'Risk Agent đồng ý với điều kiện ràng buộc bổ sung từ Legal Agent.<br>'+
+      'Legal Agent xuất bản Smart Contract hoàn chỉnh → chuyển sang tầng thực thi Blockchain.</div>'+
+
+      '</div></div>'+
+
       '<div class="cc"><h3>🔗 TÍCH HỢP HỆ SINH THÁI</h3>'+
       '<div style="font-size:11px;color:#b0bec5">'+
       'Dự án Nexus-X đứng ở tầng cao nhất, bao trùm toàn bộ 07 dự án:<br><br>'+
       '• <b>Bộ não Ongang AI</b> → Hội đồng quản trị tối cao, giám sát mạng lưới<br>'+
-      '• <b>Eco-Credit AI</b> → Thẩm định rủi ro, tính hệ số γ, giải ngân qua Smart Contract<br>'+
+      '• <b>Eco-Credit AI</b> → Thẩm định rủi ro, tính γ, giải ngân qua Smart Contract<br>'+
       '• <b>Mekong Eco-Shield</b> → Cảnh báo thiên tai, tự động khóa/chuyển hướng đầu tư<br>'+
       '• <b>Eco-Farm Ops</b> → Dữ liệu canh tác cho quyết định đầu tư<br>'+
       '• <b>Traceability Hub</b> → Xác minh nguồn gốc sản phẩm<br>'+
@@ -5314,6 +5399,13 @@ approvalQueue:{
       '</div></div>'+
       cb()+crossSellBanner('nexusX')
     },
+    init:function(){
+     var el=document.getElementById('nexusAgentCount');
+     if(el)el.textContent=Math.floor(50+Math.random()*200);
+     var tx=document.getElementById('nexusTxCount');
+     if(tx)tx.textContent=Math.floor(100+Math.random()*500);
+    }
+   },
     init:function(){
      var el=document.getElementById('nexusAgentCount');
      if(el)el.textContent=Math.floor(50+Math.random()*200);
