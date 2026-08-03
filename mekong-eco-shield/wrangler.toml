@@ -1,0 +1,8 @@
+name = "mekong-eco-shield"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "./www"
+
+[[d1_databases]]
+database_id = "bf74015f-b1d1-4096-b697-7229ac944f25"
+binding = "mekong_eco_shield_db"
+database_name = "mekong_eco_shield_db"

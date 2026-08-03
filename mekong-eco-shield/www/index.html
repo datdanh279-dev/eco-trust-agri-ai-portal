@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-var _APP_V='v61';
+var _APP_V='v64';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -288,6 +288,7 @@ a{text-decoration:none;color:inherit}
 <div class="notif-bell" onclick="toggleNotif()">🔔<span class="badge"></span></div>
 </div>
 </header>
+<div id="offlineBanner" style="display:none;background:linear-gradient(90deg,#ff1744,#ff9100);color:#0b1120;font-weight:700;text-align:center;font-size:11px;padding:6px 12px;cursor:pointer" onclick="showOfflineGuide()">📴 KHÔNG CÓ MẠNG — Đang hiển thị dữ liệu đã lưu. Nhấn để xem hướng dẫn offline.</div>
 <div id="content"></div>
 <footer id="footer">
 <div class="fb">MEKONG ECO-SHIELD</div>
@@ -333,8 +334,8 @@ var KS='mes2_',U=null;
 var API_BASE=(location.origin.includes('mekong-eco-shield')?location.origin:'')+'/api';
 var _LANG=(LS.get(KS+'set',{lang:'vi'}).lang)||'vi';
 var _TR={vi:{},en:{}};
-_TR.vi={dashboard:'Bảng điều khiển',profile:'Hồ sơ',settings:'Cài đặt',notifications:'Thông báo',map:'Bản đồ',alerts:'Cảnh báo',logout:'Đăng xuất',login:'Đăng nhập',register:'Đăng ký',search:'Tìm kiếm',page:'Trang',admin:'Quản trị',save:'Lưu',cancel:'Hủy',confirm:'Xác nhận',delete:'Xóa',edit:'Sửa',add:'Thêm',back:'Quay lại',next:'Tiếp',loading:'Đang tải...',error:'Lỗi',success:'Thành công',warning:'Cảnh báo',info:'Thông tin',dashboard2:'Bảng điều khiển',map2:'Bản đồ tương tác',evacuation:'Sơ tán khẩn cấp',earthquakeLive:'Động đất',stormAI:'Dự báo bão',sarImaging:'SAR Radar',lstmSalinity:'Xâm nhập mặn',imageAnchor:'Neo hình ảnh',diseaseScan:'Quét bệnh',remoteSensing:'Viễn thám',plots:'Thửa đất',satelliteNode:'Vệ tinh',notifications2:'Thông báo',profile2:'Hồ sơ',settings2:'Cài đặt',farms:'Trang trại',farmDetail:'Chi tiết',farmOps:'Thao tác',warehouse:'Kho',marketplace:'Chợ số',traceability:'Truy xuất',nftVault:'Kho NFT',knowledgeMarket:'Tri thức',carbon:'Carbon',token:'Token',eWallet:'Ví',creditAI:'Tín dụng',impactTrust:'Quỹ tín thác',ecoTrust:'Eco Trust',fundAI:'Quỹ AI',impact:'Tác động',econImpact:'Kinh tế',forwardContracts:'HĐTL',iotDevices:'Thiết bị IoT',droneCenter:'Trung tâm bay',depin:'Depin',sosOffline:'SOS',aiSwarm:'AI bầy đàn',multiAgent:'Đa tác tử',aiCallEngine:'AI gọi',scoutingMatrix:'Trinh sát',security:'Bảo mật',securityCenter:'Trung tâm',securityFortress:'Pháo đài',geoTemporal:'Geo-Temporal',aiGatekeeper:'AI gác cổng',immuneSystem:'Hệ miễn dịch',database:'CSDL',dataCenter:'Trung tâm dữ liệu',governance:'Quản trị',audit:'Kiểm toán',federated:'Federated',pinnFlood:'PINNs Lũ',riskSegment:'Phân khúc rủi ro',digitalTwin:'Digital Twin',resilienceIndex:'Chỉ số an sinh',eternalLegacy:'Di sản',disasterScholars:'Học giả',globalBridge:'Cầu nối',disasterThresholds:'Ngưỡng thiên tai',knowledgeLoop:'Vòng tri thức',dynamicEquilibrium:'Cân bằng động',riskIntelligence:'Tình báo rủi ro',emergencyCenter:'Trung tâm khẩn cấp',drillReport:'Báo cáo diễn tập',superAdmin:'Super Admin',systemMaturity:'Mức độ trưởng thành',approvalQueue:'Phê duyệt',infraDashboard:'Infrastructure',disasterWarning:'Cảnh báo Thiên tai AI',stormForecast:'Dự báo Bão AI',floodWarning:'Cảnh báo Lũ AI',installAppPage:'Tải ứng dụng',nexusX:'Nexus-X DAO',climateExtreme:'Khí hậu Cực đoan',ecoShield:'Mekong Eco-Shield',subtitle:'100 TRIỆU NGƯỜI DÙNG • VIỆT NAM & THẾ GIỚI'};
-_TR.en={dashboard:'Dashboard',profile:'Profile',settings:'Settings',notifications:'Notifications',map:'Map',alerts:'Alerts',logout:'Logout',login:'Login',register:'Register',search:'Search',page:'Page',admin:'Admin',save:'Save',cancel:'Cancel',confirm:'Confirm',delete:'Delete',edit:'Edit',add:'Add',back:'Back',next:'Next',loading:'Loading...',error:'Error',success:'Success',warning:'Warning',info:'Info',dashboard2:'Dashboard',map2:'Interactive Map',evacuation:'Emergency Evacuation',earthquakeLive:'Earthquake Live',stormAI:'Storm Forecast',sarImaging:'SAR Radar',lstmSalinity:'Salinity Intrusion',imageAnchor:'Image Anchor',diseaseScan:'Disease Scan',remoteSensing:'Remote Sensing',plots:'Plots',satelliteNode:'Satellite',notifications2:'Notifications',profile2:'Profile',settings2:'Settings',farms:'Farms',farmDetail:'Farm Detail',farmOps:'Farm Ops',warehouse:'Warehouse',marketplace:'Digital Market',traceability:'Traceability',nftVault:'NFT Vault',knowledgeMarket:'Knowledge Market',carbon:'Carbon',token:'Token',eWallet:'E-Wallet',creditAI:'AI Credit',impactTrust:'Impact Trust',ecoTrust:'Eco Trust',fundAI:'AI Fund',impact:'Impact',econImpact:'Economic Impact',forwardContracts:'Futures',iotDevices:'IoT Devices',droneCenter:'Drone Center',depin:'Depin',sosOffline:'SOS Offline',aiSwarm:'AI Swarm',multiAgent:'Multi Agent',aiCallEngine:'AI Call Engine',scoutingMatrix:'Scouting Matrix',security:'Security',securityCenter:'Security Center',securityFortress:'Security Fortress',geoTemporal:'Geo-Temporal',aiGatekeeper:'AI Gatekeeper',immuneSystem:'Immune System',database:'Database',dataCenter:'Data Center',governance:'Governance',audit:'Audit',federated:'Federated',pinnFlood:'PINNs Flood',riskSegment:'Risk Segment',digitalTwin:'Digital Twin',resilienceIndex:'Resilience Index',eternalLegacy:'Eternal Legacy',disasterScholars:'Disaster Scholars',globalBridge:'Global Bridge',disasterThresholds:'Disaster Thresholds',knowledgeLoop:'Knowledge Loop',dynamicEquilibrium:'Dynamic Equilibrium',riskIntelligence:'Risk Intelligence',emergencyCenter:'Emergency Center',drillReport:'Drill Report',superAdmin:'Super Admin',systemMaturity:'System Maturity',approvalQueue:'Approval Queue',infraDashboard:'Infrastructure',disasterWarning:'AI Disaster Warning',stormForecast:'AI Storm Forecast',floodWarning:'AI Flood Warning',installAppPage:'Install App',nexusX:'Nexus-X DAO',climateExtreme:'Extreme Climate',ecoShield:'Mekong Eco-Shield',subtitle:'100 MILLION USERS • VIETNAM & WORLD'};
+_TR.vi={dashboard:'Bảng điều khiển',profile:'Hồ sơ',settings:'Cài đặt',notifications:'Thông báo',map:'Bản đồ',alerts:'Cảnh báo',logout:'Đăng xuất',login:'Đăng nhập',register:'Đăng ký',search:'Tìm kiếm',page:'Trang',admin:'Quản trị',save:'Lưu',cancel:'Hủy',confirm:'Xác nhận',delete:'Xóa',edit:'Sửa',add:'Thêm',back:'Quay lại',next:'Tiếp',loading:'Đang tải...',error:'Lỗi',success:'Thành công',warning:'Cảnh báo',info:'Thông tin',dashboard2:'Bảng điều khiển',map2:'Bản đồ tương tác',evacuation:'Sơ tán khẩn cấp',earthquakeLive:'Động đất',stormAI:'Dự báo bão',sarImaging:'SAR Radar',lstmSalinity:'Xâm nhập mặn',imageAnchor:'Neo hình ảnh',diseaseScan:'Quét bệnh',remoteSensing:'Viễn thám',plots:'Thửa đất',satelliteNode:'Vệ tinh',notifications2:'Thông báo',profile2:'Hồ sơ',settings2:'Cài đặt',farms:'Trang trại',farmDetail:'Chi tiết',farmOps:'Thao tác',warehouse:'Kho',marketplace:'Chợ số',traceability:'Truy xuất',nftVault:'Kho NFT',knowledgeMarket:'Tri thức',carbon:'Carbon',token:'Token',eWallet:'Ví',creditAI:'Tín dụng',impactTrust:'Quỹ tín thác',ecoTrust:'Eco Trust',fundAI:'Quỹ AI',impact:'Tác động',econImpact:'Kinh tế',forwardContracts:'HĐTL',iotDevices:'Thiết bị IoT',droneCenter:'Trung tâm bay',depin:'Depin',sosOffline:'SOS',aiSwarm:'AI bầy đàn',multiAgent:'Đa tác tử',aiCallEngine:'AI gọi',scoutingMatrix:'Trinh sát',security:'Bảo mật',securityCenter:'Trung tâm',securityFortress:'Pháo đài',geoTemporal:'Geo-Temporal',aiGatekeeper:'AI gác cổng',immuneSystem:'Hệ miễn dịch',database:'CSDL',dataCenter:'Trung tâm dữ liệu',governance:'Quản trị',audit:'Kiểm toán',federated:'Federated',pinnFlood:'PINNs Lũ',riskSegment:'Phân khúc rủi ro',digitalTwin:'Digital Twin',resilienceIndex:'Chỉ số an sinh',eternalLegacy:'Di sản',disasterScholars:'Học giả',globalBridge:'Cầu nối',disasterThresholds:'Ngưỡng thiên tai',knowledgeLoop:'Vòng tri thức',dynamicEquilibrium:'Cân bằng động',riskIntelligence:'Tình báo rủi ro',emergencyCenter:'Trung tâm khẩn cấp',drillReport:'Báo cáo diễn tập',superAdmin:'Super Admin',systemMaturity:'Mức độ trưởng thành',approvalQueue:'Phê duyệt',infraDashboard:'Infrastructure',disasterWarning:'Cảnh báo Thiên tai AI',stormForecast:'Dự báo Bão AI',floodWarning:'Cảnh báo Lũ AI',multiHazard:'Phân tích Đa thiên tai',installAppPage:'Tải ứng dụng',nexusX:'Nexus-X DAO',climateExtreme:'Khí hậu Cực đoan',ecoShield:'Mekong Eco-Shield',subtitle:'100 TRIỆU NGƯỜI DÙNG • VIỆT NAM & THẾ GIỚI'};
+_TR.en={dashboard:'Dashboard',profile:'Profile',settings:'Settings',notifications:'Notifications',map:'Map',alerts:'Alerts',logout:'Logout',login:'Login',register:'Register',search:'Search',page:'Page',admin:'Admin',save:'Save',cancel:'Cancel',confirm:'Confirm',delete:'Delete',edit:'Edit',add:'Add',back:'Back',next:'Next',loading:'Loading...',error:'Error',success:'Success',warning:'Warning',info:'Info',dashboard2:'Dashboard',map2:'Interactive Map',evacuation:'Emergency Evacuation',earthquakeLive:'Earthquake Live',stormAI:'Storm Forecast',sarImaging:'SAR Radar',lstmSalinity:'Salinity Intrusion',imageAnchor:'Image Anchor',diseaseScan:'Disease Scan',remoteSensing:'Remote Sensing',plots:'Plots',satelliteNode:'Satellite',notifications2:'Notifications',profile2:'Profile',settings2:'Settings',farms:'Farms',farmDetail:'Farm Detail',farmOps:'Farm Ops',warehouse:'Warehouse',marketplace:'Digital Market',traceability:'Traceability',nftVault:'NFT Vault',knowledgeMarket:'Knowledge Market',carbon:'Carbon',token:'Token',eWallet:'E-Wallet',creditAI:'AI Credit',impactTrust:'Impact Trust',ecoTrust:'Eco Trust',fundAI:'AI Fund',impact:'Impact',econImpact:'Economic Impact',forwardContracts:'Futures',iotDevices:'IoT Devices',droneCenter:'Drone Center',depin:'Depin',sosOffline:'SOS Offline',aiSwarm:'AI Swarm',multiAgent:'Multi Agent',aiCallEngine:'AI Call Engine',scoutingMatrix:'Scouting Matrix',security:'Security',securityCenter:'Security Center',securityFortress:'Security Fortress',geoTemporal:'Geo-Temporal',aiGatekeeper:'AI Gatekeeper',immuneSystem:'Immune System',database:'Database',dataCenter:'Data Center',governance:'Governance',audit:'Audit',federated:'Federated',pinnFlood:'PINNs Flood',riskSegment:'Risk Segment',digitalTwin:'Digital Twin',resilienceIndex:'Resilience Index',eternalLegacy:'Eternal Legacy',disasterScholars:'Disaster Scholars',globalBridge:'Global Bridge',disasterThresholds:'Disaster Thresholds',knowledgeLoop:'Knowledge Loop',dynamicEquilibrium:'Dynamic Equilibrium',riskIntelligence:'Risk Intelligence',emergencyCenter:'Emergency Center',drillReport:'Drill Report',superAdmin:'Super Admin',systemMaturity:'System Maturity',approvalQueue:'Approval Queue',infraDashboard:'Infrastructure',disasterWarning:'AI Disaster Warning',stormForecast:'AI Storm Forecast',floodWarning:'AI Flood Warning',multiHazard:'Multi-Hazard Analysis',installAppPage:'Install App',nexusX:'Nexus-X DAO',climateExtreme:'Extreme Climate',ecoShield:'Mekong Eco-Shield',subtitle:'100 MILLION USERS • VIETNAM & WORLD'};
 function _t(k){return _TR[_LANG]&&_TR[_LANG][k]?(_TR[_LANG][k]):(_TR.vi[k]||k)}
 function applyLang(){try{_LANG=LS.get(KS+'set',{lang:'vi'}).lang||'vi';document.documentElement.lang=_LANG}catch(e){}}
 
@@ -465,9 +466,10 @@ function addKB(d){
 }
 function verifyAlert(aid,actual,notes){
  var a=getAIL();
- a.forEach(function(x){if(x.id===aid){x.status='verified';x.verifiedAt=new Date().toISOString();x.actualOutcome=actual;x.verificationNotes=notes||''}});
+ var matched=null;
+ a.forEach(function(x){if(x.id===aid){x.status='verified';x.verifiedAt=new Date().toISOString();x.actualOutcome=actual;x.verificationNotes=notes||'';matched=x}});
  sAIL(a);
- addKB({eventType:x.type,prediction:JSON.stringify(x.result),actualOutcome:actual,error:Math.abs((x.confidence||0)-(actual==='matched'?100:0)),lesson:notes,modelUsed:x.model,confidence:x.confidence});
+ if(matched)addKB({eventType:matched.type,prediction:JSON.stringify(matched.result),actualOutcome:actual,error:Math.abs((matched.confidence||0)-(actual==='matched'?100:0)),lesson:notes,modelUsed:matched.model,confidence:matched.confidence});
 }
 function getAIHealth(){
  var a=getAIL();
@@ -1086,9 +1088,301 @@ function getMockStormData(){
    affectedAreas:['Palawan','Nam Biển Đông'],
    models:{ecmwf:{track:'Hướng về phía Tây Nam Biển Đông',confidence:65,wind:75},gfs:{track:'Mạnh lên thành bão cấp 1',confidence:60,wind:85},ensemble:{track:'Có 40% mạnh lên thành bão trong 48h',confidence:70,wind:80}},
    warning:'Theo dõi sát diễn biến áp thấp nhiệt đới',source:'JTWC + NCHMF + ECMWF + GFS'}
- ]}
+  ]}
+ }
+// === MULTI-HAZARD EARLY WARNING — PHÂN TÍCH SÂU + HƯỚNG DI CHUYỂN ===
+function loadMultiHazard(){
+ loadMHOverview();
+ loadMHStorm();
+ loadMHEarthquake();
+ loadMHTsunami();
+ loadMHLandslide();
+ loadMHOutlook();
 }
-// === COMPREHENSIVE DISASTER ANALYSIS ENGINE v53 ===
+function mhFetch(u){
+ return fetch(API_BASE+'/engine/multi-hazard/'+u).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).catch(function(){return null})
+}
+function loadMHOverview(){
+ mhFetch('overview').then(function(d){
+  var el=document.getElementById('mhOverallLevel');
+  if(!el)return;
+  if(!d||!d.ok){el.textContent='N/A';return}
+  var lvl=d.overall_level||0;
+  el.textContent=lvl+'/6';
+  el.style.color=lvl>=5?'#ff1744':lvl>=4?'#ff9100':lvl>=3?'#ffc107':'#00e676';
+ }).catch(function(){})
+}
+function loadMHStorm(){
+ mhFetch('storm').then(function(d){
+  var el=document.getElementById('mhStorm');
+  if(!el)return;
+  if(!d||!d.ok){el.innerHTML='<div style="color:#ff1744;padding:12px;font-size:12px">⚠️ Không có dữ liệu bão</div>';return}
+  var it=d.intensity||{},mv=d.movement||{},an=d.analysis||{};
+  var catC=it.category>=3?'#ff1744':it.category>=2?'#ff9100':'#ffc107';
+  var srcBadge=d.data_source==='THỜI GIAN THỰC'
+   ?'<span style="font-size:9px;background:#00e67622;color:#00e676;padding:2px 8px;border-radius:8px">🔴 THỜI GIAN THỰC</span>'
+   :'<span style="font-size:9px;background:#607d8b22;color:#607d8b;padding:2px 8px;border-radius:8px">🟢 MÔ PHỎNG</span>';
+  var stormName=d.storm_name?' <span style="color:#b0bec5;font-size:11px">('+d.storm_name+')</span>':'';
+  var rows=(d.trajectory||[]).map(function(t){
+   return '<span style="display:inline-block;background:#0b1120;border:1px solid #1e2d4a;border-radius:4px;padding:2px 6px;margin:2px;font-size:9px;color:#b0bec5">T+'+t.hour+'h: '+t.lat+'°N,'+t.lon+'°E · '+t.wind_speed+'km/h</span>'
+  }).join('');
+  el.innerHTML=
+   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+   '<b style="color:#e8eaf6;font-size:13px">Cường độ'+stormName+'</b><span style="font-size:11px;background:'+catC+'22;color:'+catC+';padding:2px 8px;border-radius:8px">Cấp '+(it.category||0)+'</span></div>'+
+   '<div style="margin-bottom:6px">'+srcBadge+'</div>'+
+   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;margin-bottom:8px">'+
+   '<div><span style="color:#607d8b">Gió max:</span> <b style="color:#ffc107">'+(it.max_wind_kmh||0)+' km/h</b></div>'+
+   '<div><span style="color:#607d8b">Áp suất:</span> <b style="color:#00bcd4">'+(it.min_pressure_hpa||0)+' hPa</b></div>'+
+   '<div><span style="color:#607d8b">Xu hướng:</span> <b style="color:'+(it.trend==='Mạnh lên'?'#ff1744':'#ffc107')+'">'+(it.trend||'-')+'</b></div>'+
+   '<div><span style="color:#607d8b">Vị trí:</span> '+(d.current?d.current.lat+'°N,'+d.current.lon+'°E':'')+'</div></div>'+
+   '<div style="background:#18243c;border-left:4px solid #00bcd4;border-radius:6px;padding:8px;margin-bottom:8px;font-size:11px">'+
+   '<div style="color:#00bcd4;font-weight:600;margin-bottom:4px">🧭 HƯỚNG DI CHUYỂN</div>'+
+   '<div style="color:#b0bec5">'+(mv.bearing_compass||'-')+' ('+(mv.bearing_deg||0)+'°) · '+(mv.speed_kmh||0)+' km/h · '+(mv.trend||'')+'</div>'+
+   '<div style="color:#ff9100;margin-top:4px">Đổ bộ: '+(mv.landfall_zone||'-')+(mv.landfall_hour?' trong '+mv.landfall_hour+'h':'')+'</div></div>'+
+   (an.pressure_analysis?'<div style="font-size:10px;color:#607d8b;margin-bottom:4px">🔬 '+an.pressure_analysis+'</div>':'')+
+   (an.movement_analysis?'<div style="font-size:10px;color:#607d8b;margin-bottom:4px">🧭 '+an.movement_analysis+'</div>':'')+
+   '<div style="margin-top:6px">'+rows+'</div>'+
+   '<div style="font-size:9px;color:#607d8b;margin-top:6px">Công cụ: '+(d.tools||[]).map(function(t){return t.name}).join(' · ')+'</div>';
+ }).catch(function(){})
+}
+function loadMHEarthquake(){
+ mhFetch('earthquake').then(function(d){
+  var el=document.getElementById('mhEarthquake');
+  if(!el)return;
+  if(!d||!d.ok){el.innerHTML='<div style="color:#607d8b;padding:12px;font-size:12px">Không có dữ liệu động đất</div>';return}
+  var ev=d.event||{},mv=d.movement||{},an=d.analysis||{};
+  var magC=ev.magnitude>=7?'#ff1744':ev.magnitude>=6?'#ff9100':'#ffc107';
+  var srcBadge=d.data_source==='THỜI GIAN THỰC'
+   ?'<span style="font-size:9px;background:#00e67622;color:#00e676;padding:2px 8px;border-radius:8px">🔴 THỜI GIAN THỰC</span>'
+   :'<span style="font-size:9px;background:#607d8b22;color:#607d8b;padding:2px 8px;border-radius:8px">🟢 MÔ PHỎNG</span>';
+  el.innerHTML=
+   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+   '<b style="color:#e8eaf6;font-size:13px">'+(ev.region||'-')+'</b>'+
+   '<span style="font-size:13px;font-weight:700;background:'+magC+'22;color:'+magC+';padding:2px 8px;border-radius:8px">M'+(ev.magnitude||0)+'</span></div>'+
+   '<div style="margin-bottom:6px">'+srcBadge+'</div>'+
+   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;margin-bottom:8px">'+
+   '<div><span style="color:#607d8b">Độ sâu:</span> <b style="color:#b0bec5">'+(ev.depth_km||0)+' km</b></div>'+
+   '<div><span style="color:#607d8b">MMI:</span> <b style="color:#ffc107">'+(ev.mmi||0)+'</b></div>'+
+   '<div><span style="color:#607d8b">Thời gian:</span> <span style="color:#b0bec5;font-size:10px">'+(ev.time_utc||'').substring(0,16)+'</span></div>'+
+   '<div><span style="color:#607d8b">Gần nhất:</span> <b style="color:#b0bec5">'+(ev.nearest_city||'-')+'</b></div></div>'+
+   '<div style="background:#18243c;border-left:4px solid #ff9100;border-radius:6px;padding:8px;margin-bottom:8px;font-size:11px">'+
+   '<div style="color:#ff9100;font-weight:600;margin-bottom:4px">🧭 HƯỚNG TRƯỢT</div>'+
+   '<div style="color:#b0bec5">'+(mv.slip_direction_compass||'-')+' ('+(mv.slip_direction_deg||0)+'°)</div>'+
+   '<div style="color:#607d8b;margin-top:4px;font-size:10px">'+(mv.propagation||'')+'</div></div>'+
+   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;color:#607d8b;margin-bottom:6px">'+
+   '<div>🔬 '+(an.depth_analysis||'')+'</div><div>🔬 '+(an.magnitude_analysis||'')+'</div></div>'+
+   '<div style="background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.2);border-radius:6px;padding:6px;font-size:10px;color:#ffc107">Dư chấn: '+(d.aftershock||{}).probability+'% · max M'+(d.aftershock||{}).max_expected_magnitude+'</div>';
+ }).catch(function(){})
+}
+function loadMHTsunami(){
+ mhFetch('tsunami').then(function(d){
+  var el=document.getElementById('mhTsunami');
+  if(!el)return;
+  if(!d||!d.ok){el.innerHTML='<div style="color:#607d8b;padding:12px;font-size:12px">Không có dữ liệu sóng thần</div>';return}
+  var wc=d.worst_case||{};
+  var statusC=d.watch_status&&d.watch_status.indexOf('KHÔNG')>=0?'#00e676':'#ff1744';
+  var srcBadge=d.data_source==='THỜI GIAN THỰC'
+   ?'<span style="font-size:9px;background:#00e67622;color:#00e676;padding:2px 8px;border-radius:8px">🔴 THỜI GIAN THỰC</span>'
+   :'<span style="font-size:9px;background:#607d8b22;color:#607d8b;padding:2px 8px;border-radius:8px">🟢 MÔ PHỎNG</span>';
+  el.innerHTML=
+   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+   '<b style="color:#e8eaf6;font-size:13px">Trạng thái</b>'+
+   '<span style="font-size:10px;font-weight:700;color:'+statusC+';padding:2px 8px;border-radius:8px;background:'+statusC+'22">'+(d.watch_status||'')+'</span></div>'+
+   '<div style="margin-bottom:6px">'+srcBadge+'</div>'+
+   (d.generation?'<div style="font-size:10px;color:#607d8b;margin-bottom:8px">'+d.generation+'</div>':'')+
+   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+   (d.runups||[]).slice(0,4).map(function(r){
+    return '<div style="background:#18243c;border-radius:6px;padding:6px">'+
+     '<div style="font-size:10px;color:#00bcd4">'+r.zone+'</div>'+
+     '<div style="font-size:13px;font-weight:700;color:'+(r.wave_height_m>=1.5?'#ff1744':r.wave_height_m>=0.5?'#ff9100':'#ffc107')+'">'+r.wave_height_m+' m</div>'+
+     '<div style="font-size:9px;color:#607d8b">'+(r.travel_time_min||0)+' phút · '+(r.direction_compass||'')+'</div></div>'
+   }).join('')+'</div>'+
+   '<div style="font-size:9px;color:#607d8b;margin-top:8px">Nguy cơ cao nhất: '+(wc.zone||'-')+' — '+(wc.wave_height_m||0)+' m trong '+(wc.travel_time_min||0)+' phút</div>';
+ }).catch(function(){})
+}
+function loadMHLandslide(){
+ mhFetch('landslide').then(function(d){
+  var el=document.getElementById('mhLandslide');
+  if(!el)return;
+  if(!d||!d.ok){el.innerHTML='<div style="color:#607d8b;padding:12px;font-size:12px">Không có dữ liệu sạt lở</div>';return}
+  var statusC=d.watch_status&&d.watch_status.indexOf('CẢNH BÁO')>=0?'#ff1744':'#00e676';
+  var srcBadge=d.data_source==='THỜI GIAN THỰC'
+   ?'<span style="font-size:9px;background:#00e67622;color:#00e676;padding:2px 8px;border-radius:8px">🔴 THỜI GIAN THỰC · '+(d.live_zones_used||0)+' tỉnh</span>'
+   :'<span style="font-size:9px;background:#607d8b22;color:#607d8b;padding:2px 8px;border-radius:8px">🟢 MÔ PHỎNG</span>';
+  el.innerHTML=
+   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+   '<b style="color:#e8eaf6;font-size:13px">'+(d.active_zones||0)+' vùng nguy hiểm</b>'+
+   '<span style="font-size:10px;font-weight:700;color:'+statusC+';padding:2px 8px;border-radius:8px;background:'+statusC+'22">'+(d.watch_status||'')+'</span></div>'+
+   '<div style="margin-bottom:6px">'+srcBadge+'</div>'+
+   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
+   (d.zones||[]).slice(0,4).map(function(z){
+    var lc=z.risk_level>=5?'#ff1744':z.risk_level>=4?'#ff9100':z.risk_level>=3?'#ffc107':'#00e676';
+    return '<div style="background:#18243c;border-left:3px solid '+lc+';border-radius:6px;padding:6px">'+
+     '<div style="font-size:10px;color:#e8eaf6;font-weight:600">'+z.province+'</div>'+
+     '<div style="font-size:9px;color:#607d8b">'+z.zone+' · Cấp '+z.risk_level+'</div>'+
+     '<div style="font-size:9px;color:#b0bec5">Mưa '+z.rain_24h_mm+'mm · Bão hòa '+z.soil_saturation_pct+'%</div>'+
+     '<div style="font-size:9px;color:#ff9100">🧭 Trượt '+(z.movement_direction_compass||'')+' · '+z.movement_speed_cm_day+'cm/ngày</div></div>'
+   }).join('')+'</div>'+
+   '<div style="font-size:9px;color:#607d8b;margin-top:8px">'+(d.methodology||'')+'</div>';
+ }).catch(function(){})
+}
+function loadMHOutlook(){
+ mhFetch('outlook?months=2').then(function(d){
+  var el=document.getElementById('mhOutlook');
+  if(!el)return;
+  if(!d||!d.ok){el.innerHTML='<div style="color:#607d8b;padding:12px;font-size:12px">Không có dữ liệu dự báo</div>';return}
+  var st=d.storm||{},en=d.enso||{};
+  var rl=d.risk_level||0;
+  el.innerHTML=
+   '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">'+
+   '<div class="sc"><div class="sl">Tháng</div><div class="sv" style="font-size:13px;color:#00e676">'+(d.outlook_month||'-')+'</div></div>'+
+   '<div class="sc"><div class="sl">ENSO</div><div class="sv" style="font-size:11px;color:#00bcd4">'+(en.phase||'').substring(0,28)+'</div></div>'+
+   '<div class="sc"><div class="sl">Bão dự kiến</div><div class="sv" style="font-size:13px;color:#ffc107">'+(st.expected_count||0)+' cơn</div></div>'+
+   '<div class="sc"><div class="sl">Cấp rủi ro</div><div class="sv" style="font-size:13px;color:'+(rl>=4?'#ff1744':rl>=3?'#ff9100':'#00e676')+'">'+rl+'/6</div></div></div>'+
+   '<div style="font-size:11px;color:#b0bec5;line-height:1.6;margin-bottom:8px">'+(d.narrative||'')+'</div>'+
+   '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:10px">'+
+   '<div style="background:#18243c;border-radius:6px;padding:6px"><span style="color:#00bcd4">🌧️ Mưa lớn:</span> '+(d.heavy_rain_weeks||[]).join(', ')+'</div>'+
+   '<div style="background:#18243c;border-radius:6px;padding:6px"><span style="color:#ff9100">⛰️ Sạt lở:</span> '+(d.landslide_weeks||[]).join(', ')+'</div>'+
+    '<div style="background:#18243c;border-radius:6px;padding:6px"><span style="color:#ff1744">🔥 Nắng nóng:</span> '+(d.heatwave_weeks&&d.heatwave_weeks.length?d.heatwave_weeks.join(', '):'Không')+'</div></div>';
+  }).catch(function(){})
+}
+function mhRiskColor(level){
+ if(level>=5)return'#ff1744';
+ if(level>=4)return'#ff9100';
+ if(level>=3)return'#ffc107';
+ if(level>=2)return'#ffeb3b';
+ return'#00e676'
+}
+function loadMHRiskMap(){
+ var c=document.getElementById('mhRiskMap');
+ if(!c)return;
+ c.innerHTML='<div style="text-align:center;padding:40px;color:#607d8b">🔄 Đang tải bản đồ rủi ro...</div>';
+ var doMap=function(d){
+  if(!d||!d.ok||!d.layers){c.innerHTML='<div style="text-align:center;padding:40px;color:#ff1744">⚠️ Không thể tải dữ liệu bản đồ</div>';return}
+  if(!window.L){c.innerHTML='<div style="text-align:center;padding:40px;color:#ff9100">🗺️ Đang nạp thư viện bản đồ...</div>';
+   var s=document.createElement('script');s.src='leaflet.js';s.onload=function(){doMap(d)};document.head.appendChild(s);return}
+  c.innerHTML='';
+  var map;
+  try{
+   if(window._mhRiskMap){window._mhRiskMap.remove()}
+   map=L.map(c,{zoomControl:false,attributionControl:false}).setView([16,108],5);
+   L.control.zoom({position:'topright'}).addTo(map);
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'MEKONG ECO-SHIELD — Bản đồ rủi ro tổng hợp'}).addTo(map);
+   window._mhRiskMap=map;
+  }catch(e){c.innerHTML='<div style="text-align:center;padding:40px;color:#ff1744">⚠️ Lỗi khởi tạo bản đồ</div>';return}
+  // Storm: current + track
+  var sl=d.layers.storm||{},track=sl.track||[];
+  if(sl.current&&sl.current.lat){
+   var scol=mhRiskColor(sl.risk_level||1);
+   L.circleMarker([sl.current.lat,sl.current.lon],{radius:14,color:'#fff',weight:2,fillColor:scol,fillOpacity:0.9}).addTo(map)
+    .bindPopup('<b>🌀 Bão</b><br>Mức '+sl.risk_level+'/6 · '+sl.data_source);
+  }
+  if(track.length){
+   var pts=track.filter(function(t){return typeof t.lat==='number'&&typeof t.lon==='number'}).map(function(t){return[t.lat,t.lon]});
+   if(pts.length>1){
+    L.polyline(pts,{color:'#00bcd4',weight:2.5,dashArray:'6 4'}).addTo(map);
+    L.circleMarker(pts[0],{radius:6,color:'#00bcd4',fillColor:'#00bcd4',fillOpacity:0.8}).addTo(map).bindPopup('<b>🌀 Quỹ đạo bão</b><br>Điểm bắt đầu');
+   }
+  }
+  // Earthquake epicenter
+  var el=d.layers.earthquake||{},ev=el.event||{};
+  if(ev.lat&&ev.lon){
+   var ecol=mhRiskColor(el.risk_level||2);
+   L.circleMarker([ev.lat,ev.lon],{radius:12,color:'#fff',weight:2,fillColor:ecol,fillOpacity:0.9}).addTo(map)
+    .bindPopup('<b>🌍 Động đất</b><br>M'+ev.magnitude+' · '+ev.region+'<br>Độ sâu '+ev.depth_km+' km · MMI '+ev.mmi);
+  }
+  // Tsunami runups
+  var tsu=d.layers.tsunami||{};
+  (tsu.runups||[]).forEach(function(r){
+   if(!r.lat||!r.lon)return;
+   var tcol=mhRiskColor(r.severity_level||1);
+   L.circleMarker([r.lat,r.lon],{radius:9,color:'#fff',weight:1,fillColor:tcol,fillOpacity:0.75}).addTo(map)
+    .bindPopup('<b>🌊 '+r.zone+'</b><br>Sóng '+r.wave_height_m+' m · '+r.travel_time_min+' phút');
+  });
+  // Landslide zones
+  var lsl=d.layers.landslide||{};
+  (lsl.zones||[]).forEach(function(z){
+   if(!z.lat||!z.lon)return;
+   var lcol=mhRiskColor(z.risk_level||1);
+   L.circle([z.lat,z.lon],{radius:25000,color:lcol,fillColor:lcol,fillOpacity:0.15,weight:1.5}).addTo(map)
+    .bindPopup('<b>⛰️ '+z.zone+'</b><br>Cấp '+z.risk_level+' · Mưa '+z.rain_24h_mm+'mm');
+  });
+  var lvl=d.overall_level||1;
+  c.innerHTML='<div style="position:relative">'+c.innerHTML+'</div>';
+  L.control.scale({position:'bottomleft',metric:true}).addTo(map);
+ };
+ mhFetch('risk-map').then(doMap).catch(function(){doMap(null)});
+}
+function exportRiskReport(){
+ toast('📄 Báo cáo','Đang tổng hợp dữ liệu...');
+ mhFetch('risk-map').then(function(rm){
+  mhFetch('overview').then(function(ov){
+   Promise.all([
+    mhFetch('storm'),mhFetch('earthquake'),mhFetch('tsunami'),mhFetch('landslide'),mhFetch('outlook?months=2')
+   ]).then(function(res){
+    var st=res[0]||{},eq=res[1]||{},ts=res[2]||{},ls=res[3]||{},ol=res[4]||{};
+    var now=new Date();
+    var L1=[];
+    L1.push('='.repeat(60));
+    L1.push('MEKONG ECO-SHIELD — BÁO CÁO RỦI RO THIÊN TAI');
+    L1.push('DANH ĐẠT (SÓI CÔ ĐỘC) — Mekong Delta');
+    L1.push('Thời gian: '+now.toLocaleString('vi-VN'));
+    L1.push('='.repeat(60));
+    L1.push('');
+    L1.push('TỔNG MỨC RỦI RO: '+(ov?ov.overall_level:'N/A')+'/6');
+    L1.push('');
+    L1.push('--- 🌀 BÃO / ÁP THẤP NHIỆT ĐỚI ('+(st.data_source||'MÔ PHỎNG')+') ---');
+    if(st.intensity){
+     L1.push('  Gió max: '+(st.intensity.max_wind_kmh||0)+' km/h · Áp suất: '+(st.intensity.min_pressure_hpa||0)+' hPa');
+     L1.push('  Hướng di chuyển: '+(st.movement?st.movement.bearing_compass:'-')+' ('+(st.movement?st.movement.bearing_deg:0)+'°) · '+(st.movement?st.movement.speed_kmh:0)+' km/h');
+     L1.push('  Cấp: '+st.intensity.category+' · Xu hướng: '+(st.intensity.trend||'-'));
+    }
+    L1.push('');
+    L1.push('--- 🌍 ĐỘNG ĐẤT ('+(eq.data_source||'MÔ PHỎNG')+') ---');
+    if(eq.event){
+     L1.push('  Chấn tâm: '+eq.event.region+' · M'+(eq.event.magnitude||0)+' · Sâu '+(eq.event.depth_km||0)+' km');
+     L1.push('  MMI: '+eq.event.mmi+' · Gần nhất: '+eq.event.nearest_city+' ('+(eq.event.nearest_city_km||0)+' km)');
+    }
+    L1.push('');
+    L1.push('--- 🌊 SÓNG THẦN ('+(ts.data_source||'MÔ PHỎNG')+') ---');
+    L1.push('  Trạng thái: '+(ts.watch_status||'-'));
+    if(ts.worst_case)L1.push('  Nguy cơ cao nhất: '+ts.worst_case.zone+' — '+ts.worst_case.wave_height_m+' m sau '+ts.worst_case.travel_time_min+' phút');
+    L1.push('');
+    L1.push('--- ⛰️ SẠT LỞ ĐẤT ('+(ls.data_source||'MÔ PHỎNG')+') ---');
+    L1.push('  '+((ls.active_zones||0))+' vùng nguy hiểm · Trạng thái: '+(ls.watch_status||'-'));
+    (ls.zones||[]).slice(0,5).forEach(function(z){
+     L1.push('  - '+z.province+' ('+z.zone+'): Cấp '+z.risk_level+' · Mưa '+z.rain_24h_mm+'mm');
+    });
+    L1.push('');
+    L1.push('--- 📈 DỰ BÁO 2 THÁNG ('+(ol.data_source||'MÔ PHỎNG')+') ---');
+    L1.push('  Tháng: '+(ol.outlook_month||'-')+' · ENSO: '+(ol.enso?ol.enso.phase:'-'));
+    L1.push('  Bão dự kiến: '+(ol.storm?ol.storm.expected_count:0)+' · Cấp rủi ro: '+(ol.risk_level||0)+'/6');
+    if(ol.narrative)L1.push('  '+(ol.narrative||''));
+    L1.push('');
+    L1.push('='.repeat(60));
+    L1.push('Tạo bởi: Mekong Eco-Shield AI Engine — '+now.toISOString());
+    L1.push('='.repeat(60));
+    var txt=L1.join('\n');
+    // TXT download
+    var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='mekong-risk-report-'+now.getTime()+'.txt';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    toast('📄 Báo cáo TXT','Đã tải xuống — đang mở bản in PDF...');
+    // PDF via print-friendly HTML window
+    var w=window.open('','_blank');
+    w.document.write('<html><head><title>Báo cáo rủi ro thiên tai — Mekong Eco-Shield</title>');
+    w.document.write('<style>body{font-family:monospace;color:#111;padding:30px;max-width:800px;margin:auto;line-height:1.6}hr{border:none;border-top:2px solid #333;margin:14px 0}h1{font-size:18px}h2{font-size:14px;margin-top:20px}pre{white-space:pre-wrap}</style></head><body>');
+    w.document.write('<h1>MEKONG ECO-SHIELD — BÁO CÁO RỦI RO THIÊN TAI</h1>');
+    w.document.write('<hr><pre>'+txt.replace(/</g,'&lt;')+'</pre>');
+    w.document.write('<script>window.onload=function(){window.print()}<\/script>');
+    w.document.write('</body></html>');
+    w.document.close();
+   }).catch(function(){toast('❌ Lỗi','Không thể tạo báo cáo')});
+  });
+ });
+}
 // USGS + Open-Meteo + PTWC + JMA — Phân tích sâu mọi loại thiên tai
 
 // --- MM intensity calculator (ShakeMap standard) ---
@@ -5660,6 +5954,38 @@ approvalQueue:{
     },
     init:function(){fetchLandslideRisk()}
    },
+   multiHazard:{
+    title:'PHÂN TÍCH ĐA THIÊN TAI',
+    render:function(){
+     return '<div class="pt">☣️ PHÂN TÍCH ĐA THIÊN TAI CHUYÊN SÂU</div>'+
+      '<div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Bão · Động đất · Sóng thần · Sạt lở — Hướng di chuyển · Dự báo sớm 2 tháng</div>'+
+      '<div class="sr">'+
+      '<div class="sc"><div class="sl">Tổng mức rủi ro</div><div class="sv" id="mhOverallLevel" style="color:#ff1744">Đang tải...</div></div>'+
+      '<div class="sc"><div class="sl">🌀 Bão</div><div class="sv" id="mhStormRisk" style="font-size:13px;color:#00bcd4">...</div></div>'+
+      '<div class="sc"><div class="sl">🌍 Động đất</div><div class="sv" id="mhEqRisk" style="font-size:13px;color:#ff9100">...</div></div>'+
+      '<div class="sc"><div class="sl">📈 Dự báo 2 tháng</div><div class="sv" id="mhOutlookRisk" style="color:#00e676">...</div></div></div>'+
+      '<div class="cr">'+
+      '<div class="cc"><h3>🌀 BÃO / ÁP THẤP NHIỆT ĐỚI — HƯỚNG DI CHUYỂN</h3><div id="mhStorm"><div style="text-align:center;padding:20px;color:#607d8b">🔄 Đang phân tích quỹ đạo...</div></div></div>'+
+      '<div class="cc"><h3>🌍 ĐỘNG ĐẤT — HƯỚNG TRƯỢT</h3><div id="mhEarthquake"><div style="text-align:center;padding:20px;color:#607d8b">🔄 Đang quét địa chấn...</div></div></div></div>'+
+      '<div class="cr">'+
+      '<div class="cc"><h3>🌊 SÓNG THẦN — HƯỚNG LAN TRUYỀN</h3><div id="mhTsunami"><div style="text-align:center;padding:20px;color:#607d8b">🔄 Đang tính toán sóng...</div></div></div>'+
+      '<div class="cc"><h3>⛰️ SẠT LỞ ĐẤT — HƯỚNG TRƯỢT</h3><div id="mhLandslide"><div style="text-align:center;padding:20px;color:#607d8b">🔄 Đang phân tích sườn dốc...</div></div></div></div>'+
+       '<div class="cc"><h3>📅 DỰ BÁO SỚM 2 THÁNG — ĐA THIÊN TAI</h3><div id="mhOutlook"><div style="text-align:center;padding:12px;color:#607d8b">Đang xây dựng kịch bản...</div></div></div>'+
+       '<div style="display:flex;gap:8px;margin-top:12px">'+
+       '<button onclick="exportRiskReport()" style="flex:1;background:#0b1120;border:1px solid #1e2d4a;border-radius:8px;padding:10px;color:#00e676;cursor:pointer;font-size:12px">📄 Xuất báo cáo TXT / PDF</button>'+
+       '<button onclick="loadMHRiskMap()" style="flex:1;background:#0b1120;border:1px solid #1e2d4a;border-radius:8px;padding:10px;color:#00bcd4;cursor:pointer;font-size:12px">🗺️ Bản đồ rủi ro tổng hợp</button></div>'+
+       '<div class="cc" style="margin-top:10px"><h3>🗺️ BẢN ĐỒ RỦI RO TỔNG HỢP — 4 LOẠI THIÊN TAI</h3>'+
+       '<div style="background:#0b1120;border-radius:10px;overflow:hidden"><div id="mhRiskMap" style="height:380px;background:#0b1120"></div></div>'+
+       '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:10px;color:#607d8b">'+
+       '<span>🌀 Bão: <b style="color:#00bcd4">quỹ đạo</b></span>'+
+       '<span>🌍 Động đất: <b style="color:#ff9100">chấn tâm</b></span>'+
+       '<span>🌊 Sóng thần: <b style="color:#7c4dff">vùng bờ</b></span>'+
+       '<span>⛰️ Sạt lở: <b style="color:#ffc107">vùng nguy hiểm</b></span>'+
+       '<span style="margin-left:auto"><span style="color:#00e676">●</span> An toàn <span style="color:#ffc107">●</span> Cảnh báo <span style="color:#ff9100">●</span> Nguy hiểm <span style="color:#ff1744">●</span> Thảm họa</span></div></div>'+
+       cb()
+    },
+    init:function(){loadMultiHazard();loadMHRiskMap()}
+   },
    danhDatChat:{
     title:'DANH ĐẠT AI',
     render:function(){
@@ -5714,8 +6040,23 @@ approvalQueue:{
       cb()
     },
     init:function(){loadHyperLocalPage()}
+   },
+   hydrology:{
+    title:'THỦY VĂN MEKONG',
+    render:function(){
+     var r='<div class="cc"><h3>💧 THỦY VĂN ĐỒNG BẰNG SÔNG CỬU LONG — GIÁM SÁT MỰC NƯỚC</h3>'+
+      '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:11px;color:#607d8b;margin-bottom:8px">'+
+      '<span>🌧️ Nguồn: <b id="hydDataSource" style="color:#00e676">THỜI GIAN THỰC</b></span>'+
+      '<span id="hydLevelBadge" style="padding:3px 10px;border-radius:12px;background:#18243c"></span></div></div>'+
+      '<div class="cc"><h3>💦 CẢNH BÁO LŨ LỤT THEO TRẠM</h3><div id="hydAlerts"><div style="text-align:center;padding:12px;color:#607d8b">Đang phân tích mực nước...</div></div></div>'+
+      '<div class="cc"><h3>📈 BIỂU ĐỒ MỰC NƯỚC CÁC TRẠM</h3><div id="hydChart"><div style="text-align:center;padding:12px;color:#607d8b">Đang tổng hợp dữ liệu trạm...</div></div></div>'+
+      '<div class="cc"><h3>🌊 MỰC NƯỚC CÁC TRẠM GIÁM SÁT</h3><div id="hydStations"><div style="text-align:center;padding:12px;color:#607d8b">Đang tải dữ liệu trạm...</div></div></div>'+
+      cb();
+     return r;
+    },
+    init:function(){loadHydrology()}
    }
-};
+ };
 
 
 function simulateGatekeeper(){
@@ -6108,8 +6449,10 @@ var MENU=[
          {label:'🌋 Núi lửa Live',id:'volcanoMonitor',icon:'🌋',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
          {label:'🌊 Sóng thần Live',id:'tsunamiWarning',icon:'🌊',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
          {label:'⛰️ Đất lở Live',id:'landslideRisk',icon:'⛰️',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
+         {label:'☣️ Phân tích Đa Thiên tai',id:'multiHazard',icon:'☣️',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NHA_DAU_TU','NGUOI_DAN']},
          {label:'🤖 Danh Đạt AI',id:'danhDatChat',icon:'🤖',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NHA_DAU_TU','NGUOI_DAN']},
          {label:'📍 Dữ liệu ĐBSCL',id:'hyperLocalData',icon:'📍',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
+         {label:'💧 Thủy văn Mekong',id:'hydrology',icon:'💧',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
          {label:'📲 Tải ứng dụng',id:'installAppPage',icon:'📲',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NHA_DAU_TU','NGUOI_DAN']},
          {label:'🔗 Nexus-X DAO',id:'nexusX',icon:'🔗',roles:['GOD','NHA_DAU_TU','DOANH_NGHIEP']},
          {label:'🌍 Khí hậu Cực đoan',id:'climateExtreme',icon:'🌍',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']}
@@ -6134,9 +6477,9 @@ function canAccess(pageId){
 }
 
 var MENU_GROUPS=[
- {id:'core',label:'Hệ thống & Tổng quan',icon:'📊',items:['dashboard','map','multiLayerMap','profile','notifications','settings','drillReport','emergencyCenter','superAdmin','admin','systemMaturity','approvalQueue','infraDashboard','installAppPage','danhDatChat','hyperLocalData']},
+ {id:'core',label:'Hệ thống & Tổng quan',icon:'📊',items:['dashboard','map','multiLayerMap','profile','notifications','settings','drillReport','emergencyCenter','superAdmin','admin','systemMaturity','approvalQueue','infraDashboard','installAppPage','danhDatChat','hyperLocalData','hydrology']},
  {id:'agri',label:'Nông nghiệp & Chuỗi cung ứng',icon:'🌾',items:['farms','farmDetail','farmOps','warehouse','marketplace','traceability','nftVault','knowledgeMarket']},
- {id:'sensing',label:'AI Viễn thám & Môi trường',icon:'🛰️',items:['alerts','evacuation','earthquakeLive','stormAI','sarImaging','lstmSalinity','imageAnchor','diseaseScan','remoteSensing','plots','satelliteNode','disasterWarning','stormForecast','floodWarning','climateExtreme']},
+ {id:'sensing',label:'AI Viễn thám & Môi trường',icon:'🛰️',items:['alerts','evacuation','earthquakeLive','stormAI','sarImaging','lstmSalinity','imageAnchor','diseaseScan','remoteSensing','plots','satelliteNode','disasterWarning','stormForecast','floodWarning','climateExtreme','multiHazard']},
  {id:'finance',label:'Kinh tế Số & Tài chính',icon:'🪙',items:['carbon','token','eWallet','creditAI','impactTrust','ecoTrust','fundAI','disbursment','impact','econImpact','forwardContracts']},
  {id:'iot',label:'Hạ tầng IoT & Mạng lưới',icon:'🔌',items:['iotDevices','droneCenter','depin','sosOffline','aiSwarm','multiAgent','aiCallEngine','scoutingMatrix']},
  {id:'security',label:'Bảo mật & Blockchain',icon:'🔒',items:['security','securityCenter','securityFortress','geoTemporal','aiGatekeeper','immuneSystem','database','dataCenter','governance','audit']},
@@ -9144,6 +9487,86 @@ function loadHyperLocalPage(){
  }
 }
 
+// === THỦY VĂN MEKONG ===
+function hydroLevelColor(l){
+ if(l>=4)return'#ff1744';
+ if(l===3)return'#ff9100';
+ if(l===2)return'#ffc107';
+ return'#00e676'
+}
+function hydroLevelLabel(l){
+ var m={1:'AN TOÀN',2:'CẢNH BÁO',3:'NGUY HIỂM',4:'THẢM HỌA'};
+ return m[l]||'AN TOÀN'
+}
+function loadHydrology(){
+ var st=document.getElementById('hydStations');
+ var at=document.getElementById('hydAlerts');
+ var ch=document.getElementById('hydChart');
+ var badge=document.getElementById('hydLevelBadge');
+ var src=document.getElementById('hydDataSource');
+ Promise.all([
+  fetch('/api/engine/hydrology/stations').then(function(r){return r.json()}).catch(function(){return null}),
+  fetch('/api/engine/hydrology/overview').then(function(r){return r.json()}).catch(function(){return null})
+ ]).then(function(res){
+  var stations=res[0],ov=res[1];
+  if(st&&ov){
+   badge.style.background=hydroLevelColor(ov.overview_level);
+   badge.style.color='#0b1120';
+   badge.style.fontWeight='700';
+   badge.innerHTML='MỨC TỔNG: '+hydroLevelLabel(ov.overview_level)+' ('+ov.overview_level+'/4)';
+   badge.style.padding='3px 12px';
+   badge.style.borderRadius='12px';
+  }
+  if(src&&ov&&ov.data_source)src.innerHTML=ov.data_source;
+  if(st&&stations&&stations.stations){
+   var cols=stations.stations.slice().sort(function(a,b){return b.water_level_m-a.water_level_m}).map(function(s){
+    var dist=s.distance_from_alarm_m!=null?s.distance_from_alarm_m:null;
+    var col=hydroLevelColor(s.alert_level||1);
+    var bar=Math.min(Math.max(((s.water_level_m||0)/8)*100,5),100);
+    var dir=s.trend_m_per_hour>0?'<span style="color:#ff1744">▲ +'+s.trend_m_per_hour+' m/h</span>':s.trend_m_per_hour<0?'<span style="color:#00e676">▼ '+s.trend_m_per_hour+' m/h</span>':'<span style="color:#607d8b">▬ 0.00 m/h</span>';
+    return '<div style="background:#18243c;border-radius:8px;padding:10px;margin-bottom:8px">'+
+     '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'+
+     '<div><b style="color:#e8eaf6;font-size:12px">'+s.name+'</b> <span style="font-size:9px;color:#607d8b">'+s.province+'</span></div>'+
+     '<span style="font-size:10px;color:'+col+';background:#0b1120;padding:2px 8px;border-radius:10px">'+hydroLevelLabel(s.alert_level)+'</span></div>'+
+     '<div style="display:flex;justify-content:space-between;font-size:11px;color:#b0bec5;margin-top:6px">'+
+     '<span>Mực nước: <b style="color:#00e676">'+s.water_level_m+' m</b></span><span>'+dir+'</span></div>'+
+     '<div style="height:5px;background:#0b1120;border-radius:3px;margin-top:6px;overflow:hidden"><div style="height:5px;background:'+col+';width:'+bar+'%;transition:width .4s"></div></div>'+
+     (dist!=null?'<div style="font-size:9px;color:#607d8b;margin-top:4px">Cách ngưỡng báo động '+s.alarm_m+' m: '+dist+' m</div>':'')+
+     '</div>';
+   }).join('');
+   st.innerHTML=cols||'<div style="color:#607d8b;padding:10px">Không có dữ liệu trạm</div>';
+  }else if(st){
+   st.innerHTML='<div style="text-align:center;padding:20px;color:#ff1744">⚠️ Không tải được dữ liệu trạm</div>';
+  }
+  if(at){
+   var alerts=[];
+   if(ov&&ov.active_stations&&ov.active_stations.length){
+    ov.active_stations.forEach(function(a){
+     var col=hydroLevelColor(a.alert_level);
+     alerts.push('<div style="background:'+col+'22;border:1px solid '+col+';border-radius:8px;padding:10px;margin-bottom:8px">'+
+      '<div style="font-size:12px;color:#e8eaf6"><b>'+a.name+'</b> — '+hydroLevelLabel(a.alert_level)+'</div>'+
+      '<div style="font-size:11px;color:#b0bec5;margin-top:4px">Mực nước '+a.water_level_m+' m · xu hướng '+a.trend_m_per_hour+' m/h</div>'+
+      '<div style="font-size:11px;color:#b0bec5">Cách ngưỡng: '+a.distance_from_alarm_m+' m</div></div>');
+    });
+   }
+   if(ov&&ov.coastal_warning)alerts.push('<div style="background:#ff910022;border:1px solid #ff9100;border-radius:8px;padding:10px;margin-bottom:8px"><div style="font-size:12px;color:#e8eaf6"><b>🌊 Cảnh báo ven biển</b></div><div style="font-size:11px;color:#b0bec5">'+ov.coastal_warning+'</div></div>');
+   if(ov&&ov.rainfall_note)alerts.push('<div style="background:#18243c;border-radius:8px;padding:10px;margin-bottom:8px;font-size:11px;color:#b0bec5">🌧️ '+ov.rainfall_note+'</div>');
+   at.innerHTML=alerts.length?alerts.join(''):'<div style="background:#18243c;border-radius:8px;padding:12px;color:#00e676;font-size:11px">✅ Tất cả các trạm đều dưới ngưỡng báo động</div>';
+  }
+  if(ch&&stations&&stations.stations){
+   var bars=stations.stations.slice().sort(function(a,b){return b.water_level_m-a.water_level_m}).map(function(s){
+    var col=hydroLevelColor(s.alert_level);
+    var h=Math.min(Math.max(((s.water_level_m||0)/8)*100,4),100);
+    return '<div style="display:flex;align-items:flex-end;flex:1;min-width:26px;height:180px;justify-content:center;position:relative">'+
+     '<div style="width:16px;background:linear-gradient(180deg,'+col+','+col+'99);border-radius:4px 4px 0 0;height:'+h+'%;cursor:pointer" title="'+s.name+': '+s.water_level_m+'m"></div>'+
+     '<div style="position:absolute;bottom:-14px;left:0;right:0;text-align:center;font-size:8px;color:#607d8b;transform:rotate(-45deg);white-space:nowrap">'+s.name+'</div></div>';
+   }).join('');
+   ch.innerHTML='<div style="display:flex;align-items:flex-end;gap:4px;height:200px;overflow-x:auto;padding-bottom:14px">'+bars+'</div>'+
+    '<div style="font-size:10px;color:#607d8b;margin-top:6px">Chiều cao cột = mực nước so với 8m chuẩn · ▲ dâng / ▼ rút</div>';
+  }
+ }).catch(function(){});
+}
+
 // === PUSH NOTIFICATION — Browser API ===
 var _notifGranted=false;
 function requestNotifPermission(){
@@ -9178,6 +9601,62 @@ function startDisasterMonitor(){
  },60000);
 }
 startDisasterMonitor();
+
+// === OFFLINE MODE (ENHANCED) — v64 ===
+var _offlineAlertsKey='mekong_offline_alerts';
+function updateOfflineBanner(){
+ var ob=document.getElementById('offlineBanner');
+ if(!ob)return;
+ ob.style.display=navigator.onLine?'none':'block';
+}
+window.addEventListener('online',function(){updateOfflineBanner();toast('📶','Đã kết nối lại mạng — đồng bộ dữ liệu...')});
+window.addEventListener('offline',function(){updateOfflineBanner();toast('📴','Mất kết nối — dùng dữ liệu đã lưu')});
+function showOfflineGuide(){
+ var ob=document.getElementById('offlineBanner');
+ if(ob)ob.style.display='none';
+ showPage('sosOffline');
+}
+function cacheAlertsOffline(){
+ try{
+  fetch('/api/engine/alerts').then(function(r){return r.json()}).then(function(d){
+   if(d&&d.ok){
+    var ts=new Date().toISOString();
+    var stored=LS.get(_offlineAlertsKey,[]);
+    if(stored.length>100)stored=stored.slice(stored.length-100);
+    var rec={ts:ts,count:d.alerts?d.alerts.length:0,snapshot:d.alerts||[]};
+    stored.push(rec);
+    LS.set(_offlineAlertsKey,stored);
+    // Also push to service worker cache for replay
+    if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+     navigator.serviceWorker.controller.postMessage({type:'CACHE_ALERT',alerts:d.alerts||[]});
+    }
+   }
+  }).catch(function(){})
+ }catch(e){}
+}
+setInterval(cacheAlertsOffline,60000);
+cacheAlertsOffline();
+updateOfflineBanner();
+
+// === SERVICE WORKER REGISTRATION ===
+if('serviceWorker' in navigator){
+ window.addEventListener('load',function(){
+  navigator.serviceWorker.register('service-worker.js?v=64').then(function(){
+   navigator.serviceWorker.ready.then(function(reg){
+    if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
+    reg.addEventListener('updatefound',function(){
+     var nw=reg.installing;
+     if(nw)nw.addEventListener('statechange',function(){
+      if(nw.state==='installed'&&navigator.serviceWorker.controller)nw.postMessage('SKIP_WAITING');
+     });
+    });
+   });
+  }).catch(function(e){console.warn('SW register failed',e)});
+ });
+}
 </script>
+
+<!-- Mekong Eco-Shield AI Engine UI v2.0 — Ensemble, GIS, Ground Truth, Alert Dispatch -->
+<script src="engine-ui.js?v=61"></script>
 </body>
 </html>

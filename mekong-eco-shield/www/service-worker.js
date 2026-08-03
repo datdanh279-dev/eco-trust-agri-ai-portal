@@ -1,4 +1,5 @@
-const CACHE = 'mekong-eco-v59';
+const CACHE = 'mekong-eco-v64';
+const API_CACHE = 'mekong-api-v64';
 const ASSETS = ['/', '/index.html', '/manifest.json', '/leaflet.css', '/leaflet.js', '/icon-192.svg', '/icon-512.svg'];
 
 self.addEventListener('install', e => {
@@ -9,15 +10,40 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE && k !== API_CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  // API requests: network first, no cache
+  // API requests: network-first, fallback to cached copy when offline
   if (url.pathname.startsWith('/api/')) {
+    if (e.request.method === 'GET') {
+      e.respondWith(
+        fetch(e.request)
+          .then(res => {
+            const clone = res.clone();
+            caches.open(API_CACHE).then(c => c.put(e.request, clone));
+            return res;
+          })
+          .catch(() =>
+            caches.match(e.request).then(cached => {
+              if (cached) return cached;
+              // offline replay: serve last cached alert snapshot for alerts history
+              if (url.pathname.indexOf('/alerts/history') >= 0) {
+                return caches.match('/api/offline-alerts').then(snap => {
+                  if (snap) return snap;
+                  return new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+                });
+              }
+              return new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+            })
+          )
+      );
+      return;
+    }
+    // non-GET API: network only
     e.respondWith(fetch(e.request).catch(() => new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } })));
     return;
   }
@@ -35,4 +61,9 @@ self.addEventListener('fetch', e => {
 
 self.addEventListener('message', e => {
   if (e.data === 'SKIP_WAITING') self.skipWaiting();
+  if (e.data && e.data.type === 'CACHE_ALERT') {
+    // store a manual alert copy for offline replay
+    const key = '/api/offline-alerts';
+    caches.open(API_CACHE).then(c => c.put(key, new Response(JSON.stringify(e.data.alerts), { headers: { 'Content-Type': 'application/json' } })));
+  }
 });
