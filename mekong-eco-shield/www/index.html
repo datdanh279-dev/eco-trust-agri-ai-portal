@@ -6552,7 +6552,7 @@ function buildSB(){
   var ng=document.createElement('div');ng.className='ng';
   var ngt=document.createElement('div');ngt.className='ngt';
   ngt.innerHTML='<span class="ng-icon">'+grp.icon+'</span><span>'+grp.label+'</span><span class="ar">▶</span>';
-  ngt.onclick=function(){document.querySelectorAll('.ng.open').forEach(function(g){if(g!==ng)g.classList.remove('open')};ng.classList.toggle('open')};
+  ngt.onclick=function(){document.querySelectorAll('.ng.open').forEach(function(g){if(g!==ng)g.classList.remove('open')});ng.classList.toggle('open')};
   ng.appendChild(ngt);
   var ngi=document.createElement('div');ngi.className='ngi';
   grpItems.forEach(function(itemId){
