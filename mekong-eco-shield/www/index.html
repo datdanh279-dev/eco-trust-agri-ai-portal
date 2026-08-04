@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-var _APP_V='v64';
+var _APP_V='v65';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -9641,7 +9641,7 @@ updateOfflineBanner();
 // === SERVICE WORKER REGISTRATION ===
 if('serviceWorker' in navigator){
  window.addEventListener('load',function(){
-  navigator.serviceWorker.register('service-worker.js?v=64').then(function(){
+  navigator.serviceWorker.register('service-worker.js?v='+_APP_V).then(function(){
    navigator.serviceWorker.ready.then(function(reg){
     if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
     reg.addEventListener('updatefound',function(){

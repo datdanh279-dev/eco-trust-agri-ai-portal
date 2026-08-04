@@ -1,5 +1,5 @@
-const CACHE = 'mekong-eco-v64';
-const API_CACHE = 'mekong-api-v64';
+const CACHE = 'mekong-eco-v65';
+const API_CACHE = 'mekong-api-v65';
 const ASSETS = ['/', '/index.html', '/manifest.json', '/leaflet.css', '/leaflet.js', '/icon-192.svg', '/icon-512.svg'];
 
 self.addEventListener('install', e => {
@@ -17,7 +17,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  // API requests: network-first, fallback to cached copy when offline
   if (url.pathname.startsWith('/api/')) {
     if (e.request.method === 'GET') {
       e.respondWith(
@@ -30,7 +29,6 @@ self.addEventListener('fetch', e => {
           .catch(() =>
             caches.match(e.request).then(cached => {
               if (cached) return cached;
-              // offline replay: serve last cached alert snapshot for alerts history
               if (url.pathname.indexOf('/alerts/history') >= 0) {
                 return caches.match('/api/offline-alerts').then(snap => {
                   if (snap) return snap;
@@ -43,11 +41,21 @@ self.addEventListener('fetch', e => {
       );
       return;
     }
-    // non-GET API: network only
     e.respondWith(fetch(e.request).catch(() => new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } })));
     return;
   }
-  // Static assets: cache-first, fallback to network
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match(e.request).then(cached => cached || caches.match('/')))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
       if (res.ok && url.origin === self.location.origin) {
