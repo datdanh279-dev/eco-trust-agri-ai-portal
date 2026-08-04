@@ -1,5 +1,5 @@
-const CACHE = 'mekong-eco-v66';
-const API_CACHE = 'mekong-api-v66';
+const CACHE = 'mekong-eco-v67';
+const API_CACHE = 'mekong-api-v67';
 const ASSETS = ['/', '/index.html', '/manifest.json', '/leaflet.css', '/leaflet.js', '/icon-192.svg', '/icon-512.svg'];
 
 self.addEventListener('install', e => {
