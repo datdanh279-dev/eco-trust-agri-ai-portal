@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-var _APP_V='v68';
+var _APP_V='v70';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -721,7 +721,7 @@ function captureLongTermSnapshot(){
  var mhp=getMHP();
  var sys=getSystemMaturityScore();
  var coord=checkModuleCoordination();
- var snapshot={ts:Date.now(),systemScore:sys.score,systemGrade:sys.grade,moduleScores:mhp.modules.map(function(m){return{id:m.id,name:m.name,quality:m.quality,accuracy:m.accuracy,stability:m稳定性||m.stability,errorRate:m.errorRate}}),coordination:coord.consistency,issues:coord.issues.length};
+ var snapshot={ts:Date.now(),systemScore:sys.score,systemGrade:sys.grade,moduleScores:mhp.modules.map(function(m){return{id:m.id,name:m.name,quality:m.quality,accuracy:m.accuracy,stability:m.stability,errorRate:m.errorRate}}),coordination:coord.consistency,issues:coord.issues.length};
  var ltt=getLTT();
  ltt.snapshots.push(snapshot);
  if(ltt.snapshots.length>400)ltt.snapshots=ltt.snapshots.slice(-400);
@@ -2282,7 +2282,7 @@ function initAdmin(){
 function showModal(title,html,onConfirm){
  var o=document.getElementById('modalOverlay'),b=document.getElementById('modalBox');
  if(!o||!b)return;
- b.innerHTML='<h3>'+esc(title)+'</h3>'+html+'<div class="modal-actions"><button class="btn br" onclick="closeModal()">Hủy</button><button class="btn bp" id="modalConfirmBtn">Xác nhận</button></div>';
+ b.innerHTML='<h3>'+esc(title)+'</h3>'+html+'<div class="modal-actions"><button class="btn br" onclick="closeModal()">Hủy</button>'+(typeof onConfirm==='function'?'<button class="btn bp" id="modalConfirmBtn">Xác nhận</button>':'')+'</div>';
  o.classList.add('show');
  var btn=document.getElementById('modalConfirmBtn');
  if(btn)btn.onclick=function(){if(onConfirm)onConfirm();closeModal()}
@@ -2718,18 +2718,39 @@ function showSendMoney(){
 }
 
 function showDepositWallet(){
- var h='<label>Số tiền nạp (đ)</label><input class="input" id="dwAmt" type="number" placeholder="VD: 1000000" value="1000000"><label>Phương thức</label><select class="input" id="dwMethod"><option>Chuyển khoản ngân hàng</option><option>Ví MoMo</option><option>VNPay</option><option>Trực tiếp</option></select>';
- showModal('📥 Nạp tiền vào ví',h,function(){
-  var amt=parseInt(document.getElementById('dwAmt').value)||0;
-  if(amt<=0){toast('Lỗi','Nhập số tiền');return}
-  var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
-  wl.balance+=amt;
-  wl.history.push({type:'receive',from:'Nạp tiền',amt:amt,note:document.getElementById('dwMethod').value,ts:new Date().toISOString()});
-  LS.set(KS+'wallet',wl);
-  addNotif('Nạp tiền','Đã nạp '+amt.toLocaleString()+' đ vào ví');
-  toast('📥 Đã nạp',amt.toLocaleString()+' đ');
-  showPage('eWallet')
- })
+ var h='<label>Số tiền nạp (đ)</label><input class="input" id="dwAmt" type="number" placeholder="VD: 1000000" value="1000000"><label>Phương thức</label><select class="input" id="dwMethod" onchange="toggleBankInfo()"><option>Chuyển khoản ngân hàng</option><option>Ví MoMo</option><option>VNPay</option><option>Trực tiếp</option></select>'
+  +'<div id="bankInfo" style="background:#18243c;border:1px solid rgba(0,200,83,.2);border-radius:10px;padding:12px;margin-top:10px">'
+  +'<div style="font-size:10px;color:#607d8b;margin-bottom:6px">🏦 THÔNG TIN TÀI KHOẢN NHẬN TIỀN</div>'
+  +'<div style="font-size:12px;color:#e8eaf6">Chủ tài khoản: <b>DANH DAT</b></div>'
+  +'<div style="font-size:12px;color:#e8eaf6;margin-top:4px">Ngân hàng: <b>MB Bank (MB)</b></div>'
+  +'<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><div style="flex:1;font-size:15px;font-weight:700;color:#00c853;letter-spacing:1px" id="bankAcct">0358814661</div><button class="btn bp" style="font-size:10px;padding:5px 10px" type="button" onclick="copyBankInfo()">📋 Copy</button></div>'
+  +'<div style="font-size:9px;color:#b0bec5;margin-top:6px">Chuyển tiền đến số tài khoản trên, sau đó nhập mã giao dịch & gửi lại bill để admin xác nhận.</div></div>'
+  +'<label style="margin-top:10px">Mã giao dịch / Bill</label><input class="input" id="dwBill" placeholder="VD: MB20260806.123456" value="">'
+  +'<div style="display:flex;gap:6px;margin-top:12px"><button class="btn bp" style="flex:1" type="button" onclick="doDepositWallet()">✅ Tôi đã chuyển khoản</button></div>';
+ showModal('📥 Nạp tiền vào ví',h,null)
+}
+function toggleBankInfo(){
+ var b=document.getElementById('bankInfo'),m=document.getElementById('dwMethod');
+ if(b&&m)b.style.display=(m.value==='Chuyển khoản ngân hàng')?'block':'none'
+}
+function copyBankInfo(){
+ var t='0358814661';
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('📋 Đã copy','Số tài khoản: '+t)}).catch(function(){toast('📋 Copy','Số TK: '+t)})}else{toast('📋 Copy','Số TK: '+t)}
+}
+function doDepositWallet(){
+ var amt=parseInt(document.getElementById('dwAmt').value)||0;
+ if(amt<=0){toast('Lỗi','Nhập số tiền');return}
+ var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
+ var method=document.getElementById('dwMethod').value;
+ var bill=(document.getElementById('dwBill').value||'').trim();
+ var note=method+(bill?' — Bill: '+bill:'');
+ wl.balance+=amt;
+ wl.history.push({type:'receive',from:'Nạp tiền',amt:amt,note:note,ts:new Date().toISOString()});
+ LS.set(KS+'wallet',wl);
+ addNotif('Nạp tiền','Đã nạp '+amt.toLocaleString()+' đ vào ví ('+method+')');
+ toast('📥 Đã nạp',amt.toLocaleString()+' đ'+(bill?' — Bill: '+bill:''));
+ closeModal();
+ showPage('eWallet')
 }
 
 function toggleBottomNav(id){
@@ -3245,7 +3266,24 @@ var PAGES={
   title:'CHI TIẾT NÔNG TRẠI',
   render:function(){
    var f=getFarms();
-   return '<div class="pt">Chi tiết nông trại</div><div class="ps">Thông tin chi tiết về nông trại được chọn</div><div class="cr"><div class="cc"><h3>Thông tin chung</h3><div style="font-size:12px;color:#b0bec5">Chọn nông trại từ danh sách để xem chi tiết</div></div><div class="cc"><h3>Chỉ số theo dõi</h3><div style="font-size:12px;color:#607d8b">Chưa có dữ liệu</div></div></div>'+cb()
+   var sel=LS.get(KS+'selFarm',null);
+   var x=sel!==null?f[sel]:null;
+   if(x){
+    var status=x.st==='active'?'<span class="tg g">Đang hoạt động</span>':'<span class="tg o">Tạm ngừng</span>';
+    var metrics=x.st==='active'?'<div class="sr"><div class="sc"><div class="sl">Năng suất</div><div class="sv" style="color:#00e676">'+(6+Math.round(x.area*1.5))+' tấn/ha</div></div><div class="sc"><div class="sl">Chỉ số mặn</div><div class="sv" style="color:'+((x.area>4)?'#ffc107':'#00e676')+'">'+((x.area>4)?'1.8':'0.6')+'‰</div></div><div class="sc"><div class="sl">Nguồn nước</div><div class="sv" style="color:#00bcd4">'+(x.area>4?'Kênh chính':'Mương nội đồng')+'</div></div><div class="sc"><div class="sl">Mức rủi ro</div><div class="sv" style="color:'+((x.area>4)?'#ffc107':'#00e676')+'">'+(x.area>4?'Trung bình':'Thấp')+'</div></div></div>':'<div class="sr"><div class="sc"><div class="sl">Năng suất</div><div class="sv" style="color:#607d8b">—</div></div><div class="sc"><div class="sl">Chỉ số mặn</div><div class="sv" style="color:#607d8b">—</div></div><div class="sc"><div class="sl">Nguồn nước</div><div class="sv" style="color:#607d8b">—</div></div><div class="sc"><div class="sl">Mức rủi ro</div><div class="sv" style="color:#607d8b">—</div></div></div>';
+    return '<div class="pt">Chi tiết nông trại</div><div class="ps">Thông tin chi tiết về nông trại được chọn</div>'+
+     '<div style="background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.2);border-radius:12px;padding:14px;margin-bottom:12px">'+
+     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="font-size:14px;color:#e8eaf6">'+esc(x.name)+'</b>'+status+'</div>'+
+     '<div style="font-size:10px;color:#607d8b">Mã: '+esc(x.id)+' • '+esc(x.type)+' • Diện tích: '+esc(x.area)+' ha</div></div>'+metrics+
+     '<div class="cc"><h3>Chỉ số theo dõi</h3>'+
+     '<div style="font-size:12px;color:#b0bec5;line-height:1.8">'+
+     (x.st==='active'?'✅ Chất lượng đất đạt chuẩn VietGAP<br>💧 Độ ẩm đất: 62% — Phù hợp canh tác<br>🌱 Vụ mùa hiện tại: Đang gieo sạ<br>📡 Cập nhật lần cuối: '+new Date().toLocaleString()
+      :'⏸️ Nông trại đang tạm ngừng sản xuất<br>🛠️ Kiểm tra lại sau khi hệ thống kích hoạt lại')+
+     '</div></div>'+
+     '<div style="margin-top:12px;display:flex;gap:6px"><button class="btn bs" onclick="LS.set(KS+\'selFarm\',null);showPage(\'farmDetail\')">← Danh sách nông trại</button><button class="btn bp" onclick="navigate(\'farmOps\')">🌱 Vào Farm Ops</button></div>'+cb()
+   }
+   var list=f.map(function(x,i){return '<div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer" onclick="LS.set(KS+\'selFarm\','+i+');showPage(\'farmDetail\')"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:12px;color:#e8eaf6">'+esc(x.name)+'</b>'+(x.st==='active'?'<span class="tg g">Hoạt động</span>':'<span class="tg o">Tạm ngừng</span>')+'</div><div style="font-size:10px;color:#607d8b;margin-top:4px">'+esc(x.id)+' • '+esc(x.type)+' • '+esc(x.area)+' ha</div></div>'}).join('');
+   return '<div class="pt">Chi tiết nông trại</div><div class="ps">Chọn nông trại từ danh sách để xem chi tiết</div><div style="margin-bottom:10px"><button class="btn bp" onclick="showAddFarm()">+ Thêm nông trại</button></div><div>'+list+'</div>'+cb()
   }
  },
  token:{
@@ -4319,7 +4357,7 @@ approvalQueue:{
       '<div style="background:linear-gradient(135deg,rgba(0,200,83,.08),rgba(0,200,83,.02));border:1px solid rgba(0,200,83,.15);border-radius:10px;padding:12px;text-align:center">'+
       '<div style="font-size:10px;color:#607d8b">Công thức đã bán</div><div style="font-size:18px;font-weight:700;color:#00e676">'+(kbs.reduce(function(s,x){return s+x.sold},0))+'</div></div></div>'+
       '<div style="margin-bottom:10px;display:flex;gap:6px">'+
-      '<button class="btn bp" onclick="toast(\'Knowledge\',\'🍀 Hệ thống AI phát hiện: Bạn có năng suất cao nhất vùng! Bạn có muốn tokenize công thức vụ này? - 5\'+xp.level*1000+\' điểm thưởng khi tham gia\')">🔐 Tokenize công thức của bạn</button></div>'+
+      '<button class="btn bp" onclick="toast(\'Knowledge\',\'🍀 Hệ thống AI phát hiện: Bạn có năng suất cao nhất vùng! Bạn có muốn tokenize công thức vụ này? - 5\'+getXP().level*1000+\' điểm thưởng khi tham gia\')">🔐 Tokenize công thức của bạn</button></div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+kbs.map(function(x){
        return '<div style="background:#18243c;border:1px solid rgba(0,200,83,.1);border-radius:10px;padding:12px">'+
         '<div style="font-size:11px;font-weight:600;color:#e8eaf6">'+esc(x.title)+'</div>'+
