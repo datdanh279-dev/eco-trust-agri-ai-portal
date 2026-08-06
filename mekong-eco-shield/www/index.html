@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-var _APP_V='v70';
+var _APP_V='v71';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -2701,17 +2701,23 @@ function unlockNFT(tid){
 function showSendMoney(){
  var users=getU().filter(function(x){return x.email!==U.email&&x.st==='approved'});
  var optList=users.map(function(u){return '<option value="'+esc(u.email)+'">'+esc(u.name||u.email)+'</option>'}).join('');
- var h='<label>Người nhận</label><select class="input" id="smTo">'+(optList||'<option>Không có người dùng khác</option>')+'</select><label>Số tiền (đ)</label><input class="input" id="smAmt" type="number" placeholder="VD: 500000"><label>Ghi chú</label><input class="input" id="smNote" placeholder="Lýdo chuyển...">';
+ var banks=['Vietcombank','BIDV','VietinBank','Agribank','MB Bank (MB)','Techcombank','VPBank','ACB','Sacombank','VIB','SHB','Eximbank','HDBank','TPBank','MSB','OCB','Nam Á Bank','ABBank','NCB','VietBank','Bảo Việt Bank','PVcomBank','LienVietPostBank','SCB','OceanBank','GPBank','DongA Bank','VietABank','Saigonbank','PG Bank','VRB','CBBank','Citibank','HSBC','Standard Chartered','JPMorgan','Bank of America','Wells Fargo','Deutsche Bank','UBS','Barclays','ANZ','DBS','OCBC','UOB','Maybank','CIMB','ICBC','China Construction Bank'];
+ var bankOpts='<option>Chọn ngân hàng</option>'+banks.map(function(b){return '<option>'+b+'</option>'}).join('');
+ var h='<label>Người nhận</label><select class="input" id="smTo">'+(optList||'<option>Không có người dùng khác</option>')+'</select><label>Ngân hàng</label><select class="input" id="smBank">'+bankOpts+'</select><label>Số tài khoản người nhận</label><input class="input" id="smAcct" placeholder="VD: 1234567890"><label>Số tiền (đ)</label><input class="input" id="smAmt" type="number" placeholder="VD: 500000"><label>Ghi chú</label><input class="input" id="smNote" placeholder="Lýdo chuyển...">';
  showModal('📤 Chuyển tiền',h,function(){
   var to=document.getElementById('smTo').value;
+  var bank=document.getElementById('smBank').value;
+  var acct=(document.getElementById('smAcct').value||'').trim();
   var amt=parseInt(document.getElementById('smAmt').value)||0;
   var note=document.getElementById('smNote').value||'Chuyển tiền';
+  if(bank==='Chọn ngân hàng'){toast('Lỗi','Chọn ngân hàng');return}
+  if(!acct){toast('Lỗi','Nhập số tài khoản người nhận');return}
   var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
   if(amt<=0||amt>wl.balance){toast('Lỗi','Số tiền không hợp lệ');return}
   wl.balance-=amt;
-  wl.history.push({type:'send',to:to,amt:amt,note:note,ts:new Date().toISOString()});
+  wl.history.push({type:'send',to:to,amt:amt,note:note,bank:bank,acct:acct,ts:new Date().toISOString()});
   LS.set(KS+'wallet',wl);
-  addNotif('Chuyển tiền','Đã chuyển '+amt.toLocaleString()+' đ cho '+to);
+  addNotif('Chuyển tiền','Đã chuyển '+amt.toLocaleString()+' đ cho '+to+' ('+bank+' '+acct+')');
   toast('📤 Đã chuyển',amt.toLocaleString()+' đ → '+to);
   showPage('eWallet')
  })
