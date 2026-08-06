@@ -7,6 +7,9 @@ const ADMIN_AID = 'MASTER_KEY';
 // Engine backend URL (Python FastAPI, if available)
 const ENGINE_URL = 'http://localhost:8000';
 
+// MiroFish backend URL (Python Flask Multi-Agent GraphRAG, if available)
+const MIROFISH_URL = 'http://localhost:5001';
+
 async function getDB(env) { return env.mekong_eco_shield_db; }
 
 function json(data, status = 200) {
@@ -39,6 +42,24 @@ export default {
         const engineResp = await fetch(engineUrl, { method, headers: { 'Content-Type': 'application/json' } });
         if (engineResp.ok) return engineResp;
       } catch (_) { /* engine offline, fall through */ }
+    }
+
+    // Proxy MiroFish Multi-Agent GraphRAG. Forward POST body to the Flask
+    // backend (localhost:5001); if unreachable, serve deterministic mock data.
+    if (path === '/api/mirofish/mekong-trigger') {
+      if (method === 'POST') {
+        try {
+          let body = {};
+          try { body = await request.json(); } catch (_) { /* empty body */ }
+          const mirofishResp = await fetch(`${MIROFISH_URL}/api/simulation/mekong-trigger`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          if (mirofishResp.ok) return mirofishResp;
+        } catch (_) { /* mirofish offline, serve mock */ }
+        return json({ ok: true, data: generateMirofishMock() });
+      }
     }
 
     // === USER AUTH (unchanged) ===
@@ -1374,4 +1395,80 @@ async function serveMultiHazard(sub) {
   if (sub === 'tsunami') return { ok: true, ...generateMultiHazardTsunami() };
   if (sub === 'landslide') return { ok: true, ...generateMultiHazardLandslide() };
   return null;
+}
+
+// === MIROFISH MULTI-AGENT GRAPHRAG (mock fallback) ===
+
+function generateMirofishMock() {
+  return {
+    status: 'KÍCH HOẠT',
+    province: 'Kiên Giang',
+    salinity_level: 4.2,
+    flood_tier: 3,
+    impact_grade: 4,
+    impact_color: '#ff1744',
+    impact_analysis: {
+      summary: 'Xâm nhập mặn mức nghiêm trọng (4.2‰) tại Kiên Giang — kết hợp lũ cấp 3 (Báo động II).',
+      salinity_grade: 4,
+      salinity_level: 'Nghiêm trọng (>=4.0‰)',
+      flood_tier: 3,
+      flood_level_name: 'Báo động II',
+      affected_zone: 'Vịnh Thái Lan, đồng bằng ven biển',
+      key_infrastructure: ['Cống ngăn mặn Rạch Giá', 'Hệ thống thủy lợi U Minh Thượng'],
+      crops: ['Lúa - tôm', 'Mía', 'Cây ăn trái']
+    },
+    agent_decisions: [
+      {
+        agent_id: 'water_station',
+        agent_name: 'Agent Trạm Cấp Nước',
+        icon: '🚰',
+        action: 'Vận hành cống ngăn mặn và trữ nước ngọt',
+        priority: 'Cao',
+        actions: [
+          'Đóng các cửa cống ngăn mặn tại vùng ảnh hưởng',
+          'Kích hoạt xe bồn cấp nước sinh hoạt cho khu vực dân cư',
+          'Tăng cường trữ nước ngọt tại ao trữ dự phòng'
+        ]
+      },
+      {
+        agent_id: 'farmer',
+        agent_name: 'Agent Nông Dân',
+        icon: '🌾',
+        action: 'Chuyển đổi cơ cấu cây trồng chịu mặn',
+        priority: 'Cao',
+        actions: [
+          'Chuyển sang giống lúa chịu mặn cho vụ tới',
+          'Khuyến cáo thu hoạch sớm vụ lúa đang chín',
+          'Hướng dẫn nông dân chuyển đổi cây trồng phù hợp'
+        ]
+      },
+      {
+        agent_id: 'grid_logistics',
+        agent_name: 'Agent Lưới điện & Logistics',
+        icon: '⚡',
+        action: 'Điều phối năng lượng và vật tư ứng phó',
+        priority: 'Trung bình',
+        actions: [
+          'Ưu tiên cấp điện liên tục cho các trạm bơm và trạm xử lý nước',
+          'Bố trí dự phòng máy phát điện cho trạm nước sinh hoạt'
+        ]
+      },
+      {
+        agent_id: 'government',
+        agent_name: 'Agent Chính quyền',
+        icon: '🏛️',
+        action: 'Ban hành lệnh kích hoạt thiên tai',
+        priority: 'Cao',
+        actions: [
+          'Ban hành lệnh kích hoạt ứng phó theo cấp thiên tai',
+          'Công bố thông tin dự báo mặn/lũ lên cổng thông tin tỉnh',
+          'Phân bổ ngân sách dự phòng cho công tác ứng phó'
+        ]
+      }
+    ],
+    recommendation: 'KÍCH HOẠT ỨNG PHÓ CẤP CAO tại Kiên Giang: mặn 4.2‰ kết hợp lũ cấp 3. Triển khai ngay đóng cống ngăn mặn, cấp nước sinh hoạt bằng xe bồn, thu hoạch sớm lúa chín, sẵn sàng sơ tán dân vùng trũng.',
+    agents_total: 4,
+    engine: 'mock',
+    timestamp: new Date().toISOString()
+  };
 }
