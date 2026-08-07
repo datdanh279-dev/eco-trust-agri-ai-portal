@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-var _APP_V='v78';
+var _APP_V='v80';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -320,8 +320,8 @@ var KS='mes2_',U=null;
 var API_BASE=(location.origin.includes('mekong-eco-shield')?location.origin:'')+'/api';
 var _LANG=(LS.get(KS+'set',{lang:'vi'}).lang)||'vi';
 var _TR={vi:{},en:{}};
-_TR.vi={dashboard:'Bảng điều khiển',profile:'Hồ sơ',settings:'Cài đặt',notifications:'Thông báo',map:'Bản đồ',alerts:'Cảnh báo',logout:'Đăng xuất',login:'Đăng nhập',register:'Đăng ký',search:'Tìm kiếm',page:'Trang',admin:'Quản trị',save:'Lưu',cancel:'Hủy',confirm:'Xác nhận',delete:'Xóa',edit:'Sửa',add:'Thêm',back:'Quay lại',next:'Tiếp',loading:'Đang tải...',error:'Lỗi',success:'Thành công',warning:'Cảnh báo',info:'Thông tin',dashboard2:'Bảng điều khiển',map2:'Bản đồ tương tác',evacuation:'Sơ tán khẩn cấp',earthquakeLive:'Động đất',stormAI:'Dự báo bão',sarImaging:'SAR Radar',lstmSalinity:'Xâm nhập mặn',imageAnchor:'Neo hình ảnh',diseaseScan:'Quét bệnh',remoteSensing:'Viễn thám',plots:'Thửa đất',satelliteNode:'Vệ tinh',notifications2:'Thông báo',profile2:'Hồ sơ',settings2:'Cài đặt',farms:'Trang trại',farmDetail:'Chi tiết',farmOps:'Thao tác',warehouse:'Kho',marketplace:'Chợ số',traceability:'Truy xuất',nftVault:'Kho NFT',knowledgeMarket:'Tri thức',carbon:'Carbon',token:'Token',eWallet:'Ví',creditAI:'Tín dụng',impactTrust:'Quỹ tín thác',ecoTrust:'Eco Trust',fundAI:'Quỹ AI',impact:'Tác động',econImpact:'Kinh tế',forwardContracts:'HĐTL',iotDevices:'Thiết bị IoT',droneCenter:'Trung tâm bay',depin:'Depin',sosOffline:'SOS',aiSwarm:'AI bầy đàn',multiAgent:'Đa tác tử',aiCallEngine:'AI gọi',scoutingMatrix:'Trinh sát',security:'Bảo mật',securityCenter:'Trung tâm',securityFortress:'Pháo đài',geoTemporal:'Geo-Temporal',aiGatekeeper:'AI gác cổng',immuneSystem:'Hệ miễn dịch',database:'CSDL',dataCenter:'Trung tâm dữ liệu',governance:'Quản trị',audit:'Kiểm toán',federated:'Federated',pinnFlood:'PINNs Lũ',riskSegment:'Phân khúc rủi ro',digitalTwin:'Digital Twin',resilienceIndex:'Chỉ số an sinh',eternalLegacy:'Di sản',disasterScholars:'Học giả',globalBridge:'Cầu nối',disasterThresholds:'Ngưỡng thiên tai',knowledgeLoop:'Vòng tri thức',dynamicEquilibrium:'Cân bằng động',riskIntelligence:'Tình báo rủi ro',emergencyCenter:'Trung tâm khẩn cấp',drillReport:'Báo cáo diễn tập',superAdmin:'Super Admin',systemMaturity:'Mức độ trưởng thành',approvalQueue:'Phê duyệt',infraDashboard:'Infrastructure',disasterWarning:'Cảnh báo Thiên tai AI',stormForecast:'Dự báo Bão AI',floodWarning:'Cảnh báo Lũ AI',multiHazard:'Phân tích Đa thiên tai',installAppPage:'Tải ứng dụng',nexusX:'Nexus-X DAO',climateExtreme:'Khí hậu Cực đoan',ecoShield:'Mekong Eco-Shield',subtitle:'100 TRIỆU NGƯỜI DÙNG • VIỆT NAM & THẾ GIỚI'};
-_TR.en={dashboard:'Dashboard',profile:'Profile',settings:'Settings',notifications:'Notifications',map:'Map',alerts:'Alerts',logout:'Logout',login:'Login',register:'Register',search:'Search',page:'Page',admin:'Admin',save:'Save',cancel:'Cancel',confirm:'Confirm',delete:'Delete',edit:'Edit',add:'Add',back:'Back',next:'Next',loading:'Loading...',error:'Error',success:'Success',warning:'Warning',info:'Info',dashboard2:'Dashboard',map2:'Interactive Map',evacuation:'Emergency Evacuation',earthquakeLive:'Earthquake Live',stormAI:'Storm Forecast',sarImaging:'SAR Radar',lstmSalinity:'Salinity Intrusion',imageAnchor:'Image Anchor',diseaseScan:'Disease Scan',remoteSensing:'Remote Sensing',plots:'Plots',satelliteNode:'Satellite',notifications2:'Notifications',profile2:'Profile',settings2:'Settings',farms:'Farms',farmDetail:'Farm Detail',farmOps:'Farm Ops',warehouse:'Warehouse',marketplace:'Digital Market',traceability:'Traceability',nftVault:'NFT Vault',knowledgeMarket:'Knowledge Market',carbon:'Carbon',token:'Token',eWallet:'E-Wallet',creditAI:'AI Credit',impactTrust:'Impact Trust',ecoTrust:'Eco Trust',fundAI:'AI Fund',impact:'Impact',econImpact:'Economic Impact',forwardContracts:'Futures',iotDevices:'IoT Devices',droneCenter:'Drone Center',depin:'Depin',sosOffline:'SOS Offline',aiSwarm:'AI Swarm',multiAgent:'Multi Agent',aiCallEngine:'AI Call Engine',scoutingMatrix:'Scouting Matrix',security:'Security',securityCenter:'Security Center',securityFortress:'Security Fortress',geoTemporal:'Geo-Temporal',aiGatekeeper:'AI Gatekeeper',immuneSystem:'Immune System',database:'Database',dataCenter:'Data Center',governance:'Governance',audit:'Audit',federated:'Federated',pinnFlood:'PINNs Flood',riskSegment:'Risk Segment',digitalTwin:'Digital Twin',resilienceIndex:'Resilience Index',eternalLegacy:'Eternal Legacy',disasterScholars:'Disaster Scholars',globalBridge:'Global Bridge',disasterThresholds:'Disaster Thresholds',knowledgeLoop:'Knowledge Loop',dynamicEquilibrium:'Dynamic Equilibrium',riskIntelligence:'Risk Intelligence',emergencyCenter:'Emergency Center',drillReport:'Drill Report',superAdmin:'Super Admin',systemMaturity:'System Maturity',approvalQueue:'Approval Queue',infraDashboard:'Infrastructure',disasterWarning:'AI Disaster Warning',stormForecast:'AI Storm Forecast',floodWarning:'AI Flood Warning',multiHazard:'Multi-Hazard Analysis',installAppPage:'Install App',nexusX:'Nexus-X DAO',climateExtreme:'Extreme Climate',ecoShield:'Mekong Eco-Shield',subtitle:'100 MILLION USERS • VIETNAM & WORLD'};
+_TR.vi={dashboard:'Bảng điều khiển',profile:'Hồ sơ',settings:'Cài đặt',notifications:'Thông báo',map:'Bản đồ',alerts:'Cảnh báo',logout:'Đăng xuất',login:'Đăng nhập',register:'Đăng ký',search:'Tìm kiếm',page:'Trang',admin:'Quản trị',save:'Lưu',cancel:'Hủy',confirm:'Xác nhận',delete:'Xóa',edit:'Sửa',add:'Thêm',back:'Quay lại',next:'Tiếp',loading:'Đang tải...',error:'Lỗi',success:'Thành công',warning:'Cảnh báo',info:'Thông tin',dashboard2:'Bảng điều khiển',map2:'Bản đồ tương tác',evacuation:'Sơ tán khẩn cấp',earthquakeLive:'Động đất',stormAI:'Dự báo bão',sarImaging:'SAR Radar',lstmSalinity:'Xâm nhập mặn',imageAnchor:'Neo hình ảnh',diseaseScan:'Quét bệnh',remoteSensing:'Viễn thám',plots:'Thửa đất',satelliteNode:'Vệ tinh',notifications2:'Thông báo',profile2:'Hồ sơ',settings2:'Cài đặt',farms:'Trang trại',farmDetail:'Chi tiết',farmOps:'Thao tác',warehouse:'Kho',marketplace:'Chợ số',traceability:'Truy xuất',nftVault:'Kho NFT',knowledgeMarket:'Tri thức',carbon:'Carbon',token:'Token',eWallet:'Ví',creditAI:'Tín dụng',impactTrust:'Quỹ tín thác',ecoTrust:'Eco Trust',fundAI:'Quỹ AI',impact:'Tác động',econImpact:'Kinh tế',forwardContracts:'HĐTL',iotDevices:'Thiết bị IoT',droneCenter:'Trung tâm bay',depin:'Depin',sosOffline:'SOS',aiSwarm:'AI bầy đàn',multiAgent:'Đa tác tử',aiCallEngine:'AI gọi',scoutingMatrix:'Trinh sát',security:'Bảo mật',securityCenter:'Trung tâm',securityFortress:'Pháo đài',geoTemporal:'Geo-Temporal',aiGatekeeper:'AI gác cổng',immuneSystem:'Hệ miễn dịch',database:'CSDL',dataCenter:'Trung tâm dữ liệu',governance:'Quản trị',audit:'Kiểm toán',federated:'Federated',pinnFlood:'PINNs Lũ',riskSegment:'Phân khúc rủi ro',digitalTwin:'Digital Twin',resilienceIndex:'Chỉ số an sinh',eternalLegacy:'Di sản',disasterScholars:'Học giả',globalBridge:'Cầu nối',disasterThresholds:'Ngưỡng thiên tai',knowledgeLoop:'Vòng tri thức',dynamicEquilibrium:'Cân bằng động',riskIntelligence:'Tình báo rủi ro',emergencyCenter:'Trung tâm khẩn cấp',drillReport:'Báo cáo diễn tập',superAdmin:'Super Admin',systemMaturity:'Mức độ trưởng thành',approvalQueue:'Phê duyệt',infraDashboard:'Infrastructure',disasterWarning:'Cảnh báo Thiên tai AI',stormForecast:'Dự báo Bão AI',floodWarning:'Cảnh báo Lũ AI',multiHazard:'Phân tích Đa thiên tai',installAppPage:'Tải ứng dụng',nexusX:'Nexus-X DAO',climateExtreme:'Khí hậu Cực đoan',quydinh:'Quy định nền tảng',ecoShield:'Mekong Eco-Shield',subtitle:'100 TRIỆU NGƯỜI DÙNG • VIỆT NAM & THẾ GIỚI'};
+_TR.en={dashboard:'Dashboard',profile:'Profile',settings:'Settings',notifications:'Notifications',map:'Map',alerts:'Alerts',logout:'Logout',login:'Login',register:'Register',search:'Search',page:'Page',admin:'Admin',save:'Save',cancel:'Cancel',confirm:'Confirm',delete:'Delete',edit:'Edit',add:'Add',back:'Back',next:'Next',loading:'Loading...',error:'Error',success:'Success',warning:'Warning',info:'Info',dashboard2:'Dashboard',map2:'Interactive Map',evacuation:'Emergency Evacuation',earthquakeLive:'Earthquake Live',stormAI:'Storm Forecast',sarImaging:'SAR Radar',lstmSalinity:'Salinity Intrusion',imageAnchor:'Image Anchor',diseaseScan:'Disease Scan',remoteSensing:'Remote Sensing',plots:'Plots',satelliteNode:'Satellite',notifications2:'Notifications',profile2:'Profile',settings2:'Settings',farms:'Farms',farmDetail:'Farm Detail',farmOps:'Farm Ops',warehouse:'Warehouse',marketplace:'Digital Market',traceability:'Traceability',nftVault:'NFT Vault',knowledgeMarket:'Knowledge Market',carbon:'Carbon',token:'Token',eWallet:'E-Wallet',creditAI:'AI Credit',impactTrust:'Impact Trust',ecoTrust:'Eco Trust',fundAI:'AI Fund',impact:'Impact',econImpact:'Economic Impact',forwardContracts:'Futures',iotDevices:'IoT Devices',droneCenter:'Drone Center',depin:'Depin',sosOffline:'SOS Offline',aiSwarm:'AI Swarm',multiAgent:'Multi Agent',aiCallEngine:'AI Call Engine',scoutingMatrix:'Scouting Matrix',security:'Security',securityCenter:'Security Center',securityFortress:'Security Fortress',geoTemporal:'Geo-Temporal',aiGatekeeper:'AI Gatekeeper',immuneSystem:'Immune System',database:'Database',dataCenter:'Data Center',governance:'Governance',audit:'Audit',federated:'Federated',pinnFlood:'PINNs Flood',riskSegment:'Risk Segment',digitalTwin:'Digital Twin',resilienceIndex:'Resilience Index',eternalLegacy:'Eternal Legacy',disasterScholars:'Disaster Scholars',globalBridge:'Global Bridge',disasterThresholds:'Disaster Thresholds',knowledgeLoop:'Knowledge Loop',dynamicEquilibrium:'Dynamic Equilibrium',riskIntelligence:'Risk Intelligence',emergencyCenter:'Emergency Center',drillReport:'Drill Report',superAdmin:'Super Admin',systemMaturity:'System Maturity',approvalQueue:'Approval Queue',infraDashboard:'Infrastructure',disasterWarning:'AI Disaster Warning',stormForecast:'AI Storm Forecast',floodWarning:'AI Flood Warning',multiHazard:'Multi-Hazard Analysis',installAppPage:'Install App',nexusX:'Nexus-X DAO',climateExtreme:'Extreme Climate',quydinh:'Platform Regulations',ecoShield:'Mekong Eco-Shield',subtitle:'100 MILLION USERS • VIETNAM & WORLD'};
 function _t(k){return _TR[_LANG]&&_TR[_LANG][k]?(_TR[_LANG][k]):(_TR.vi[k]||k)}
 function applyLang(){try{_LANG=LS.get(KS+'set',{lang:'vi'}).lang||'vi';document.documentElement.lang=_LANG}catch(e){}}
 
@@ -6053,10 +6053,22 @@ approvalQueue:{
       '</div>'+
       '<div style="margin-top:8px;background:#18243c;border-left:3px solid #7c4dff;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6">'+
       '<b>Nexus-X — Hệ thống Kinh tế Vi mô Tự trị</b><br>'+
-      'Dự án Nexus-X (Autonomous Sovereign DAO) là tầng cao nhất của hệ sinh thái, điều phối toàn bộ 06 dự án hiện hữu thông qua Multi-Agent Consensus. Nội dung dự án này được xem là đã khóa và không đưa vào danh sách đề xuất ở các lần đánh giá tiếp theo.'+
-      '</div>'+
-      '</div>'+
-      cb()
+       'Dự án Nexus-X (Autonomous Sovereign DAO) là tầng cao nhất của hệ sinh thái, điều phối toàn bộ 06 dự án hiện hữu thông qua Multi-Agent Consensus. Nội dung dự án này được xem là đã khóa và không đưa vào danh sách đề xuất ở các lần đánh giá tiếp theo.'+
+       '</div>'+
+       '<div style="margin-top:8px;background:#18243c;border-left:3px solid #00bcd4;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6">'+
+       '<b>Nguyên tắc vận hành (rút gọn)</b><br>'+
+       '<table style="width:100%;border-collapse:collapse;margin-top:6px;font-size:10px">'+
+       '<tr style="background:#0b1120"><th style="padding:6px;text-align:left;border:1px solid #1e2d4a">Nguyên tắc</th><th style="padding:6px;text-align:left;border:1px solid #1e2d4a">Yêu cầu</th></tr>'+
+       '<tr><td style="padding:6px;border:1px solid #1e2d4a">Độc quyền URL</td><td style="padding:6px;border:1px solid #1e2d4a">Chỉ https://mekong-eco-shield.pages.dev</td></tr>'+
+       '<tr><td style="padding:6px;border:1px solid #1e2d4a">Bảo toàn chức năng</td><td style="padding:6px;border:1px solid #1e2d4a">Không xóa tính năng cũ</td></tr>'+
+       '<tr><td style="padding:6px;border:1px solid #1e2d4a">Phát triển gia tăng</td><td style="padding:6px;border:1px solid #1e2d4a">Chỉ nâng cấp / mở rộng / sửa lỗi</td></tr>'+
+       '<tr><td style="padding:6px;border:1px solid #1e2d4a">Tránh trùng lặp</td><td style="padding:6px;border:1px solid #1e2d4a">Không làm lại nội dung đã xong</td></tr>'+
+       '<tr><td style="padding:6px;border:1px solid #1e2d4a">Khóa sau hoàn thành</td><td style="padding:6px;border:1px solid #1e2d4a">Mỗi mục ghi nhận 1 lần rồi khóa</td></tr>'+
+       '</table>'+
+       '<button class="btn bp" style="width:100%;margin-top:10px;font-size:11px;padding:8px" onclick="navigate(\'quydinh\')">📜 Xem đầy đủ Quy định nền tảng</button>'+
+       '</div>'+
+       '</div>'+
+       cb()
     },
     init:function(){
      var d=document.getElementById('installBanner');
@@ -6542,8 +6554,40 @@ approvalQueue:{
      return r;
     },
     init:function(){loadHydrology()}
+   },
+   quydinh:{
+    title:'QUY ĐỊNH NỀN TẢNG',
+    render:function(){
+     return '<div class="pt">📜 QUY ĐỊNH NỀN TẢNG ỨNG DỤNG</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Quy định phát triển lâu dài hệ sinh thái Mekong Eco-Shield</div>'+
+      '<div class="cc"><h3>1️⃣ ĐỘC QUYỀN NỀN TẢNG</h3>'+
+      '<div style="background:#18243c;border-left:3px solid #ffc107;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
+      'Hệ thống Mekong Eco-Shield <b style="color:#00e676">chỉ</b> sử dụng, vận hành và ghi nhận <b style="color:#00e676">duy nhất</b> trên nền tảng tại địa chỉ <b style="color:#00bcd4">https://mekong-eco-shield.pages.dev</b>.<br>'+
+      'Mọi hoạt động phát triển, cập nhật và vận hành đều được thực hiện trên nền tảng này.<br>'+
+      '<b style="color:#ff1744">Không</b> sử dụng bất kỳ ứng dụng, nền tảng hoặc tên gọi khác để thay thế, chuyển đổi hoặc đổi tên dưới bất kỳ hình thức nào.'+
+      '</div></div>'+
+      '<div class="cc"><h3>2️⃣ QUY TẮC LƯU TRỮ VÀ PHÁT TRIỂN</h3>'+
+      '<div style="background:#18243c;border-left:3px solid #00e676;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
+      'Toàn bộ nội dung, chức năng, quy tắc và cấu trúc của hệ thống được xem là <b>nền tảng phát triển lâu dài</b>. Trong quá trình phát triển:'+
+      '<div style="margin-top:8px">1️⃣ <b style="color:#00e676">Không xóa hoặc loại bỏ</b> các chức năng đã có.<br>'+
+      '2️⃣ Chỉ được phép <b style="color:#00bcd4">nâng cấp, mở rộng hoặc sửa lỗi</b> trên nền tảng hiện hữu.<br>'+
+      '3️⃣ <b style="color:#ffc107">Không đề xuất hoặc thực hiện</b> các nội dung đã hoàn thành nhằm tránh trùng lặp.<br>'+
+      '4️⃣ Mỗi nội dung nâng cấp hoặc sửa lỗi <b style="color:#7c4dff">chỉ được ghi nhận một lần</b>; sau khi hoàn thành sẽ được xem là <b>đã khóa</b> và <b>không đưa vào danh sách đề xuất</b> ở các lần đánh giá tiếp theo.</div>'+
+      '</div></div>'+
+      '<div class="cc"><h3>3️⃣ NGUYÊN TẮC VẬN HÀNH (RÚT GỌN)</h3>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:11px">'+
+      '<tr style="background:#18243c"><th style="padding:8px;text-align:left;border:1px solid #1e2d4a">Nguyên tắc</th><th style="padding:8px;text-align:left;border:1px solid #1e2d4a">Yêu cầu</th></tr>'+
+      '<tr><td style="padding:8px;border:1px solid #1e2d4a">Độc quyền URL</td><td style="padding:8px;border:1px solid #1e2d4a">Chỉ https://mekong-eco-shield.pages.dev</td></tr>'+
+      '<tr><td style="padding:8px;border:1px solid #1e2d4a">Bảo toàn chức năng</td><td style="padding:8px;border:1px solid #1e2d4a">Không xóa tính năng cũ</td></tr>'+
+      '<tr><td style="padding:8px;border:1px solid #1e2d4a">Phát triển gia tăng</td><td style="padding:8px;border:1px solid #1e2d4a">Chỉ nâng cấp / mở rộng / sửa lỗi</td></tr>'+
+      '<tr><td style="padding:8px;border:1px solid #1e2d4a">Tránh trùng lặp</td><td style="padding:8px;border:1px solid #1e2d4a">Không làm lại nội dung đã xong</td></tr>'+
+      '<tr><td style="padding:8px;border:1px solid #1e2d4a">Khóa sau hoàn thành</td><td style="padding:8px;border:1px solid #1e2d4a">Mỗi mục ghi nhận 1 lần rồi khóa</td></tr>'+
+      '</table>'+
+      '<div style="font-size:10px;color:#607d8b;margin-top:8px">🔒 Mọi nội dung đã hoàn thành trên nền tảng đều được khóa và không đưa vào danh sách đề xuất ở các lần đánh giá tiếp theo.</div>'+
+      '</div>'+
+      cb()
+    }
    }
- };
+  };
 
 
 function simulateGatekeeper(){
@@ -6943,8 +6987,9 @@ var MENU=[
          {label:'💧 Thủy văn Mekong',id:'hydrology',icon:'💧',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
          {label:'📲 Tải ứng dụng',id:'installAppPage',icon:'📲',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NHA_DAU_TU','NGUOI_DAN']},
          {label:'🔗 Nexus-X DAO',id:'nexusX',icon:'🔗',roles:['GOD','NHA_DAU_TU','DOANH_NGHIEP']},
-         {label:'🌍 Khí hậu Cực đoan',id:'climateExtreme',icon:'🌍',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']}
-];
+          {label:'🌍 Khí hậu Cực đoan',id:'climateExtreme',icon:'🌍',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
+          {label:'📜 Quy định nền tảng',id:'quydinh',icon:'📜',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NHA_DAU_TU','NGUOI_DAN']}
+ ];
 // admin menu item now pushed inside buildSB() for correct timing
 
 function getUserRole(){
@@ -6965,7 +7010,7 @@ function canAccess(pageId){
 }
 
 var MENU_GROUPS=[
- {id:'core',label:'Hệ thống & Tổng quan',icon:'📊',items:['dashboard','map','multiLayerMap','profile','notifications','settings','drillReport','emergencyCenter','superAdmin','admin','systemMaturity','approvalQueue','infraDashboard','installAppPage','danhDatChat','hyperLocalData','hydrology']},
+ {id:'core',label:'Hệ thống & Tổng quan',icon:'📊',items:['dashboard','map','multiLayerMap','profile','notifications','settings','drillReport','emergencyCenter','superAdmin','admin','systemMaturity','approvalQueue','infraDashboard','installAppPage','quydinh','danhDatChat','hyperLocalData','hydrology']},
  {id:'agri',label:'Nông nghiệp & Chuỗi cung ứng',icon:'🌾',items:['farms','farmDetail','farmOps','warehouse','marketplace','traceability','nftVault','knowledgeMarket']},
  {id:'sensing',label:'AI Viễn thám & Môi trường',icon:'🛰️',items:['alerts','evacuation','earthquakeLive','stormAI','sarImaging','lstmSalinity','imageAnchor','diseaseScan','remoteSensing','plots','satelliteNode','disasterWarning','stormForecast','floodWarning','climateExtreme','multiHazard']},
  {id:'finance',label:'Kinh tế Số & Tài chính',icon:'🪙',items:['carbon','token','eWallet','creditAI','impactTrust','ecoTrust','fundAI','disbursment','impact','econImpact','forwardContracts']},
