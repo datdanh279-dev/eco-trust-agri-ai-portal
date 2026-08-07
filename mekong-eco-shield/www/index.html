@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-var _APP_V='v71';
+var _APP_V='v78';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -309,22 +309,6 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
  <div class="bni" onclick="navigate('alerts')"><span class="bi">⚠️</span>Cảnh báo</div>
  <div class="bni" onclick="navigate('eWallet')"><span class="bi">💰</span>Ví</div>
  <div class="bni" onclick="toggleSB()"><span class="bi">☰</span>Menu</div>
-</div>
-<!-- NLI Assistant Floating Widget -->
-<div id="nliBtn" onclick="toggleNLI()" style="position:fixed;bottom:20px;left:20px;width:50px;height:50px;background:linear-gradient(135deg,#00c853,#00e676);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;cursor:pointer;z-index:9999;box-shadow:0 4px 20px rgba(0,200,83,.4);transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🤖</div>
-<div id="nliPanel" style="position:fixed;bottom:80px;left:20px;width:320px;max-height:420px;background:#131c31;border:1px solid #1e2d4a;border-radius:12px;z-index:9998;display:none;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,.5)">
-<div style="padding:12px 14px;border-bottom:1px solid #1e2d4a;display:flex;justify-content:space-between;align-items:center">
-<div><span style="font-weight:600;font-size:13px">🤖 DANH ĐẠT (SÓI CÔ ĐỘC)</span><br><span style="font-size:10px;color:#607d8b">Trợ lý ngôn ngữ tự nhiên</span></div>
-<button class="btn bs" style="padding:2px 8px;font-size:10px" onclick="toggleNLI()">✕</button>
-</div>
-<div id="nliMsgs" style="flex:1;overflow-y:auto;padding:10px;min-height:200px;max-height:280px;font-size:12px">
-<div style="color:#607d8b;text-align:center;padding:20px 0">👋 Hỏi tôi bất cứ điều gì về Mekong Eco-Shield!<br><span style="font-size:10px">Ví dụ: "Mùa này mặn lên không?" "Làm sao để vay vốn?"</span></div>
-</div>
-<div style="padding:8px 10px;border-top:1px solid #1e2d4a;display:flex;gap:6px">
-<input class="input" id="nliInput" placeholder="Nhập câu hỏi..." style="font-size:12px;padding:6px 10px" onkeydown="if(event.key==='Enter')sendNLI()">
-<button class="btn bp" style="padding:6px 10px;font-size:11px" onclick="sendNLI()">➤</button>
-<button class="btn bs" style="padding:6px 8px;font-size:10px" onclick="startVoiceNLI()" title="Nhập bằng giọng nói">🎤</button>
-</div>
 </div>
 <script src="leaflet.js" async></script>
 <script>
@@ -912,7 +896,7 @@ function loadApprovalQueue(){
   // Sync local cache from D1 (overwrite local with D1 truth)
   var u=getU();var newU=[];users.forEach(function(x){var ex=u.find(function(y){return y.email===x.email});newU.push({name:x.name,email:x.email,phone:x.phone||'',pass:ex&&ex.pass?ex.pass:'',role:x.role,st:x.status,aid:x.accessId||'',ts:x.createdAt||'',userRole:x.userRole||''})});sU(newU);
   // Poll every 10s while on approval queue page
-  if(currentPage==='approvalQueue'){_aqPollTimer=setInterval(function(){loadApprovalQueue()},10000)}
+  if(currentPage==='approvalQueue'){_aqPollTimer=setInterval(function(){loadApprovalQueue()},10000);if(typeof loadDepositsAdmin==='function')setTimeout(loadDepositsAdmin,200);if(typeof loadWithdrawalsAdmin==='function')setTimeout(loadWithdrawalsAdmin,200);if(typeof loadTransfersAdmin==='function')setTimeout(loadTransfersAdmin,200)}
  }).catch(function(e){
   _aqRetryCount++;
   if(syncEl)syncEl.innerHTML='<span style="color:#ff9100">⚠️ Mất kết nối Cloud — Đang thử lại (lần '+_aqRetryCount+')</span>';
@@ -951,7 +935,177 @@ function loadAQFromLocal(users){
   }).join('')}else{pendingEl.innerHTML='<div style="color:#607d8b;font-size:12px;text-align:center;padding:10px">Không có tài khoản chờ duyệt</div>'}
  }
 }
-function pageApprovalQueue(){navigate('approvalQueue');setTimeout(loadApprovalQueue,300)}
+function pageApprovalQueue(){navigate('approvalQueue');setTimeout(loadApprovalQueue,300);setTimeout(function(){if(typeof loadDepositsAdmin==='function')loadDepositsAdmin();if(typeof loadWithdrawalsAdmin==='function')loadWithdrawalsAdmin();if(typeof loadTransfersAdmin==='function')loadTransfersAdmin()},400)}
+
+function loadDepositsAdmin(){
+ var el=document.getElementById('aqDepositList');
+ if(!el)return;
+ var adminEmail=U?U.email:'datdanh279@gmail.com';
+ fetch(API_BASE+'/deposits?admin='+encodeURIComponent(adminEmail))
+ .then(function(r){return r.json()}).then(function(d){
+  if(!d.ok){el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ '+esc(d.error||'Lỗi')+'</div>';return}
+  var list=d.deposits||[];
+  if(!list.length){el.innerHTML='<div style="color:#607d8b;font-size:12px;text-align:center;padding:8px">Chưa có yêu cầu nạp tiền</div>';return}
+  el.innerHTML=list.map(function(x){
+   var stColor=x.status==='approved'?'#00e676':x.status==='rejected'?'#ff1744':'#ffc107';
+   var stLabel=x.status==='approved'?'✅ Đã duyệt':x.status==='rejected'?'❌ Từ chối':'⏳ Chờ duyệt';
+   var acts='';
+   if(x.status==='pending')acts='<button class="btn bp" style="font-size:10px;padding:4px 10px" onclick="doDepositApprove(\''+x.id+'\',\'approve\')">✅ Duyệt</button><button class="btn bs" style="background:rgba(255,23,68,.12);color:#ff1744;font-size:10px;padding:4px 10px" onclick="doDepositApprove(\''+x.id+'\',\'reject\')">❌ Từ chối</button>';
+   var billImg=(x.bill_img)?'<div style="margin-top:4px"><img src="'+x.bill_img+'" style="width:70px;border-radius:6px;border:1px solid #1e2d4a;cursor:pointer" onclick="window.open(this.src,\'_blank\')"></div>':'';
+   return '<div style="background:#18243c;border-left:3px solid '+stColor+';border-radius:8px;padding:8px;margin-bottom:6px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:12px;color:#e8eaf6">'+(x.amount||0).toLocaleString()+' đ</b><span style="font-size:9px;background:'+stColor+'22;color:'+stColor+';padding:2px 8px;border-radius:8px">'+stLabel+'</span></div>'+
+    '<div style="font-size:10px;color:#b0bec5;margin-top:2px">👤 '+esc(x.full_name||'')+' · '+esc(x.email)+' | '+esc(x.method||'')+(x.bill?' · Bill: '+esc(x.bill):'')+'</div>'+
+    '<div style="font-size:9px;color:#607d8b;margin-top:2px">ID: '+esc(x.id)+' | '+esc(x.created_at?new Date(x.created_at).toLocaleString('vi-VN'):'')+'</div>'+
+    billImg+
+    (acts?'<div style="margin-top:6px;display:flex;gap:6px">'+acts+'</div>':'')+
+   '</div>';
+  }).join('');
+ }).catch(function(e){
+  el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ Mất kết nối: '+esc(e.message)+'</div>';
+ });
+}
+function doDepositApprove(id,action){
+ var adminEmail=U?U.email:'datdanh279@gmail.com';
+ fetch(API_BASE+'/deposit/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminEmail:adminEmail,id:id,action:action})})
+ .then(function(r){return r.json()}).then(function(d){
+  if(d.ok){
+   toast(action==='approve'?'✅ Đã duyệt nạp':'🗑️ Đã từ chối','Yêu cầu nạp '+id);
+   loadDepositsAdmin();
+  }else{toast('Lỗi',d.error||'Thất bại')}
+ }).catch(function(e){toast('Lỗi','Mất kết nối: '+e.message)});
+}
+
+function loadWithdrawalsAdmin(){
+ var el=document.getElementById('aqWithdrawList');
+ if(!el)return;
+ var adminEmail=U?U.email:'datdanh279@gmail.com';
+ fetch(API_BASE+'/withdraws?admin='+encodeURIComponent(adminEmail))
+ .then(function(r){return r.json()}).then(function(d){
+  if(!d.ok){el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ '+esc(d.error||'Lỗi')+'</div>';return}
+  var list=d.withdrawals||[];
+  if(!list.length){el.innerHTML='<div style="color:#607d8b;font-size:12px;text-align:center;padding:8px">Chưa có yêu cầu rút tiền</div>';return}
+  el.innerHTML=list.map(function(x){
+   var stColor=x.status==='approved'?'#00e676':x.status==='rejected'?'#ff1744':'#ffc107';
+   var stLabel=x.status==='approved'?'✅ Đã duyệt':x.status==='rejected'?'❌ Từ chối':'⏳ Chờ duyệt';
+   var acts='';
+   if(x.status==='pending')acts='<button class="btn bp" style="font-size:10px;padding:4px 10px" onclick="doWithdrawApprove(\''+x.id+'\',\'approve\')">✅ Duyệt</button><button class="btn bs" style="background:rgba(255,23,68,.12);color:#ff1744;font-size:10px;padding:4px 10px" onclick="doWithdrawApprove(\''+x.id+'\',\'reject\')">❌ Từ chối</button>';
+   return '<div style="background:#18243c;border-left:3px solid '+stColor+';border-radius:8px;padding:8px;margin-bottom:6px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:12px;color:#e8eaf6">'+(x.amount||0).toLocaleString()+' đ</b><span style="font-size:9px;background:'+stColor+'22;color:'+stColor+';padding:2px 8px;border-radius:8px">'+stLabel+'</span></div>'+
+    '<div style="font-size:10px;color:#b0bec5;margin-top:2px">👤 '+esc(x.full_name||'')+' · '+esc(x.email)+' | '+esc(x.method||'')+' '+esc(x.bank_account||'')+'</div>'+
+    '<div style="font-size:9px;color:#607d8b;margin-top:2px">ID: '+esc(x.id)+' | '+esc(x.created_at?new Date(x.created_at).toLocaleString('vi-VN'):'')+'</div>'+
+    (acts?'<div style="margin-top:6px;display:flex;gap:6px">'+acts+'</div>':'')+
+   '</div>';
+  }).join('');
+ }).catch(function(e){
+  el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ Mất kết nối: '+esc(e.message)+'</div>';
+ });
+}
+function doWithdrawApprove(id,action){
+ var adminEmail=U?U.email:'datdanh279@gmail.com';
+ fetch(API_BASE+'/withdraw/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminEmail:adminEmail,id:id,action:action})})
+ .then(function(r){return r.json()}).then(function(d){
+  if(d.ok){
+   toast(action==='approve'?'✅ Đã duyệt rút':'🗑️ Đã từ chối','Yêu cầu rút '+id);
+   loadWithdrawalsAdmin();
+  }else{toast('Lỗi',d.error||'Thất bại')}
+ }).catch(function(e){toast('Lỗi','Mất kết nối: '+e.message)});
+}
+function loadTransfersAdmin(){
+ var el=document.getElementById('aqTransferList');
+ if(!el)return;
+ var adminEmail=U?U.email:'datdanh279@gmail.com';
+ fetch(API_BASE+'/transfers?admin='+encodeURIComponent(adminEmail))
+ .then(function(r){return r.json()}).then(function(d){
+  if(!d.ok){el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ '+esc(d.error||'Lỗi')+'</div>';return}
+  var list=d.transfers||[];
+  if(!list.length){el.innerHTML='<div style="color:#607d8b;font-size:12px;text-align:center;padding:8px">Chưa có giao dịch chuyển khoản</div>';return}
+  el.innerHTML=list.map(function(x){
+   return '<div style="background:#18243c;border-left:3px solid #ff9100;border-radius:8px;padding:8px;margin-bottom:6px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:12px;color:#e8eaf6">'+(x.amount||0).toLocaleString()+' đ</b><span style="font-size:9px;color:#607d8b">'+esc(x.created_at?new Date(x.created_at).toLocaleString('vi-VN'):'')+'</span></div>'+
+    '<div style="font-size:10px;color:#b0bec5;margin-top:2px">📤 '+esc(x.sender_name||'')+' ('+esc(x.sender_email)+') → 📥 '+esc(x.receiver_email)+(x.bank?' | '+esc(x.bank)+' '+esc(x.acct):'')+'</div>'+
+    (x.note?'<div style="font-size:9px;color:#607d8b;margin-top:2px">Ghi chú: '+esc(x.note)+'</div>':'')+
+   '</div>';
+  }).join('');
+  }).catch(function(e){
+   el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ Mất kết nối: '+esc(e.message)+'</div>';
+  });
+}
+function loadFinanceAdmin(){
+ var adminEmail=U?U.email:'datdanh279@gmail.com';
+ fetch(API_BASE+'/finance/stats?admin='+encodeURIComponent(adminEmail))
+ .then(function(r){return r.json()}).then(function(d){
+  var st=document.getElementById('finStats');
+  if(st){
+   if(!d.ok){st.innerHTML='<div style="grid-column:1/-1;color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ '+esc(d.error||'Lỗi')+'</div>';}
+   else{
+    var s=d.stats||{};
+    st.innerHTML=
+     '<div style="background:#18243c;border:1px solid #00e67633;border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:#00e676">💵 TỔNG NẠP</div><div style="font-size:20px;font-weight:700;color:#e8eaf6;margin-top:4px">'+fmtMoney(s.deposited||0)+'</div><div style="font-size:9px;color:#607d8b">'+fmtMoney(s.depPending||0)+' đ chờ duyệt</div></div>'+
+     '<div style="background:#18243c;border:1px solid #ff174433;border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:#ff1744">🏧 TỔNG RÚT</div><div style="font-size:20px;font-weight:700;color:#e8eaf6;margin-top:4px">'+fmtMoney(s.withdrawn||0)+'</div><div style="font-size:9px;color:#607d8b">'+fmtMoney(s.wdPending||0)+' đ chờ duyệt</div></div>'+
+     '<div style="background:#18243c;border:1px solid #ff910033;border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:#ff9100">📤 TỔNG CHUYỂN</div><div style="font-size:20px;font-weight:700;color:#e8eaf6;margin-top:4px">'+fmtMoney(s.transferred||0)+'</div><div style="font-size:9px;color:#607d8b">'+fmtMoney(0)+' đ chờ duyệt</div></div>';
+   }
+  }
+  var dl=document.getElementById('finDepList');
+  if(dl){
+   var dlist=(d.deposits&&d.deposits.slice(0,20))||[];
+   dl.innerHTML=dlist.length?dlist.map(function(x){
+    var st2=x.status==='approved'?'#00e676':x.status==='pending'?'#ff9100':'#ff1744';
+    return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:11px"><span style="color:#b0bec5">'+esc(x.email||'')+'</span><span style="color:#e8eaf6;font-weight:700">'+(x.amount||0).toLocaleString()+' đ</span><span style="color:'+st2+'">'+esc(x.status||'')+'</span></div>';
+   }).join(''):'<div style="color:#607d8b;font-size:11px;padding:6px">Chưa có giao dịch nạp</div>';
+  }
+  var wl=document.getElementById('finWdList');
+  if(wl){
+   var wlist=(d.withdrawals&&d.withdrawals.slice(0,20))||[];
+   wl.innerHTML=wlist.length?wlist.map(function(x){
+    var st2=x.status==='approved'?'#00e676':x.status==='pending'?'#ff9100':'#ff1744';
+    return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:11px"><span style="color:#b0bec5">'+esc(x.email||'')+'</span><span style="color:#e8eaf6;font-weight:700">'+(x.amount||0).toLocaleString()+' đ</span><span style="color:'+st2+'">'+esc(x.status||'')+'</span></div>';
+   }).join(''):'<div style="color:#607d8b;font-size:11px;padding:6px">Chưa có giao dịch rút</div>';
+  }
+  var tl=document.getElementById('finTrList');
+  if(tl){
+   var tlist=(d.transfers&&d.transfers.slice(0,20))||[];
+   tl.innerHTML=tlist.length?tlist.map(function(x){
+    return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:11px"><span style="color:#b0bec5">'+esc(x.sender_email||'')+' → '+esc(x.receiver_email||'')+'</span><span style="color:#e8eaf6;font-weight:700">'+(x.amount||0).toLocaleString()+' đ</span></div>';
+   }).join(''):'<div style="color:#607d8b;font-size:11px;padding:6px">Chưa có giao dịch chuyển</div>';
+  }
+  var bd=document.getElementById('finByDay');
+  if(bd){
+   var rows=(d.stats&&d.stats.byDay)||[];
+   var dayMap={};
+   rows.forEach(function(x){
+    var day=x.day||'';
+    if(!dayMap[day])dayMap[day]={deposits:0,withdrawals:0,transfers:0};
+    if(x.type==='deposit')dayMap[day].deposits+=(x.s||0);
+    else if(x.type==='withdraw')dayMap[day].withdrawals+=(x.s||0);
+    else dayMap[day].transfers+=(x.s||0);
+   });
+   var dayArr=Object.keys(dayMap).sort().reverse().map(function(k){return {day:k,deposits:dayMap[k].deposits,withdrawals:dayMap[k].withdrawals,transfers:dayMap[k].transfers}});
+   bd.innerHTML=dayArr.length?'<table class="dt" style="width:100%"><thead><tr><th>Ngày</th><th>Nạp</th><th>Rút</th><th>Chuyển</th><th>Dòng tiền ròng</th></tr></thead><tbody>'+dayArr.map(function(x){
+    var net=(x.deposits||0)-(x.withdrawals||0);
+    return '<tr><td>'+esc(x.day||'')+'</td><td style="color:#00e676">'+fmtMoney(x.deposits||0)+'</td><td style="color:#ff1744">'+fmtMoney(x.withdrawals||0)+'</td><td style="color:#ff9100">'+fmtMoney(x.transfers||0)+'</td><td style="color:'+(net>=0?'#00e676':'#ff1744')+'">'+fmtMoney(net)+'</td></tr>';
+   }).join('')+'</tbody></table>':'<div style="color:#607d8b;font-size:11px;padding:6px">Chưa có dữ liệu theo ngày</div>';
+  }
+  var tu=document.getElementById('finTopUsers');
+  if(tu){
+   var rows2=(d.stats&&d.stats.topUsers)||[];
+   tu.innerHTML=rows2.length?'<table class="dt" style="width:100%"><thead><tr><th>#</th><th>Email</th><th>Nạp</th><th>Rút</th></tr></thead><tbody>'+rows2.slice(0,10).map(function(x,i){
+    return '<tr><td>'+(i+1)+'</td><td>'+esc(x.email||'')+'</td><td style="color:#00e676">'+fmtMoney(x.tin||0)+'</td><td style="color:#ff1744">'+fmtMoney(x.tout||0)+'</td></tr>';
+   }).join('')+'</tbody></table>':'<div style="color:#607d8b;font-size:11px;padding:6px">Chưa có dữ liệu top users</div>';
+  }
+  var rtx=document.getElementById('finRecentTx');
+  if(rtx){
+   var rt=(d.stats&&d.stats.recentTx)||[];
+   rtx.innerHTML=rt.length?rt.map(function(x){
+    var col=x.direction==='in'?'#00e676':x.direction==='out'?'#ff1744':'#ff9100';
+    var icon=x.direction==='in'?'📥':x.direction==='out'?'📤':'↔';
+    return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e2d4a;font-size:11px"><span style="color:#b0bec5">'+icon+' '+esc(x.email||'')+'</span><span style="color:'+col+';font-weight:700">'+((x.direction==='out')?'-':'+')+fmtMoney(x.amount||0)+'</span><span style="color:#607d8b;font-size:9px">'+esc(x.type||'')+(x.created_at?' · '+esc(String(x.created_at).slice(0,16)):'')+'</span></div>';
+   }).join(''):'<div style="color:#607d8b;font-size:11px;padding:6px">Chưa có giao dịch ví đồng bộ</div>';
+  }
+ }).catch(function(e){
+  var st=document.getElementById('finStats');
+  if(st)st.innerHTML='<div style="grid-column:1/-1;color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ Mất kết nối: '+esc(e.message)+'</div>';
+ });
+}
 
 // === AI DISASTER WARNING ===
 function loadClimateData(){
@@ -2698,12 +2852,42 @@ function unlockNFT(tid){
  showPage('nftVault')
 }
 
+function fmtMoney(n){
+ n=Number(n)||0;
+ if(n>=1000000000)return (n/1000000000).toFixed(2).replace(/\.00$/,'')+' tỷ đ';
+ if(n>=1000000)return (n/1000000).toFixed(2).replace(/\.00$/,'')+' triệu đ';
+ if(n>=1000)return (n/1000).toFixed(2).replace(/\.00$/,'')+' nghìn đ';
+ return Math.round(n).toLocaleString()+' đ';
+}
+function getTierLimits(){
+ var t=(U&&U.tier)?U.tier:'standard';
+ var m={admin:{perTx:Infinity,daily:Infinity},trusted:{perTx:100000000,daily:300000000},standard:{perTx:50000000,daily:150000000},awaiting_approval:{perTx:10000000,daily:30000000},exception:{perTx:10000000,daily:30000000},flagged:{perTx:2000000,daily:10000000},blocked:{perTx:0,daily:0}};
+ return m[t]||m.standard;
+}
+function tierLimitLabel(){
+ var l=getTierLimits();
+ var per=l.perTx===Infinity?'Không giới hạn':(l.perTx/1000000)+' triệu đ';
+ var daily=l.daily===Infinity?'Không giới hạn':(l.daily/1000000)+' triệu đ';
+ return {perTx:per,daily:daily,tier:(U&&U.tier)?U.tier:'standard'}
+}
+function warnLowBalance(){
+ var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
+ if((wl.balance||0)<50000&&(wl.balance||0)>=0){
+  addNotif('⚠️ Số dư thấp','Ví của bạn còn '+(wl.balance||0).toLocaleString()+' đ — dưới 50.000 đ. Vui lòng nạp tiền!');
+  toast('⚠️ Số dư thấp','Ví còn '+(wl.balance||0).toLocaleString()+' đ');
+ }
+}
+function checkTxLimit(amt){
+ var l=getTierLimits();
+ if(amt>l.perTx){toast('Lỗi','Vượt hạn mức giao dịch mỗi lần: '+((l.perTx===Infinity)?'Không giới hạn':(l.perTx/1000000)+' triệu đ'));return false}
+ return true;
+}
 function showSendMoney(){
- var users=getU().filter(function(x){return x.email!==U.email&&x.st==='approved'});
+ var users=getU().filter(function(x){return (U&&U.email)?x.email!==U.email&&x.st==='approved':x.st==='approved'});
  var optList=users.map(function(u){return '<option value="'+esc(u.email)+'">'+esc(u.name||u.email)+'</option>'}).join('');
  var banks=['Vietcombank','BIDV','VietinBank','Agribank','MB Bank (MB)','Techcombank','VPBank','ACB','Sacombank','VIB','SHB','Eximbank','HDBank','TPBank','MSB','OCB','Nam Á Bank','ABBank','NCB','VietBank','Bảo Việt Bank','PVcomBank','LienVietPostBank','SCB','OceanBank','GPBank','DongA Bank','VietABank','Saigonbank','PG Bank','VRB','CBBank','Citibank','HSBC','Standard Chartered','JPMorgan','Bank of America','Wells Fargo','Deutsche Bank','UBS','Barclays','ANZ','DBS','OCBC','UOB','Maybank','CIMB','ICBC','China Construction Bank'];
  var bankOpts='<option>Chọn ngân hàng</option>'+banks.map(function(b){return '<option>'+b+'</option>'}).join('');
- var h='<label>Người nhận</label><select class="input" id="smTo">'+(optList||'<option>Không có người dùng khác</option>')+'</select><label>Ngân hàng</label><select class="input" id="smBank">'+bankOpts+'</select><label>Số tài khoản người nhận</label><input class="input" id="smAcct" placeholder="VD: 1234567890"><label>Số tiền (đ)</label><input class="input" id="smAmt" type="number" placeholder="VD: 500000"><label>Ghi chú</label><input class="input" id="smNote" placeholder="Lýdo chuyển...">';
+ var h='<label>Người nhận</label><select class="input" id="smTo">'+(optList||'<option>Không có người dùng khác</option>')+'</select><label>Ngân hàng</label><select class="input" id="smBank">'+bankOpts+'</select><label>Số tài khoản người nhận</label><input class="input" id="smAcct" placeholder="VD: 1234567890"><label>Số tiền (đ)</label><input class="input" id="smAmt" type="number" placeholder="VD: 500000"><div style="font-size:10px;color:#607d8b;margin-top:4px">🛡️ Hạn mức mỗi lần: <b style="color:#ff9100">'+tierLimitLabel().perTx+'</b> · Hạng: '+esc(tierLimitLabel().tier.toUpperCase())+'</div><label>Ghi chú</label><input class="input" id="smNote" placeholder="Lýdo chuyển...">';
  showModal('📤 Chuyển tiền',h,function(){
   var to=document.getElementById('smTo').value;
   var bank=document.getElementById('smBank').value;
@@ -2714,49 +2898,260 @@ function showSendMoney(){
   if(!acct){toast('Lỗi','Nhập số tài khoản người nhận');return}
   var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
   if(amt<=0||amt>wl.balance){toast('Lỗi','Số tiền không hợp lệ');return}
-  wl.balance-=amt;
-  wl.history.push({type:'send',to:to,amt:amt,note:note,bank:bank,acct:acct,ts:new Date().toISOString()});
-  LS.set(KS+'wallet',wl);
-  addNotif('Chuyển tiền','Đã chuyển '+amt.toLocaleString()+' đ cho '+to+' ('+bank+' '+acct+')');
-  toast('📤 Đã chuyển',amt.toLocaleString()+' đ → '+to);
-  showPage('eWallet')
+  if(!checkTxLimit(amt))return;
+  if(!U||!U.email){toast('Lỗi','Vui lòng đăng nhập');return}
+  var btn=document.getElementById('modalConfirmBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Đang ghi giao dịch...'}
+  fetch(API_BASE+'/transfer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({senderEmail:U.email,senderName:U.name||'',receiverEmail:to,amount:amt,bank:bank,acct:acct,note:note})})
+  .then(function(r){return r.json()}).then(function(d){
+   if(!d.ok){toast('Lỗi',d.error||'Ghi giao dịch thất bại');if(btn){btn.disabled=false;btn.textContent='📤 Xác nhận chuyển'}return}
+   wl.balance-=amt;
+   wl.history.push({type:'send',to:to,amt:amt,note:note,bank:bank,acct:acct,ts:new Date().toISOString()});
+   LS.set(KS+'wallet',wl);
+   addNotif('Chuyển tiền','Đã chuyển '+amt.toLocaleString()+' đ cho '+to+' ('+bank+' '+acct+')');
+   toast('📤 Đã chuyển',amt.toLocaleString()+' đ → '+to);
+   warnLowBalance();
+   closeModal();
+   showPage('eWallet')
+  }).catch(function(e){
+   toast('Lỗi','Mất kết nối: '+e.message);
+   if(btn){btn.disabled=false;btn.textContent='📤 Xác nhận chuyển'}
+  })
  })
 }
 
 function showDepositWallet(){
- var h='<label>Số tiền nạp (đ)</label><input class="input" id="dwAmt" type="number" placeholder="VD: 1000000" value="1000000"><label>Phương thức</label><select class="input" id="dwMethod" onchange="toggleBankInfo()"><option>Chuyển khoản ngân hàng</option><option>Ví MoMo</option><option>VNPay</option><option>Trực tiếp</option></select>'
+ window.__dwBillImg='';
+ var h='<label>Số tiền nạp (đ)</label><input class="input" id="dwAmt" type="number" placeholder="VD: 1000000" value="1000000">'
+  +'<label>Phương thức</label><select class="input" id="dwMethod" onchange="setDepositQR()"><option>VNPAY</option><option>VietQR</option><option>VietQR Napas</option></select>'
   +'<div id="bankInfo" style="background:#18243c;border:1px solid rgba(0,200,83,.2);border-radius:10px;padding:12px;margin-top:10px">'
-  +'<div style="font-size:10px;color:#607d8b;margin-bottom:6px">🏦 THÔNG TIN TÀI KHOẢN NHẬN TIỀN</div>'
-  +'<div style="font-size:12px;color:#e8eaf6">Chủ tài khoản: <b>DANH DAT</b></div>'
-  +'<div style="font-size:12px;color:#e8eaf6;margin-top:4px">Ngân hàng: <b>MB Bank (MB)</b></div>'
-  +'<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><div style="flex:1;font-size:15px;font-weight:700;color:#00c853;letter-spacing:1px" id="bankAcct">0358814661</div><button class="btn bp" style="font-size:10px;padding:5px 10px" type="button" onclick="copyBankInfo()">📋 Copy</button></div>'
-  +'<div style="font-size:9px;color:#b0bec5;margin-top:6px">Chuyển tiền đến số tài khoản trên, sau đó nhập mã giao dịch & gửi lại bill để admin xác nhận.</div></div>'
+  +'<div style="font-size:10px;color:#607d8b;margin-bottom:8px">📲 QUÉT MÃ QR ĐỂ NẠP TIỀN</div>'
+  +'<div style="text-align:center"><img id="dwQrImg" src="qr-vnpay.jpg" alt="Mã QR" style="width:100%;max-width:220px;border-radius:8px;border:1px solid #1e2d4a;background:#fff;padding:6px"><div style="font-size:9px;color:#00bcd4;margin-top:4px" id="dwQrLabel">VNPAY — DANH DAT 0358814661</div></div>'
+  +'<div style="font-size:9px;color:#b0bec5;margin-top:8px">Quét mã QR bằng app ngân hàng / VNPAY, sau đó nhập mã giao dịch & gửi lại bill để admin xác nhận.</div></div>'
   +'<label style="margin-top:10px">Mã giao dịch / Bill</label><input class="input" id="dwBill" placeholder="VD: MB20260806.123456" value="">'
-  +'<div style="display:flex;gap:6px;margin-top:12px"><button class="btn bp" style="flex:1" type="button" onclick="doDepositWallet()">✅ Tôi đã chuyển khoản</button></div>';
+  +'<label>Ảnh bill chuyển khoản</label><input class="input" type="file" id="dwBillFile" accept="image/*" onchange="onDepositBillFile(this)">'
+  +'<div id="dwBillPreview" style="display:none;margin-top:8px"><img id="dwBillImg" alt="Bill" style="width:100%;max-width:200px;border-radius:8px;border:1px solid #1e2d4a"></div>'
+  +'<div style="display:flex;gap:6px;margin-top:12px"><button class="btn bp" style="flex:1" type="button" id="dwSubmitBtn" onclick="doDepositWallet()">✅ Tôi đã chuyển khoản</button></div>';
  showModal('📥 Nạp tiền vào ví',h,null)
 }
-function toggleBankInfo(){
- var b=document.getElementById('bankInfo'),m=document.getElementById('dwMethod');
- if(b&&m)b.style.display=(m.value==='Chuyển khoản ngân hàng')?'block':'none'
+function onDepositBillFile(input){
+ var f=input&&input.files&&input.files[0];
+ if(!f)return;
+ var reader=new FileReader();
+ reader.onload=function(ev){
+  var img=new Image();
+  img.onload=function(){
+   var maxW=800;
+   var scale=Math.min(1,maxW/img.width);
+   var c=document.createElement('canvas');
+   c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+   c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+   window.__dwBillImg=c.toDataURL('image/jpeg',0.75);
+   var pv=document.getElementById('dwBillPreview');
+   if(pv){pv.style.display='block';pv.firstChild.src=window.__dwBillImg}
+  };
+  img.onerror=function(){toast('Lỗi','Không đọc được ảnh')};
+  img.src=ev.target.result;
+ };
+ reader.readAsDataURL(f);
 }
+function setDepositQR(){
+ var m=document.getElementById('dwMethod').value;
+ var img=document.getElementById('dwQrImg'),lb=document.getElementById('dwQrLabel');
+ if(!img||!lb)return;
+ var map={
+  'VNPAY':{src:'qr-vnpay.jpg',label:'VNPAY — DANH DAT 0358814661'},
+  'VietQR':{src:'qr-vietqr.jpg',label:'VietQR — DANH DAT 0358814661'},
+  'VietQR Napas':{src:'qr-vietqr-napas.jpg',label:'VietQR Napas — DANH DAT 0358814661'}
+ };
+ var v=map[m]||map['VNPAY'];
+ img.src=v.src;lb.textContent=v.label;
+}
+function toggleBankInfo(){}
 function copyBankInfo(){
  var t='0358814661';
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('📋 Đã copy','Số tài khoản: '+t)}).catch(function(){toast('📋 Copy','Số TK: '+t)})}else{toast('📋 Copy','Số TK: '+t)}
 }
 function doDepositWallet(){
+ if(!U||!U.email){toast('Lỗi','Vui lòng đăng nhập trước khi nạp tiền');return}
  var amt=parseInt(document.getElementById('dwAmt').value)||0;
  if(amt<=0){toast('Lỗi','Nhập số tiền');return}
- var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
- var method=document.getElementById('dwMethod').value;
+ var method=(document.getElementById('dwMethod').value||'VNPAY');
  var bill=(document.getElementById('dwBill').value||'').trim();
- var note=method+(bill?' — Bill: '+bill:'');
+ if(!bill){toast('Lỗi','Nhập mã giao dịch / Bill');return}
+ var btn=document.getElementById('dwSubmitBtn');
+ if(btn){btn.disabled=true;btn.textContent='⏳ Đang gửi bill...'}
+ fetch(API_BASE+'/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:U.email,fullName:U.name||'',amount:amt,method:method,bill:bill,billImg:window.__dwBillImg||''})})
+ .then(function(r){return r.json()}).then(function(d){
+  if(d.ok){
+   toast('📤 Đã gửi bill','Yêu cầu nạp '+amt.toLocaleString()+' đ đã gửi cho admin — chờ xác nhận');
+   addNotif('Nạp tiền','Đã gửi yêu cầu nạp '+amt.toLocaleString()+' đ ('+method+') — chờ admin xác nhận');
+   closeModal();
+   showPage('eWallet');
+   if(typeof loadDeposits==='function')setTimeout(loadDeposits,300);
+  }else{
+   toast('Lỗi',d.error||'Gửi bill thất bại');
+   if(btn){btn.disabled=false;btn.textContent='✅ Tôi đã chuyển khoản'}
+  }
+ }).catch(function(e){
+  toast('Lỗi','Mất kết nối: '+e.message);
+  if(btn){btn.disabled=false;btn.textContent='✅ Tôi đã chuyển khoản'}
+ });
+}
+function loadDeposits(){
+ var el=document.getElementById('depositRequests');
+ if(!el)return;
+ if(!U||!U.email){el.innerHTML='<div style="color:#607d8b;font-size:12px;text-align:center;padding:8px">Đăng nhập để xem yêu cầu nạp tiền</div>';return}
+ el.innerHTML='<div style="color:#ffc107;font-size:11px;text-align:center;padding:8px">🔄 Đang tải yêu cầu nạp...</div>';
+ fetch(API_BASE+'/deposits?email='+encodeURIComponent(U.email))
+ .then(function(r){return r.json()}).then(function(d){
+  if(!d.ok){el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ '+esc(d.error||'Lỗi tải dữ liệu')+'</div>';return}
+  var list=d.deposits||[];
+  var claimed=LS.get(KS+'depClaimed',[]);
+  var autoTotal=0;
+  list.forEach(function(x){
+   if(x.status==='approved'&&claimed.indexOf(x.id)<0){
+    var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
+    wl.balance+=x.amount;
+    wl.history.push({type:'receive',from:'Admin xác nhận nạp',amt:x.amount,note:'Nạp '+(x.amount||0).toLocaleString()+' đ ('+(x.method||'')+') — đã duyệt',ts:new Date().toISOString()});
+    LS.set(KS+'wallet',wl);
+    claimed.push(x.id);LS.set(KS+'depClaimed',claimed);
+    autoTotal+=x.amount;
+   }
+  });
+  if(autoTotal>0){
+   addNotif('Nạp tiền','✅ Đã nhận '+autoTotal.toLocaleString()+' đ vào ví');
+   toast('💰 Đã nhận',autoTotal.toLocaleString()+' đ đã vào ví');
+   var wc=document.getElementById('walletCard');
+   if(wc){wc.outerHTML=wc.outerHTML}
+   if(typeof updateWalletCard==='function')updateWalletCard();
+  }
+  if(!list.length){el.innerHTML='<div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Chưa có yêu cầu nạp nào</div>';return}
+  el.innerHTML=list.map(function(x){
+   var stColor=x.status==='approved'?'#00e676':x.status==='rejected'?'#ff1744':'#ffc107';
+   var stLabel=x.status==='approved'?'✅ Đã duyệt':x.status==='rejected'?'❌ Từ chối':'⏳ Chờ duyệt';
+   var isClaimed=claimed.indexOf(x.id)>=0;
+   var claimBtn=(x.status==='approved'&&!isClaimed)?'<button class="btn bp" style="font-size:10px;padding:4px 10px" onclick="claimDeposit(\''+x.id+'\','+x.amount+',\''+esc(x.method||'')+'\')">💰 Nhận tiền</button>':(isClaimed?'<span style="font-size:10px;color:#00e676">✅ Đã nhận</span>':'');
+   var billImg=(x.bill_img)?'<div style="margin-top:4px"><img src="'+x.bill_img+'" style="width:90px;border-radius:6px;border:1px solid #1e2d4a;cursor:pointer" onclick="window.open(this.src,\'_blank\')"></div>':'';
+   return '<div style="background:#18243c;border-left:3px solid '+stColor+';border-radius:8px;padding:8px;margin-bottom:6px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:12px;color:#e8eaf6">'+(x.amount||0).toLocaleString()+' đ</b><span style="font-size:9px;background:'+stColor+'22;color:'+stColor+';padding:2px 8px;border-radius:8px">'+stLabel+'</span></div>'+
+    '<div style="font-size:10px;color:#b0bec5;margin-top:2px">'+esc(x.method||'')+(x.bill?' · Bill: '+esc(x.bill):'')+'</div>'+
+    '<div style="font-size:9px;color:#607d8b;margin-top:2px">'+esc(x.created_at?new Date(x.created_at).toLocaleString('vi-VN'):'')+'</div>'+
+    billImg+
+    (claimBtn?'<div style="margin-top:6px">'+claimBtn+'</div>':'')+
+   '</div>';
+  }).join('');
+ }).catch(function(e){
+  el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ Mất kết nối: '+esc(e.message)+'</div>';
+ });
+}
+function claimDeposit(id,amt,method){
+ var claimed=LS.get(KS+'depClaimed',[]);
+ if(claimed.indexOf(id)>=0){toast('💰 Đã nhận','Tiền đã vào ví trước đó');return}
+ var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
  wl.balance+=amt;
- wl.history.push({type:'receive',from:'Nạp tiền',amt:amt,note:note,ts:new Date().toISOString()});
+ wl.history.push({type:'receive',from:'Admin xác nhận nạp',amt:amt,note:'Nạp '+amt.toLocaleString()+' đ ('+method+') — đã duyệt',ts:new Date().toISOString()});
  LS.set(KS+'wallet',wl);
- addNotif('Nạp tiền','Đã nạp '+amt.toLocaleString()+' đ vào ví ('+method+')');
- toast('📥 Đã nạp',amt.toLocaleString()+' đ'+(bill?' — Bill: '+bill:''));
- closeModal();
- showPage('eWallet')
+ claimed.push(id);LS.set(KS+'depClaimed',claimed);
+ addNotif('Nạp tiền','✅ Đã nhận '+amt.toLocaleString()+' đ vào ví');
+ toast('💰 Đã nhận',amt.toLocaleString()+' đ đã vào ví');
+ loadDeposits();
+}
+function showWithdrawWallet(){
+ if(!U||!U.email){toast('Lỗi','Vui lòng đăng nhập trước khi rút tiền');return}
+ var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
+ var banks=['Vietcombank','BIDV','VietinBank','Agribank','MB Bank (MB)','Techcombank','VPBank','ACB','Sacombank','VIB','SHB','Eximbank','HDBank','TPBank','MSB','OCB','Nam Á Bank','ABBank','NCB','VietBank','Bảo Việt Bank','PVcomBank','LienVietPostBank','SCB','OceanBank','GPBank','DongA Bank','VietABank','Saigonbank','PG Bank','VRB','CBBank'];
+ var bankOpts='<option>Chọn ngân hàng</option>'+banks.map(function(b){return '<option>'+b+'</option>'}).join('');
+ var h='<label>Số tiền rút (đ)</label><input class="input" id="wdAmt" type="number" placeholder="VD: 500000" value=""><div style="font-size:10px;color:#607d8b;margin-top:4px">💳 Số dư khả dụng: <b>'+(wl.balance||0).toLocaleString()+' đ</b></div>'
+  +'<label>Ngân hàng nhận</label><select class="input" id="wdBank">'+bankOpts+'</select>'
+  +'<label>Số tài khoản nhận</label><input class="input" id="wdAcct" placeholder="VD: 1234567890">'
+  +'<div style="font-size:9px;color:#b0bec5;margin-top:6px">Yêu cầu sẽ được gửi cho admin xác nhận. Tiền bị trừ khi admin duyệt.</div>'
+  +'<div style="font-size:10px;color:#607d8b;margin-top:6px">🛡️ Hạn mức mỗi lần: <b style="color:#ff9100">'+tierLimitLabel().perTx+'</b> · Hạng: '+esc(tierLimitLabel().tier.toUpperCase())+'</div>';
+ showModal('🏧 Rút tiền',h,function(){
+  var amt=parseInt(document.getElementById('wdAmt').value)||0;
+  var bank=document.getElementById('wdBank').value;
+  var acct=(document.getElementById('wdAcct').value||'').trim();
+  if(bank==='Chọn ngân hàng'){toast('Lỗi','Chọn ngân hàng');return}
+  if(!acct){toast('Lỗi','Nhập số tài khoản nhận');return}
+  if(amt<=0||amt>wl.balance){toast('Lỗi','Số tiền không hợp lệ');return}
+  if(!checkTxLimit(amt))return;
+  var btn=document.getElementById('modalConfirmBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Đang gửi yêu cầu...'}
+  fetch(API_BASE+'/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:U.email,fullName:U.name||'',amount:amt,method:bank,bankAccount:acct})})
+  .then(function(r){return r.json()}).then(function(d){
+   if(!d.ok){toast('Lỗi',d.error||'Gửi yêu cầu thất bại');if(btn){btn.disabled=false;btn.textContent='Xác nhận'}return}
+   toast('🏧 Đã gửi','Yêu cầu rút '+amt.toLocaleString()+' đ chờ admin xác nhận');
+   addNotif('Rút tiền','Đã gửi yêu cầu rút '+amt.toLocaleString()+' đ ('+bank+' '+acct+') — chờ admin xác nhận');
+   closeModal();
+   showPage('eWallet');
+   if(typeof loadWithdrawals==='function')setTimeout(loadWithdrawals,300);
+  }).catch(function(e){
+   toast('Lỗi','Mất kết nối: '+e.message);
+   if(btn){btn.disabled=false;btn.textContent='Xác nhận'}
+  });
+ })
+}
+function loadWithdrawals(){
+ var el=document.getElementById('withdrawRequests');
+ if(!el)return;
+ if(!U||!U.email){el.innerHTML='<div style="color:#607d8b;font-size:12px;text-align:center;padding:8px">Đăng nhập để xem yêu cầu rút tiền</div>';return}
+ el.innerHTML='<div style="color:#ffc107;font-size:11px;text-align:center;padding:8px">🔄 Đang tải yêu cầu rút...</div>';
+ fetch(API_BASE+'/withdraws?email='+encodeURIComponent(U.email))
+ .then(function(r){return r.json()}).then(function(d){
+  if(!d.ok){el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ '+esc(d.error||'Lỗi tải dữ liệu')+'</div>';return}
+  var list=d.withdrawals||[];
+  var done=LS.get(KS+'wdDone',[]);
+  if(!list.length){el.innerHTML='<div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Chưa có yêu cầu rút nào</div>';return}
+  el.innerHTML=list.map(function(x){
+   var stColor=x.status==='approved'?'#00e676':x.status==='rejected'?'#ff1744':'#ffc107';
+   var stLabel=x.status==='approved'?'✅ Đã duyệt':x.status==='rejected'?'❌ Từ chối':'⏳ Chờ duyệt';
+   var isDone=done.indexOf(x.id)>=0;
+   var btn=(x.status==='approved'&&!isDone)?'<button class="btn bp" style="font-size:10px;padding:4px 10px" onclick="confirmWithdraw(\''+x.id+'\','+x.amount+',\''+esc(x.method||'')+'\')">✅ Hoàn tất rút</button>':(isDone?'<span style="font-size:10px;color:#00e676">✅ Đã hoàn tất</span>':'');
+   return '<div style="background:#18243c;border-left:3px solid '+stColor+';border-radius:8px;padding:8px;margin-bottom:6px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:12px;color:#e8eaf6">'+(x.amount||0).toLocaleString()+' đ</b><span style="font-size:9px;background:'+stColor+'22;color:'+stColor+';padding:2px 8px;border-radius:8px">'+stLabel+'</span></div>'+
+    '<div style="font-size:10px;color:#b0bec5;margin-top:2px">'+esc(x.method||'')+' · '+esc(x.bank_account||'')+'</div>'+
+    '<div style="font-size:9px;color:#607d8b;margin-top:2px">'+esc(x.created_at?new Date(x.created_at).toLocaleString('vi-VN'):'')+'</div>'+
+    (btn?'<div style="margin-top:6px">'+btn+'</div>':'')+
+   '</div>';
+  }).join('');
+ }).catch(function(e){
+  el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ Mất kết nối: '+esc(e.message)+'</div>';
+ });
+}
+function confirmWithdraw(id,amt,method){
+ var done=LS.get(KS+'wdDone',[]);
+ if(done.indexOf(id)>=0){toast('✅ Hoàn tất','Yêu cầu đã xử lý trước đó');return}
+ var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
+ if((wl.balance||0)<amt){toast('Lỗi','Số dư không đủ để trừ');return}
+ wl.balance-=amt;
+ wl.history.push({type:'send',from:'Rút tiền',amt:amt,note:'Rút '+amt.toLocaleString()+' đ ('+method+') — admin đã duyệt',ts:new Date().toISOString()});
+ LS.set(KS+'wallet',wl);
+ done.push(id);LS.set(KS+'wdDone',done);
+  addNotif('Rút tiền','✅ Đã rút '+amt.toLocaleString()+' đ khỏi ví');
+  toast('🏧 Đã rút',amt.toLocaleString()+' đ đã trừ khỏi ví');
+  loadWithdrawals();
+}
+function loadWalletTx(){
+ var el=document.getElementById('walletTxSync');
+ if(!el)return;
+ if(!U||!U.email){el.innerHTML='<div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Đăng nhập để xem lịch sử đồng bộ</div>';return}
+ fetch(API_BASE+'/wallet-tx?email='+encodeURIComponent(U.email))
+ .then(function(r){return r.json()}).then(function(d){
+  if(!d.ok){el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ '+esc(d.error||'Lỗi tải dữ liệu')+'</div>';return}
+  var list=d.txs||[];
+  if(!list.length){el.innerHTML='<div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Chưa có giao dịch nào được đồng bộ lên Cloud D1</div>';return}
+  el.innerHTML=list.map(function(x){
+   var col=x.direction==='in'?'#00e676':x.direction==='out'?'#ff1744':'#ff9100';
+   var icon=x.direction==='in'?'📥':x.direction==='out'?'📤':'↔';
+   var sign=x.direction==='out'?'-':'+';
+   return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1e2d4a">'+
+    '<div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;background:'+(x.direction==='out'?'rgba(255,145,0,.12)':'rgba(0,230,118,.12)')+'">'+icon+'</div>'+
+    '<div style="flex:1"><div style="font-size:12px;font-weight:500">'+esc(x.type==='deposit'?'Nạp tiền (bill)':x.type==='withdraw'?'Rút tiền':'Chuyển khoản')+'</div><div style="font-size:9px;color:#607d8b">'+esc(x.created_at?String(x.created_at).slice(0,19).replace('T',' '):'')+((x.note)?' · '+esc(x.note):'')+'</div></div>'+
+    '<div style="font-size:12px;font-weight:600;color:'+col+'">'+sign+(x.amount||0).toLocaleString()+' đ</div></div>';
+  }).join('');
+ }).catch(function(e){
+  el.innerHTML='<div style="color:#ff9100;font-size:11px;text-align:center;padding:8px">⚠️ Mất kết nối: '+esc(e.message)+'</div>';
+ });
 }
 
 function toggleBottomNav(id){
@@ -2851,7 +3246,7 @@ function tryLogin(){
        return;
       }
      }
-     U={email:d.user.email,name:d.user.name,role:d.user.role,aid:d.user.accessId||'',userRole:d.user.userRole};
+     U={email:d.user.email,name:d.user.name,role:d.user.role,aid:d.user.accessId||'',userRole:d.user.userRole,tier:d.user.tier||'standard'};
      LS.set(KS+'user',U);
     var u=getU();
     if(!u.find(function(x){return x.email===d.user.email})){
@@ -2886,7 +3281,7 @@ function tryLogin(){
       }
      }
      var r=getR()||{};
-     U={email:f.email,name:f.name,role:f.role,aid:r&&r[f.email]?r[f.email].aid:'',userRole:f.userRole||f.role};
+     U={email:f.email,name:f.name,role:f.role,aid:r&&r[f.email]?r[f.email].aid:'',userRole:f.userRole||f.role,tier:f.tier||'standard'};
     LS.set(KS+'user',U);
     try{var iv=getIV();if(iv&&!iv.vault.find(function(v){return v.email===U.email})){iv.vault.push({email:U.email,name:U.name,trustScore:500,wallet:'',securityHash:U.aid||'',ts:new Date().toISOString()});iv.totalUsers=iv.vault.length;sIV(iv)}}catch(x){}
     showApp();return
@@ -3396,6 +3791,9 @@ approvalQueue:{
     return '<div class="pt">⏳ HÀNG CHỜ PHÊ DUYỆT — Quản trị viên</div>'+
      '<div class="ps">Quản lý tài khoản từ Cloud D1: Duyệt / Từ chối / Khóa / Mở khóa / Xóa</div>'+
      '<div id="aqStats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">'+loadMsg+'</div>'+
+     '<div class="cc" style="margin-bottom:14px"><h3>💵 Yêu cầu nạp tiền (bill) <span style="font-size:9px;color:#607d8b">— auto 10s</span></h3><div id="aqDepositList">'+loadMsg+'</div></div>'+
+     '<div class="cc" style="margin-bottom:14px"><h3>🏧 Yêu cầu rút tiền <span style="font-size:9px;color:#607d8b">— auto 10s</span></h3><div id="aqWithdrawList">'+loadMsg+'</div></div>'+
+     '<div class="cc" style="margin-bottom:14px"><h3>📤 Lịch sử chuyển khoản nội bộ</h3><div id="aqTransferList">'+loadMsg+'</div></div>'+
      '<div class="cc" style="margin-bottom:14px"><h3>⏳ Chờ phê duyệt (<span id="aqPendingCount">—</span>)</h3><div id="aqPendingList">'+loadMsg+'</div></div>'+
      '<div class="cc" style="margin-bottom:14px"><h3>👥 Quản lý tài khoản (<span id="aqTotalCount">—</span>)</h3><div style="overflow-x:auto"><table class="dt" style="width:100%"><thead><tr><th>Email</th><th>Họ tên</th><th>Vai trò</th><th>Trạng thái</th><th>Đăng ký</th><th>Hành động</th></tr></thead><tbody id="aqUserTable">'+loadMsg+'</tbody></table></div></div>'+
      '<div class="cc" style="margin-bottom:14px"><h3>📋 Nhật ký quản trị ('+auditLog.length+')</h3>'+
@@ -3405,10 +3803,26 @@ approvalQueue:{
        '<div style="display:flex;justify-content:space-between"><b style="color:#e8eaf6">'+esc(l.action)+'</b><span style="color:#607d8b">'+esc(l.ts?l.ts.slice(0,16):'')+'</span></div>'+
        '<div style="color:#b0bec5;margin-top:2px">'+esc(l.detail||'')+'</div>'+
        '<div style="color:#607d8b;margin-top:1px">Bởi: '+esc(l.by||'')+'</div></div>';
-     }).join(''):'<div style="color:#607d8b;font-size:12px">Chưa có nhật ký quản trị</div>')+
+      }).join(''):'<div style="color:#607d8b;font-size:12px">Chưa có nhật ký quản trị</div>')+
      '</div>'+cb()
    }
   },
+ financeAdmin:{
+  title:'QUẢN TRỊ TÀI CHÍNH',
+  render:function(){
+   var loadMsg='<div style="text-align:center;padding:20px;color:#00bcd4">⏳ Đang tải dữ liệu tài chính...</div>';
+   return '<div class="pt">📊 QUẢN TRỊ TÀI CHÍNH — Dòng tiền toàn hệ thống</div>'+
+    '<div class="ps">Tổng hợp nạp / rút / chuyển khoản từ Cloud D1 — Cập nhật theo giao dịch thực tế</div>'+
+    '<div id="finStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">'+loadMsg+'</div>'+
+    '<div class="cc" style="margin-bottom:14px"><h3>💵 Nạp tiền <span style="font-size:9px;color:#607d8b">— chờ duyệt & đã duyệt</span></h3><div id="finDepList">'+loadMsg+'</div></div>'+
+    '<div class="cc" style="margin-bottom:14px"><h3>🏧 Rút tiền <span style="font-size:9px;color:#607d8b">— chờ duyệt & đã duyệt</span></h3><div id="finWdList">'+loadMsg+'</div></div>'+
+    '<div class="cc" style="margin-bottom:14px"><h3>📤 Chuyển khoản nội bộ</h3><div id="finTrList">'+loadMsg+'</div></div>'+
+    '<div class="cc" style="margin-bottom:14px"><h3>📈 Dòng tiền theo ngày (30 ngày gần nhất)</h3><div id="finByDay">'+loadMsg+'</div></div>'+
+    '<div class="cc" style="margin-bottom:14px"><h3>🏆 Top người dùng theo dòng tiền</h3><div id="finTopUsers">'+loadMsg+'</div></div>'+
+    '<div class="cc" style="margin-bottom:14px"><h3>🧾 Lịch sử giao dịch ví (mới nhất)</h3><div id="finRecentTx">'+loadMsg+'</div></div>'+cb()
+  },
+  init:function(){setTimeout(loadFinanceAdmin,100)}
+ },
  infraDashboard:{
   title:'INFRASTRUCTURE',
   render:function(){
@@ -4396,22 +4810,29 @@ approvalQueue:{
        var txs=wl.history||[];
        return '<div class="pt">💰 VÍ ĐIỆN TỬ MES-CASH</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Ví thanh toán nông sản Mekong</div>'+
         '<div id="walletCard"><div style="position:relative;z-index:1"><div style="font-size:10px;opacity:.7;margin-bottom:2px">Số dư khả dụng</div><div style="font-size:28px;font-weight:700">'+(wl.balance||0).toLocaleString()+' <span style="font-size:14px">đ</span></div><div style="font-size:10px;opacity:.6;margin-top:4px">MES-CASH • '+esc(U?U.name||U.email:'')+'</div></div></div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+        (((wl.balance||0)<50000)?'<div style="background:rgba(255,109,0,.12);border:1px solid rgba(255,109,0,.35);border-radius:8px;padding:8px;font-size:11px;color:#ff9100;margin-bottom:10px">⚠️ Số dư thấp (dưới 50.000 đ) — vui lòng nạp tiền để tiếp tục giao dịch</div>':'')+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'+
         '<button class="btn bp" style="padding:14px;font-size:13px" onclick="showSendMoney()">📤 Chuyển tiền</button>'+
-        '<button class="btn bs" style="padding:14px;font-size:13px" onclick="showDepositWallet()">📥 Nạp tiền</button></div>'+
+        '<button class="btn bs" style="padding:14px;font-size:13px" onclick="showDepositWallet()">📥 Nạp tiền</button>'+
+        '<button class="btn" style="padding:14px;font-size:13px;background:rgba(255,145,0,.12);color:#ff9100" onclick="showWithdrawWallet()">🏧 Rút tiền</button></div>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px">'+
         '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;margin-bottom:2px">📤</div><div style="font-size:9px;color:#607d8b">Đã chuyển</div><div style="font-size:12px;font-weight:600;color:#ff9100">'+txs.filter(function(x){return x.type==='send'}).length+'</div></div>'+
         '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;margin-bottom:2px">📥</div><div style="font-size:9px;color:#607d8b">Đã nhận</div><div style="font-size:12px;font-weight:600;color:#00e676">'+txs.filter(function(x){return x.type==='receive'}).length+'</div></div>'+
         '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;margin-bottom:2px">📊</div><div style="font-size:9px;color:#607d8b">Giao dịch</div><div style="font-size:12px;font-weight:600">'+txs.length+'</div></div></div>'+
+        '<div class="cc"><h3>📥 Yêu cầu nạp tiền <button class="btn bs" style="font-size:9px;padding:2px 8px;float:right" onclick="loadDeposits()">🔄 Kiểm tra lại</button></h3><div id="depositRequests"><div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Đang tải...</div></div></div>'+
+        '<div class="cc"><h3>🏧 Yêu cầu rút tiền <button class="btn bs" style="font-size:9px;padding:2px 8px;float:right" onclick="loadWithdrawals()">🔄 Kiểm tra lại</button></h3><div id="withdrawRequests"><div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Đang tải...</div></div></div>'+
         '<div class="cc"><h3>📋 Lịch sử giao dịch</h3>'+
         (!txs.length?'<div style="color:#607d8b;font-size:12px">Chưa có giao dịch nào</div>':
-        txs.slice(-10).reverse().map(function(x){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1e2d4a">'+
+        txs.slice(-10).reverse().map(function(x,i){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1e2d4a">'+
          '<div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;background:'+(x.type==='send'?'rgba(255,145,0,.12)':'rgba(0,230,118,.12)')+'">'+(x.type==='send'?'📤':'📥')+'</div>'+
-         '<div style="flex:1"><div style="font-size:12px;font-weight:500">'+esc(x.note||'')+'</div><div style="font-size:9px;color:#607d8b">'+esc(x.ts?x.ts.slice(0,16):'')+'</div></div>'+
-         '<div style="font-size:12px;font-weight:600;color:'+(x.type==='send'?'#ff9100':'#00e676')+'">'+(x.type==='send'?'-':'+')+(x.amt||0).toLocaleString()+' đ</div></div>'}).join('')+
-         '</div>'+cb()+crossSellBanner('wallet'))
-       }
-      },
+         '<div style="flex:1"><div style="font-size:12px;font-weight:500">'+esc(x.note||'')+'</div><div style="font-size:9px;color:#607d8b">'+esc(x.ts?x.ts.slice(0,19).replace('T',' '):'')+' · GD#'+((txs.length-i))+((x.to)?' · → '+esc(x.to):'')+'</div></div>'+
+          '<div style="font-size:12px;font-weight:600;color:'+(x.type==='send'?'#ff9100':'#00e676')+'">'+(x.type==='send'?'-':'+')+(x.amt||0).toLocaleString()+' đ</div></div>'}).join('')+
+          '</div>'+
+         '<div class="cc"><h3>🛰️ Lịch sử giao dịch đồng bộ Cloud D1 <button class="btn bs" style="font-size:9px;padding:2px 8px;float:right" onclick="loadWalletTx()">🔄 Đồng bộ lại</button></h3><div id="walletTxSync"><div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Đang tải từ D1...</div></div></div>'+
+         cb()+crossSellBanner('wallet'))
+        },
+        init:function(){setTimeout(loadDeposits,50);setTimeout(loadWithdrawals,150);setTimeout(loadWalletTx,250);warnLowBalance();}
+       },
       earthquakeLive:{
        title:'ĐỘNG ĐẤT LIVE',
        render:function(){
@@ -6501,6 +6922,7 @@ var MENU=[
        {label:'⚙️ Ngưỡng kích hoạt',id:'disasterThresholds',icon:'⚙️',roles:['GOD']},
        {label:'🏗️ System Maturity',id:'systemMaturity',icon:'🏗️',roles:['GOD']},
         {label:'⏳ Phê duyệt',id:'approvalQueue',icon:'⏳',roles:['GOD']},
+        {label:'📊 Quản trị Tài chính',id:'financeAdmin',icon:'📊',roles:['GOD']},
         {label:'🔧 Infrastructure',id:'infraDashboard',icon:'🔧',roles:['GOD']},
         {label:'🌪️ Cảnh báo Thiên tai AI',id:'disasterWarning',icon:'🌪️',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
         {label:'🌀 Dự báo Bão AI',id:'stormForecast',icon:'🌀',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NGUOI_DAN']},
@@ -6685,6 +7107,8 @@ function showPage(id){
  if(typeof bmap[id]==='undefined'&&bnItems[4])bnItems[4].classList.add('active');
  else if(typeof bmap[id]!=='undefined'&&bnItems[bmap[id]])bnItems[bmap[id]].classList.add('active');
  if(p.init)setTimeout(p.init,100);
+ if(id==='eWallet'&&typeof loadDeposits==='function')setTimeout(loadDeposits,150);
+ if(id==='eWallet'&&typeof loadWithdrawals==='function')setTimeout(loadWithdrawals,200);
  if(id==='alerts'||id==='weather'||id==='earthquakeLive')_refreshTimer=setInterval(function(){showPage(id)},30000)
 }
 
@@ -6696,8 +7120,8 @@ function showApp(){
  var app=document.getElementById('app');
  app.classList.add('show');
   document.getElementById('sbUser').textContent=U?(U.role==='admin'?'Quản trị viên':U.role==='nha_dau_tu'?'Nhà đầu tư':U.role==='doanh_nghiep'?'Doanh nghiệp':''):'';
-   buildSB();
-  navigate('dashboard');
+    buildSB();
+   navigate('multiLayerMap');
   updateNotifBadge();
   updateSystemStatus();
   setInterval(updateSystemStatus,30000);
@@ -7284,6 +7708,7 @@ function installApp(){
 try{initAdmin()}catch(e){}
 try{initNLI()}catch(e){}
 var su=LS.get(KS+'user',null);if(su&&!U){U=su}
+if(U&&U.name&&(U.name==='DANH ĐẠI'||U.name.indexOf('ĐẠI')>=0&&U.name.indexOf('ĐẠT')<0)){U.name='DANH ĐẠT (SÓI CÔ ĐỘC)';LS.set(KS+'user',U)}
 var gkSaved=LS.get(KS+'gk','');
 if(gkSaved){GK.set(gkSaved);GK.auth(gkSaved)}
 if(U&&U.email){try{showApp()}catch(e){}}
@@ -7566,7 +7991,7 @@ function toggleMapLayer(name,on){
 var _dMap=null,_dLayers={},_baseLayer=null,_baseMode='osm',_radarFrames=[],_radarIdx=0,_radarTimer=null;
 
 function initDisasterMap(){
- if(typeof L==='undefined')return;
+ if(typeof L==='undefined'){setTimeout(initDisasterMap,400);return}
  var el=document.getElementById('disasterMap');
  if(!el)return;
  el.innerHTML='';

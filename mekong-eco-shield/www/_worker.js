@@ -16,6 +16,40 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 }
 
+// === PASSWORD HASHING (SHA-256 + salt) ===
+const PASS_SALT = 'MES::SHIELD::2026';
+async function hashPassword(pass) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(PASS_SALT + ':' + pass));
+  return 'sha256$' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function passMatches(pass, stored) {
+  if (!stored) return false;
+  if (stored.startsWith('sha256$')) {
+    const h = await hashPassword(pass);
+    return h === stored;
+  }
+  return stored === pass; // legacy plaintext fallback
+}
+
+// === TIER-BASED TRANSACTION LIMITS ===
+const TIER_LIMITS = {
+  admin: { perTx: Infinity, daily: Infinity },
+  trusted: { perTx: 100000000, daily: 300000000 },
+  standard: { perTx: 50000000, daily: 150000000 },
+  awaiting_approval: { perTx: 10000000, daily: 30000000 },
+  exception: { perTx: 10000000, daily: 30000000 },
+  flagged: { perTx: 2000000, daily: 10000000 },
+  blocked: { perTx: 0, daily: 0 }
+};
+function getTierLimits(tier) { return TIER_LIMITS[tier] || TIER_LIMITS.standard; }
+async function todaySpent(db, table, emailCol, email, statusOk) {
+  const today = new Date().toISOString().slice(0, 10);
+  const q = 'SELECT COALESCE(SUM(amount),0) AS s FROM ' + table + ' WHERE ' + emailCol + ' = ? AND substr(created_at,1,10) = ?';
+  const rows = await db.prepare(q + (statusOk ? ' AND status IN (\'pending\',\'approved\')' : '')).bind(email, today).first();
+  return rows ? rows.s : 0;
+}
+function fmtMoney(n) { return (n || 0).toLocaleString('vi-VN'); }
+
 function parseCookies(request) {
   const c = {};
   (request.headers.get('Cookie') || '').split(';').forEach(kv => {
@@ -94,8 +128,9 @@ export default {
         const ur = userRole || (role || 'nong_dan').toUpperCase();
         const ts = new Date().toISOString();
         const aid = accessId || crypto.randomUUID();
+        const passHash = await hashPassword(pass);
         await db.prepare('INSERT INTO users (name, email, phone, pass, role, userRole, status, accessId, trustScore, tier, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-          .bind(name, email, phone || '', pass, role || 'nong_dan', ur, status, aid, trustScore, tier, ts, ts).run();
+          .bind(name, email, phone || '', passHash, role || 'nong_dan', ur, status, aid, trustScore, tier, ts, ts).run();
         const aiLog = 'AI Gatekeeper | ' + ts + ' | ' + email + ' | Score:' + trustScore + ' | Tier:' + tier + ' | Status:' + status;
         await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('gatekeeper', aiLog, ts).run();
         return json({ ok: true, status, tier, trustScore, accessId: aid });
@@ -112,7 +147,10 @@ export default {
         if (!user) return json({ error: 'Sai email hoac mat khau' }, 401);
         if (user.status === 'blocked') return json({ error: 'Tai khoan da bi khoa' }, 403);
         if (user.status === 'pending') return json({ error: 'Tai khoan dang cho duyet' }, 403);
-        if (user.pass !== pass) return json({ error: 'Sai email hoac mat khau' }, 401);
+        if (!(await passMatches(pass, user.pass))) return json({ error: 'Sai email hoac mat khau' }, 401);
+        if (user.pass && !user.pass.startsWith('sha256$')) {
+          try { await db.prepare('UPDATE users SET pass=? WHERE id=?').bind(await hashPassword(pass), user.id).run(); } catch (e) {}
+        }
         return json({ ok: true, user: { id: user.id, name: user.name, email: user.email, phone: user.phone || '', role: user.role, userRole: user.userRole, status: user.status, accessId: user.accessId, trustScore: user.trustScore, tier: user.tier, createdAt: user.createdAt } });
       } catch (e) { return json({ error: e.message }, 500); }
     }
@@ -138,7 +176,7 @@ export default {
         if (!admin) {
           const ts = new Date().toISOString();
           try { await db.prepare('INSERT INTO users (name, email, phone, pass, role, userRole, status, accessId, trustScore, tier, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-            .bind('Admin', ADMIN_EMAIL, '0358814661', ADMIN_PASS, 'admin', 'ADMIN', 'approved', ADMIN_AID, 100, 'admin', ts, ts).run(); admin = { role: 'admin' };
+            .bind('Admin', ADMIN_EMAIL, '0358814661', await hashPassword(ADMIN_PASS), 'admin', 'ADMIN', 'approved', ADMIN_AID, 100, 'admin', ts, ts).run(); admin = { role: 'admin' };
           } catch (e) { admin = null; }
         }
         if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen', detail: admin ? 'role=' + admin.role : 'not found' }, 403);
@@ -425,6 +463,220 @@ export default {
         recommendation: 'Theo dõi sát diễn biến thời tiết, chuẩn bị phương án sơ tán cho vùng thấp trũng. Kích hoạt hệ thống cảnh báo sớm đa tầng.',
         updatedAt: new Date().toISOString()
       });
+    }
+
+    // === DEPOSIT / WALLET TOP-UP (bill submission + admin approval) ===
+    if (path === '/api/deposit' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, fullName, amount, method, bill, billImg } = body;
+        if (!email || !amount || amount <= 0) return json({ error: 'Thieu thong tin nap tien' }, 400);
+        const user = await db.prepare('SELECT id, role FROM users WHERE email = ?').bind(email).first();
+        const userId = user ? user.id : email;
+        const role = user ? user.role : '';
+        const ts = new Date().toISOString();
+        const id = 'DP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+        await db.prepare('INSERT INTO payments (id, user_id, email, full_name, amount, role, status, method, bill, bill_img, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(id, String(userId), email, fullName || '', amount, role, 'pending', method || '', bill || '', billImg || '', ts, ts).run();
+        const aiLog = 'Deposit | ' + ts + ' | ' + email + ' | ' + amount + ' đ | ' + (method || '') + ' | ' + (bill || '');
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('deposit', aiLog, ts).run();
+        return json({ ok: true, id, status: 'pending' });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    if (path === '/api/deposits' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const adminEmail = url.searchParams.get('admin');
+        const userEmail = url.searchParams.get('email');
+        if (adminEmail) {
+          const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+          if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+          const rows = await db.prepare('SELECT * FROM payments ORDER BY created_at DESC LIMIT 200').all();
+          return json({ ok: true, deposits: rows.results });
+        }
+        if (userEmail) {
+          const rows = await db.prepare('SELECT * FROM payments WHERE email = ? ORDER BY created_at DESC LIMIT 50').bind(userEmail).all();
+          return json({ ok: true, deposits: rows.results });
+        }
+        return json({ error: 'Thieu tham so' }, 400);
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    if (path === '/api/deposit/approve' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { adminEmail, id, action } = body;
+        if (!adminEmail || !id || !action) return json({ error: 'Thieu tham so' }, 400);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        const pay = await db.prepare('SELECT * FROM payments WHERE id = ?').bind(id).first();
+        if (!pay) return json({ error: 'Khong tim thay giao dich' }, 404);
+        if (action === 'reject' || action === 'delete') {
+          await db.prepare('DELETE FROM payments WHERE id = ?').bind(id).run();
+          return json({ ok: true, status: 'deleted' });
+        }
+        if (pay.status === 'approved') return json({ ok: true, status: 'approved' });
+        await db.prepare('UPDATE payments SET status=?, admin_id=?, updated_at=? WHERE id=?').bind('approved', adminEmail, new Date().toISOString(), id).run();
+        const tsA = new Date().toISOString();
+        await db.prepare('INSERT INTO wallet_tx (id, email, full_name, type, direction, amount, method, note, ref, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind('WX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase(), pay.email, pay.full_name || '', 'deposit', 'in', pay.amount, pay.method || '', 'Nạp tiền (đã duyệt)', id, tsA).run();
+        return json({ ok: true, status: 'approved' });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === WITHDRAW / CASH-OUT (admin approval) ===
+    if (path === '/api/withdraw' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, fullName, amount, method, bankAccount } = body;
+        if (!email || !amount || amount <= 0 || !bankAccount) return json({ error: 'Thieu thong tin rut tien' }, 400);
+        const user = await db.prepare('SELECT id, role, tier FROM users WHERE email = ?').bind(email).first();
+        const userId = user ? user.id : email;
+        const role = user ? user.role : '';
+        const lim = getTierLimits(user ? user.tier : 'standard');
+        if (amount > lim.perTx) return json({ error: 'Vuot han muc rut moi lan: toi da ' + fmtMoney(lim.perTx) + ' d' }, 400);
+        const spentToday = await todaySpent(db, 'withdrawals', 'email', email, true);
+        if (spentToday + amount > lim.daily) return json({ error: 'Vuot han muc rut trong ngay: toi da ' + fmtMoney(lim.daily) + ' d' }, 400);
+        const ts = new Date().toISOString();
+        const id = 'WD-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+        await db.prepare('INSERT INTO withdrawals (id, user_id, email, full_name, amount, method, bank_account, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(id, String(userId), email, fullName || '', amount, method || '', bankAccount, 'pending', ts, ts).run();
+        const aiLog = 'Withdraw | ' + ts + ' | ' + email + ' | ' + amount + ' đ | ' + (method || '') + ' | ' + bankAccount;
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('withdraw', aiLog, ts).run();
+        return json({ ok: true, id, status: 'pending' });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    if (path === '/api/withdraws' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const adminEmail = url.searchParams.get('admin');
+        const userEmail = url.searchParams.get('email');
+        if (adminEmail) {
+          const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+          if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+          const rows = await db.prepare('SELECT * FROM withdrawals ORDER BY created_at DESC LIMIT 200').all();
+          return json({ ok: true, withdrawals: rows.results });
+        }
+        if (userEmail) {
+          const rows = await db.prepare('SELECT * FROM withdrawals WHERE email = ? ORDER BY created_at DESC LIMIT 50').bind(userEmail).all();
+          return json({ ok: true, withdrawals: rows.results });
+        }
+        return json({ error: 'Thieu tham so' }, 400);
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    if (path === '/api/withdraw/approve' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { adminEmail, id, action } = body;
+        if (!adminEmail || !id || !action) return json({ error: 'Thieu tham so' }, 400);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        const wd = await db.prepare('SELECT * FROM withdrawals WHERE id = ?').bind(id).first();
+        if (!wd) return json({ error: 'Khong tim thay giao dich' }, 404);
+        if (action === 'reject' || action === 'delete') {
+          await db.prepare('DELETE FROM withdrawals WHERE id = ?').bind(id).run();
+          return json({ ok: true, status: 'deleted' });
+        }
+        if (wd.status === 'approved') return json({ ok: true, status: 'approved' });
+        await db.prepare('UPDATE withdrawals SET status=?, admin_id=?, updated_at=? WHERE id=?').bind('approved', adminEmail, new Date().toISOString(), id).run();
+        const tsW = new Date().toISOString();
+        await db.prepare('INSERT INTO wallet_tx (id, email, full_name, type, direction, amount, method, note, ref, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind('WX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase(), wd.email, wd.full_name || '', 'withdraw', 'out', wd.amount, wd.method || '', 'Rút tiền (đã duyệt)', id, tsW).run();
+        return json({ ok: true, status: 'approved' });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === INTERNAL TRANSFER LOG (record on D1) ===
+    if (path === '/api/transfer' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { senderEmail, senderName, receiverEmail, amount, bank, acct, note } = body;
+        if (!senderEmail || !receiverEmail || !amount || amount <= 0) return json({ error: 'Thieu thong tin chuyen tien' }, 400);
+        const sender = await db.prepare('SELECT tier FROM users WHERE email = ?').bind(senderEmail).first();
+        const lim = getTierLimits(sender ? sender.tier : 'standard');
+        if (amount > lim.perTx) return json({ error: 'Vuot han muc chuyen moi lan: toi da ' + fmtMoney(lim.perTx) + ' d' }, 400);
+        const spentToday = await todaySpent(db, 'transfers', 'sender_email', senderEmail, false);
+        if (spentToday + amount > lim.daily) return json({ error: 'Vuot han muc chuyen trong ngay: toi da ' + fmtMoney(lim.daily) + ' d' }, 400);
+        const ts = new Date().toISOString();
+        const id = 'TR-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+        await db.prepare('INSERT INTO transfers (id, sender_email, sender_name, receiver_email, amount, bank, acct, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(id, senderEmail, senderName || '', receiverEmail, amount, bank || '', acct || '', note || '', ts).run();
+        await db.prepare('INSERT INTO wallet_tx (id, email, full_name, type, direction, amount, method, note, ref, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind('WX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase(), senderEmail, senderName || '', 'transfer', 'out', amount, bank || '', 'Chuyển đến ' + receiverEmail, id, ts).run();
+        const aiLog = 'Transfer | ' + ts + ' | ' + senderEmail + ' → ' + receiverEmail + ' | ' + amount + ' đ | ' + (bank || '') + ' ' + (acct || '');
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('transfer', aiLog, ts).run();
+        return json({ ok: true, id });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    if (path === '/api/transfers' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const adminEmail = url.searchParams.get('admin');
+        if (adminEmail) {
+          const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+          if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+          const rows = await db.prepare('SELECT * FROM transfers ORDER BY created_at DESC LIMIT 200').all();
+          return json({ ok: true, transfers: rows.results });
+        }
+        return json({ error: 'Thieu tham so' }, 400);
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === FINANCE ADMIN DASHBOARD (aggregated cash flow) ===
+    if (path === '/api/finance/stats' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const adminEmail = url.searchParams.get('admin');
+        if (!adminEmail) return json({ error: 'Thieu admin' }, 401);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        const dep = await db.prepare("SELECT COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM payments WHERE status='approved'").first();
+        const depPending = await db.prepare("SELECT COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM payments WHERE status='pending'").first();
+        const wd = await db.prepare("SELECT COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM withdrawals WHERE status='approved'").first();
+        const wdPending = await db.prepare("SELECT COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM withdrawals WHERE status='pending'").first();
+        const tr = await db.prepare('SELECT COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM transfers').first();
+        const byDay = await db.prepare("SELECT substr(created_at,1,10) AS day, type, COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM wallet_tx GROUP BY day, type ORDER BY day DESC LIMIT 30").all();
+        const topUsers = await db.prepare("SELECT email, full_name, COALESCE(SUM(CASE WHEN direction='in' THEN amount ELSE 0 END),0) AS tin, COALESCE(SUM(CASE WHEN direction='out' THEN amount ELSE 0 END),0) AS tout FROM wallet_tx GROUP BY email ORDER BY (tin+tout) DESC LIMIT 10").all();
+        const recentTx = await db.prepare('SELECT * FROM wallet_tx ORDER BY created_at DESC LIMIT 50').all();
+        const deposits = await db.prepare('SELECT * FROM payments ORDER BY created_at DESC LIMIT 20').all();
+        const withdrawals = await db.prepare('SELECT * FROM withdrawals ORDER BY created_at DESC LIMIT 20').all();
+        const transfers = await db.prepare('SELECT * FROM transfers ORDER BY created_at DESC LIMIT 20').all();
+        return json({ ok: true, stats: {
+          deposited: dep.s, depCount: dep.c, depPending: depPending.s, depPendingCount: depPending.c,
+          withdrawn: wd.s, wdCount: wd.c, wdPending: wdPending.s, wdPendingCount: wdPending.c,
+          transferred: tr.s, trCount: tr.c,
+          byDay: byDay.results, topUsers: topUsers.results, recentTx: recentTx.results
+        }, deposits: deposits.results, withdrawals: withdrawals.results, transfers: transfers.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === WALLET TRANSACTION HISTORY (user + admin) ===
+    if (path === '/api/wallet-tx' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const adminEmail = url.searchParams.get('admin');
+        const userEmail = url.searchParams.get('email');
+        if (adminEmail) {
+          const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+          if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+          const rows = await db.prepare('SELECT * FROM wallet_tx ORDER BY created_at DESC LIMIT 300').all();
+          return json({ ok: true, txs: rows.results });
+        }
+        if (userEmail) {
+          const rows = await db.prepare('SELECT * FROM wallet_tx WHERE email = ? ORDER BY created_at DESC LIMIT 100').bind(userEmail).all();
+          return json({ ok: true, txs: rows.results });
+        }
+        return json({ error: 'Thieu tham so' }, 400);
+      } catch (e) { return json({ error: e.message }, 500); }
     }
 
     // === STATIC ASSETS ===
