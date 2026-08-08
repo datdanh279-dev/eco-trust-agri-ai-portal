@@ -30,6 +30,7 @@ Toàn bộ nội dung, chức năng, quy tắc và cấu trúc của hệ thốn
 
 ## 4. Ghi nhận nâng cấp
 
+- **2026-08-08**: Nâng cấp v82. Trang Quy định nền tảng bổ sung **Kiểm tra độc quyền nền tảng** (🛡️) — xác thực host hiện tại phải đúng https://mekong-eco-shield.pages.dev và cảnh báo khi chạy nơi khác, vận hành đúng điều 1 Độc quyền nền tảng.
 - **2026-08-08**: Nâng cấp v81. Thêm trang **Lịch sử nâng cấp** (📋) — ghi nhận các mục đã hoàn thành và đánh dấu **đã khóa**, liên kết từ trang Quy định nền tảng; mục này hỗ trợ tránh trùng lặp ở các lần đánh giá tiếp theo.
 - **2026-08-07**: Nâng cấp toàn bộ Quy định về nền tảng ứng dụng. Bổ sung trang **Quy định nền tảng** (📜) trong nền tảng tại https://mekong-eco-shield.pages.dev; cập nhật mục "QUY ĐỊNH VỀ NỀN TẢNG ỨNG DỤNG" trên trang Tải ứng dụng cho đầy đủ (bảng nguyên tắc vận hành + nút xem đầy đủ).
 - Mục đã hoàn thành **khóa lại**, không đưa vào danh sách đề xuất ở các lần đánh giá tiếp theo.

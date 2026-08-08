@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-var _APP_V='v81';
+var _APP_V='v82';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -6585,6 +6585,13 @@ approvalQueue:{
        '<div style="font-size:10px;color:#607d8b;margin-top:8px">🔒 Mọi nội dung đã hoàn thành trên nền tảng đều được khóa và không đưa vào danh sách đề xuất ở các lần đánh giá tiếp theo.</div>'+
        '<button class="btn bp" style="width:100%;margin-top:10px;font-size:11px;padding:8px" onclick="navigate(\'upgradeLog\')">📋 Xem Lịch sử nâng cấp (đã khóa)</button>'+
        '</div>'+
+       '<div class="cc"><h3>🛡️ KIỂM TRA ĐỘC QUYỀN NỀN TẢNG</h3>'+
+       (function(){var h=location.hostname;var proto=location.protocol+'//'+location.hostname+(location.port?':'+location.port:'');var st,cl,bg,bd;if(h==='mekong-eco-shield.pages.dev'){st='ĐÚNG NỀN TẢNG ĐỘC QUYỀN — hoạt động hợp lệ';cl='#00e676';bg='rgba(0,230,118,.1)';bd='rgba(0,230,118,.3)'}else if(h.indexOf('.mekong-eco-shield.pages.dev')>0){st='ĐANG CHẠY BẢN XEM TRƯỚC CỦA NỀN TẢNG (alias)';cl='#ffc107';bg='rgba(255,193,7,.1)';bd='rgba(255,193,7,.3)'}else{st='KHÔNG PHẢI NỀN TẢNG ĐỘC QUYỀN — chỉ dùng https://mekong-eco-shield.pages.dev';cl='#ff1744';bg='rgba(255,23,68,.1)';bd='rgba(255,23,68,.3)'}return '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:12px;font-size:11px">'+
+'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="color:#607d8b">Nền tảng độc quyền:</span><span style="color:#00bcd4;font-weight:700">https://mekong-eco-shield.pages.dev</span></div>'+
+'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="color:#607d8b">Host hiện tại:</span><span style="color:#e8eaf6;font-weight:600">'+esc(proto)+'</span></div>'+
+'<div style="padding:8px;border-radius:6px;text-align:center;font-size:12px;font-weight:700;background:'+bg+';color:'+cl+';border:1px solid '+bd+'">'+(h==='mekong-eco-shield.pages.dev'?'✅':'⚠️')+' '+st+'</div>'+
+'<div style="font-size:9px;color:#607d8b;margin-top:8px">Theo quy định: mọi hoạt động phát triển, cập nhật, vận hành đều phải trên đúng địa chỉ trên — không dùng ứng dụng, nền tảng hay tên gọi khác thay thế, chuyển đổi, đổi tên.</div></div>'}())+
+       '</div>'+
        cb()
     }
    },
@@ -6592,6 +6599,7 @@ approvalQueue:{
     title:'LỊCH SỬ NÂNG CẤP',
     render:function(){
      var log=[
+      {v:'v82',d:'2026-08-08',t:'🛡️ Kiểm tra độc quyền nền tảng',x:'Trang Quy định thêm kiểm tra trực tiếp: host hiện tại phải đúng https://mekong-eco-shield.pages.dev; cảnh báo khi chạy ở nơi khác'},
       {v:'v81',d:'2026-08-08',t:'📋 Trang Lịch sử nâng cấp',x:'Thêm trang ghi nhận các mục nâng cấp đã hoàn thành và đánh dấu đã khóa, liên kết từ trang Quy định nền tảng'},
       {v:'v80',d:'2026-08-07',t:'📜 Trang Quy định nền tảng',x:'Thêm trang Quy định nền tảng, hoàn thiện mục QUY ĐỊNH trên trang Tải ứng dụng, cập nhật tài liệu quy định'},
       {v:'v79',d:'2026-08-07',t:'📸 Ảnh QR nạp tiền',x:'Bổ sung ảnh QR VNPAY, VietQR, VietQR Napas cho ví điện tử'},
