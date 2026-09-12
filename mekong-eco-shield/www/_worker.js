@@ -50,6 +50,68 @@ async function todaySpent(db, table, emailCol, email, statusOk) {
 }
 function fmtMoney(n) { return (n || 0).toLocaleString('vi-VN'); }
 
+// === TOTP 2FA (v111): RFC-6238 6-digit, HMAC-SHA1, 30s window ===
+const B32_ALPH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+function base32Decode(s) {
+  const clean = String(s || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
+  const bytes = [];
+  let bits = 0, value = 0;
+  for (const ch of clean) {
+    value = (value << 5) | B32_ALPH.indexOf(ch);
+    bits += 5;
+    if (bits >= 8) { bytes.push((value >>> (bits - 8)) & 255); bits -= 8; }
+  }
+  return new Uint8Array(bytes);
+}
+async function totpVerify(secret, code) {
+  try {
+    const expected = parseInt(String(code || '').trim(), 10);
+    if (!expected || String(code).length !== 6) return false;
+    const key = base32Decode(secret);
+    const keyBuf = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+    const counter = Math.floor(Date.now() / 30000);
+    // accept window of -1,0,+1 (90s)
+    for (let w = -1; w <= 1; w++) {
+      const buf = new ArrayBuffer(8);
+      const dv = new DataView(buf);
+      dv.setUint32(4, counter + w, false);
+      const sig = await crypto.subtle.sign('HMAC', keyBuf, buf);
+      const h = new Uint8Array(sig);
+      const off = h[h.length - 1] & 0x0f;
+      const num = ((h[off] & 0x7f) << 24) | (h[off + 1] << 16) | (h[off + 2] << 8) | h[off + 3];
+      const otp = String(num % 1000000).padStart(6, '0');
+      if (parseInt(otp, 10) === expected) return true;
+    }
+    return false;
+  } catch (e) { return false; }
+}
+function genTotpSecret() {
+  const bytes = new Uint8Array(10);
+  crypto.getRandomValues(bytes);
+  let s = '';
+  for (const b of bytes) s += B32_ALPH[b & 31];
+  return s;
+}
+
+// === BRUTE-FORCE LOCK HELPER (v110): 5 fails -> lock 30 min ===
+const LOGIN_LOCK_LIMIT = 5;
+const LOGIN_LOCK_MS = 30 * 60 * 1000;
+async function recordFailLogin(db, email, nowMs) {
+  try {
+    const row = await db.prepare('SELECT failed FROM login_attempts WHERE email = ?').bind(email).first();
+    const attempts = (row ? row.failed : 0) + 1;
+    const ts = new Date(nowMs).toISOString();
+    if (attempts >= LOGIN_LOCK_LIMIT) {
+      const lockUntil = new Date(nowMs + LOGIN_LOCK_MS).toISOString();
+      if (row) await db.prepare('UPDATE login_attempts SET failed=?, last_fail=?, locked_until=? WHERE email=?').bind(attempts, ts, lockUntil, email).run();
+      else await db.prepare('INSERT INTO login_attempts (email, failed, last_fail, locked_until) VALUES (?, ?, ?, ?)').bind(email, attempts, ts, lockUntil).run();
+    } else {
+      if (row) await db.prepare('UPDATE login_attempts SET failed=?, last_fail=?, locked_until=? WHERE email=?').bind(attempts, ts, '', email).run();
+      else await db.prepare('INSERT INTO login_attempts (email, failed, last_fail, locked_until) VALUES (?, ?, ?, ?)').bind(email, attempts, ts, '').run();
+    }
+  } catch (e) { /* non-fatal */ }
+}
+
 function parseCookies(request) {
   const c = {};
   (request.headers.get('Cookie') || '').split(';').forEach(kv => {
@@ -99,11 +161,19 @@ export default {
     // === USER AUTH (unchanged) ===
     if (path === '/api/ping') return json({ ok: true, ping: 'pong' });
 
+    // Health check (SHIELD network monitor expects x-powered-by header)
+    if (path === '/api/health') {
+      return new Response(JSON.stringify({ ok: true, status: 'healthy', ts: new Date().toISOString() }), {
+        status: 200,
+        headers: { ...CORS, 'Content-Type': 'application/json', 'x-powered-by': 'MEKONG-ECO-SHIELD' }
+      });
+    }
+
     if (path === '/api/register' && method === 'POST') {
       try {
         const db = await getDB(env);
         const body = await request.json();
-        const { name, email, phone, pass, role, userRole, accessId } = body;
+        const { name, email, phone, pass, role, userRole, accessId, secQ, secA } = body;
         if (!name || !email || !pass) return json({ error: 'Thieu thong tin' }, 400);
         const existing = await db.prepare('SELECT id, role FROM users WHERE email = ?').bind(email).first();
         if (existing) {
@@ -129,8 +199,10 @@ export default {
         const ts = new Date().toISOString();
         const aid = accessId || crypto.randomUUID();
         const passHash = await hashPassword(pass);
-        await db.prepare('INSERT INTO users (name, email, phone, pass, role, userRole, status, accessId, trustScore, tier, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-          .bind(name, email, phone || '', passHash, role || 'nong_dan', ur, status, aid, trustScore, tier, ts, ts).run();
+        const secQClean = secQ ? String(secQ).slice(0, 200) : '';
+        const secAClean = secA ? await hashPassword(String(secA).toLowerCase().trim()) : '';
+        await db.prepare('INSERT INTO users (name, email, phone, pass, role, userRole, status, accessId, trustScore, tier, createdAt, updatedAt, sec_q, sec_a) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(name, email, phone || '', passHash, role || 'nong_dan', ur, status, aid, trustScore, tier, ts, ts, secQClean, secAClean).run();
         const aiLog = 'AI Gatekeeper | ' + ts + ' | ' + email + ' | Score:' + trustScore + ' | Tier:' + tier + ' | Status:' + status;
         await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('gatekeeper', aiLog, ts).run();
         return json({ ok: true, status, tier, trustScore, accessId: aid });
@@ -143,15 +215,112 @@ export default {
         const body = await request.json();
         const { email, pass } = body;
         if (!email || !pass) return json({ error: 'Thieu thong tin' }, 400);
+        // === BRUTE-FORCE LOCK (v110): server-side 5 fails / 30 min ===
+        const att = await db.prepare('SELECT failed, last_fail, locked_until FROM login_attempts WHERE email = ?').bind(email).first();
+        const nowMs = Date.now();
+        if (att && att.locked_until) {
+          const lockedUntilMs = new Date(att.locked_until).getTime();
+          if (lockedUntilMs > nowMs) {
+            const remainMin = Math.max(1, Math.ceil((lockedUntilMs - nowMs) / 60000));
+            return json({ error: 'Tai khoan tam khoa do dang nhap sai nhieu lan. Thu lai sau ' + remainMin + ' phut', locked: true, remainMin }, 423);
+          }
+        }
         const user = await db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first();
-        if (!user) return json({ error: 'Sai email hoac mat khau' }, 401);
+        if (!user) {
+          await recordFailLogin(db, email, nowMs);
+          return json({ error: 'Sai email hoac mat khau', locked: false }, 401);
+        }
         if (user.status === 'blocked') return json({ error: 'Tai khoan da bi khoa' }, 403);
         if (user.status === 'pending') return json({ error: 'Tai khoan dang cho duyet' }, 403);
-        if (!(await passMatches(pass, user.pass))) return json({ error: 'Sai email hoac mat khau' }, 401);
+        if (!(await passMatches(pass, user.pass))) {
+          await recordFailLogin(db, email, nowMs);
+          return json({ error: 'Sai email hoac mat khau', locked: false }, 401);
+        }
+        await db.prepare('DELETE FROM login_attempts WHERE email = ?').bind(email).run();
+        // === 2FA (v111): require TOTP if enabled ===
+        if (user.totp_secret) {
+          const otp = String(body.otp || '');
+          const otpOk = otp && await totpVerify(user.totp_secret, otp);
+          if (!otpOk) return json({ error: 'Nhap ma 2FA (6 so) tu app xac thuc de hoan tat dang nhap', otpRequired: true }, 401);
+        }
         if (user.pass && !user.pass.startsWith('sha256$')) {
           try { await db.prepare('UPDATE users SET pass=? WHERE id=?').bind(await hashPassword(pass), user.id).run(); } catch (e) {}
         }
-        return json({ ok: true, user: { id: user.id, name: user.name, email: user.email, phone: user.phone || '', role: user.role, userRole: user.userRole, status: user.status, accessId: user.accessId, trustScore: user.trustScore, tier: user.tier, createdAt: user.createdAt } });
+        return json({ ok: true, user: { id: user.id, name: user.name, email: user.email, phone: user.phone || '', role: user.role, userRole: user.userRole, status: user.status, accessId: user.accessId, trustScore: user.trustScore, tier: user.tier, createdAt: user.createdAt, avatar: user.avatar || '', farm_bio: user.farm_bio || '', farm_area: user.farm_area || 0, farm_crops: user.farm_crops || '', farm_region: user.farm_region || '', farm_unit: user.farm_unit || 'ha' } });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === CHANGE PASSWORD (v108) ===
+    if (path === '/api/change-password' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, oldPass, newPass } = body;
+        if (!email || !oldPass || !newPass) return json({ error: 'Thieu thong tin' }, 400);
+        if (newPass.length < 6) return json({ error: 'Mat khau moi toi thieu 6 ky tu' }, 400);
+        if (oldPass === newPass) return json({ error: 'Mat khau moi phai khac mat khau cu' }, 400);
+        const user = await db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first();
+        if (!user) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        if (!(await passMatches(oldPass, user.pass))) return json({ error: 'Sai mat khau hien tai' }, 401);
+        await db.prepare('UPDATE users SET pass=?, updatedAt=? WHERE id=?').bind(await hashPassword(newPass), new Date().toISOString(), user.id).run();
+        const tsC = new Date().toISOString();
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('change_password', 'Change password | ' + tsC + ' | ' + email, tsC).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === RESET PASSWORD (v109 — security question) ===
+    if (path === '/api/reset-password' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, secA, newPass } = body;
+        if (!email || !secA || !newPass) return json({ error: 'Thieu thong tin' }, 400);
+        if (newPass.length < 6) return json({ error: 'Mat khau moi toi thieu 6 ky tu' }, 400);
+        const user = await db.prepare('SELECT id, sec_a FROM users WHERE email = ?').bind(email).first();
+        if (!user) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        if (!user.sec_a) return json({ error: 'Tai khoan chua thiet lap cau hoi bao mat' }, 400);
+        if (!(await passMatches(String(secA).toLowerCase().trim(), user.sec_a))) return json({ error: 'Cau tra loi bao mat khong dung' }, 401);
+        await db.prepare('UPDATE users SET pass=?, updatedAt=? WHERE id=?').bind(await hashPassword(newPass), new Date().toISOString(), user.id).run();
+        const tsR = new Date().toISOString();
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('reset_password', 'Reset password | ' + tsR + ' | ' + email, tsR).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === ADMIN RESET USER PASSWORD (v109) ===
+    if (path === '/api/admin-reset-password' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { adminEmail, userId, email: targetEmail } = body;
+        if (!adminEmail || (!userId && !targetEmail)) return json({ error: 'Thieu tham so' }, 400);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        const user = userId
+          ? await db.prepare('SELECT id, email, name FROM users WHERE id = ?').bind(userId).first()
+          : await db.prepare('SELECT id, email, name FROM users WHERE email = ?').bind(targetEmail).first();
+        if (!user) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        const tempPass = 'MES' + Math.random().toString(36).slice(2, 8) + '@' + Math.floor(Math.random() * 100);
+        await db.prepare('UPDATE users SET pass=?, updatedAt=? WHERE id=?').bind(await hashPassword(tempPass), new Date().toISOString(), user.id).run();
+        const tsA = new Date().toISOString();
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('admin_reset_password', 'Admin reset password | ' + tsA + ' | ' + user.email + ' | by ' + adminEmail, tsA).run();
+        return json({ ok: true, tempPass, email: user.email, name: user.name });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === PROFILE GET/UPDATE (v108) ===
+    if (path === '/api/profile' && method === 'PUT') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, name, phone, address } = body;
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const user = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
+        if (!user) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        await db.prepare('UPDATE users SET name=?, phone=?, updatedAt=? WHERE id=?')
+          .bind(name || '', phone || '', new Date().toISOString(), user.id).run();
+        return json({ ok: true });
       } catch (e) { return json({ error: e.message }, 500); }
     }
 
@@ -160,6 +329,11 @@ export default {
         const db = await getDB(env);
         const adminEmail = url.searchParams.get('admin');
         const action = url.searchParams.get('action') || 'users';
+        if (action === 'leaderboard') {
+          // === RANKING (v110): public top 50 by trustScore ===
+          const rows = await db.prepare("SELECT name, email, role, userRole, trustScore, tier, status, createdAt FROM users WHERE status='approved' AND trustScore > 0 ORDER BY trustScore DESC, createdAt ASC LIMIT 50").all();
+          return json({ ok: true, leaderboard: rows.results });
+        }
         if (action === 'stats') {
           const total = await db.prepare('SELECT COUNT(*) as c FROM users').first();
           const approved = await db.prepare("SELECT COUNT(*) as c FROM users WHERE status='approved'").first();
@@ -208,6 +382,73 @@ export default {
         else { newStatus = 'approved'; newTier = 'trusted'; }
         await db.prepare('UPDATE users SET status=?, tier=?, updatedAt=? WHERE id=?').bind(newStatus, newTier, new Date().toISOString(), userId).run();
         return json({ ok: true, status: newStatus });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === ACTIVITY LOG (v109) ===
+    if (path === '/api/activity' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const viewerEmail = url.searchParams.get('viewer');
+        const targetEmail = url.searchParams.get('email') || '';
+        if (!viewerEmail) return json({ error: 'Thieu viewer' }, 401);
+        const viewer = await db.prepare('SELECT role FROM users WHERE email = ?').bind(viewerEmail).first();
+        let rows;
+        if (viewer && viewer.role === 'admin') {
+          if (targetEmail) {
+            rows = await db.prepare("SELECT id, logType, detail, createdAt FROM ai_log WHERE detail LIKE ? ORDER BY id DESC LIMIT 100").bind('%' + targetEmail + '%').all();
+          } else {
+            rows = await db.prepare('SELECT id, logType, detail, createdAt FROM ai_log ORDER BY id DESC LIMIT 100').all();
+          }
+          return json({ ok: true, isAdmin: true, activities: rows.results });
+        }
+        if (!viewer) return json({ error: 'Khong tim thay nguoi xem' }, 404);
+        rows = await db.prepare("SELECT id, logType, detail, createdAt FROM ai_log WHERE detail LIKE ? ORDER BY id DESC LIMIT 50").bind('%' + viewerEmail + '%').all();
+        return json({ ok: true, isAdmin: false, activities: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === SOS CLOUD (v110): send alert + admin center ===
+    if (path === '/api/sos' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, name, lat, lon, content } = body;
+        if (!email || !content) return json({ error: 'Thieu thong tin SOS' }, 400);
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO sos_alerts (email, name, lat, lon, content, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+          .bind(email, name || '', parseFloat(lat) || 0, parseFloat(lon) || 0, String(content).slice(0, 500), 'pending', ts).run();
+        const aiLog = 'SOS | ' + ts + ' | ' + email + (lat ? ' | GPS ' + lat + ',' + lon : '') + ' | ' + String(content).slice(0, 120);
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('sos', aiLog, ts).run();
+        return json({ ok: true, ts });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/sos' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const adminEmail = url.searchParams.get('admin');
+        if (!adminEmail) return json({ error: 'Thieu admin' }, 401);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        const statusF = url.searchParams.get('status') || '';
+        const rows = statusF
+          ? await db.prepare("SELECT * FROM sos_alerts WHERE status = ? ORDER BY id DESC LIMIT 100").bind(statusF).all()
+          : await db.prepare('SELECT * FROM sos_alerts ORDER BY id DESC LIMIT 100').all();
+        return json({ ok: true, alerts: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/sos/resolve' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { adminEmail, id, note } = body;
+        if (!adminEmail || !id) return json({ error: 'Thieu tham so' }, 400);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        await db.prepare("UPDATE sos_alerts SET status='resolved' WHERE id=?").bind(id).run();
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('sos_resolve', 'SOS resolved | ' + ts + ' | alert#' + id + (note ? ' | ' + String(note).slice(0, 120) : ''), ts).run();
+        return json({ ok: true });
       } catch (e) { return json({ error: e.message }, 500); }
     }
 
@@ -613,7 +854,13 @@ export default {
           .bind('WX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase(), senderEmail, senderName || '', 'transfer', 'out', amount, bank || '', 'Chuyển đến ' + receiverEmail, id, ts).run();
         const aiLog = 'Transfer | ' + ts + ' | ' + senderEmail + ' → ' + receiverEmail + ' | ' + amount + ' đ | ' + (bank || '') + ' ' + (acct || '');
         await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('transfer', aiLog, ts).run();
-        return json({ ok: true, id });
+        // === HERITAGE 2% (v110): auto-track community heritage fund per transfer ===
+        const heritageAmount = +(amount * 0.02).toFixed(0);
+        if (heritageAmount > 0) {
+          await db.prepare('INSERT INTO heritage_contributions (email, amount, ref_type, ref_id, created_at) VALUES (?, ?, ?, ?, ?)')
+            .bind(senderEmail, heritageAmount, 'transfer', id, ts).run();
+        }
+        return json({ ok: true, id, heritage: heritageAmount });
       } catch (e) { return json({ error: e.message }, 500); }
     }
 
@@ -628,6 +875,107 @@ export default {
           return json({ ok: true, transfers: rows.results });
         }
         return json({ error: 'Thieu tham so' }, 400);
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === HERITAGE FUND (v110): aggregated stats for admin finance ===
+    if (path === '/api/heritage' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const adminEmail = url.searchParams.get('admin');
+        if (!adminEmail) return json({ error: 'Thieu admin' }, 401);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        const total = await db.prepare('SELECT COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM heritage_contributions').first();
+        const byDay = await db.prepare('SELECT substr(created_at,1,10) AS day, COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM heritage_contributions GROUP BY day ORDER BY day DESC LIMIT 30').all();
+        const topContrib = await db.prepare('SELECT email, COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM heritage_contributions GROUP BY email ORDER BY s DESC LIMIT 10').all();
+        const recent = await db.prepare('SELECT * FROM heritage_contributions ORDER BY id DESC LIMIT 20').all();
+        return json({ ok: true, total: total.s, count: total.c, byDay: byDay.results, topContrib: topContrib.results, recent: recent.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === HANDY: TRANSFER LIMIT SNAPSHOT (v111) ===
+    if (path === '/api/transfer-limit' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const email = url.searchParams.get('email');
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const u = await db.prepare('SELECT tier, trustScore FROM users WHERE email = ?').bind(email).first();
+        const lim = getTierLimits(u ? u.tier : 'standard');
+        const today = new Date().toISOString().slice(0, 10);
+        const spent = await db.prepare("SELECT COALESCE(SUM(amount),0) AS s FROM transfers WHERE sender_email = ? AND substr(created_at,1,10) = ?").bind(email, today).first();
+        const used = spent ? spent.s : 0;
+        return json({ ok: true, tier: u ? u.tier : 'standard', trustScore: u ? u.trustScore : 0, perTx: lim.perTx, daily: lim.daily, usedToday: used, remainingDaily: Math.max(0, lim.daily - used) });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === 2FA ENABLE/DISABLE (v111) ===
+    if (path === '/api/2fa/enable' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, pass } = body;
+        if (!email || !pass) return json({ error: 'Thieu thong tin' }, 400);
+        const u = await db.prepare('SELECT id, pass FROM users WHERE email = ?').bind(email).first();
+        if (!u) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        if (!(await passMatches(pass, u.pass))) return json({ error: 'Sai mat khau' }, 401);
+        const secret = genTotpSecret();
+        await db.prepare('UPDATE users SET totp_secret=? WHERE id=?').bind(secret, u.id).run();
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('2fa_enable', '2FA enable | ' + ts + ' | ' + email, ts).run();
+        return json({ ok: true, secret });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/2fa/disable' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, pass, otp } = body;
+        if (!email || !pass || !otp) return json({ error: 'Thieu thong tin' }, 400);
+        const u = await db.prepare('SELECT id, pass, totp_secret FROM users WHERE email = ?').bind(email).first();
+        if (!u) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        if (!(await passMatches(pass, u.pass))) return json({ error: 'Sai mat khau' }, 401);
+        if (!u.totp_secret || !(await totpVerify(u.totp_secret, otp))) return json({ error: 'Ma 2FA khong dung' }, 401);
+        await db.prepare('UPDATE users SET totp_secret=? WHERE id=?').bind('', u.id).run();
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('2fa_disable', '2FA disable | ' + ts + ' | ' + email, ts).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === ANNOUNCEMENTS (v111): admin broadcast ===
+    if (path === '/api/announcements' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const rows = await db.prepare("SELECT * FROM announcements WHERE active=1 ORDER BY id DESC LIMIT 20").all();
+        return json({ ok: true, announcements: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/announcements' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { adminEmail, title, content, level } = body;
+        if (!adminEmail || !title) return json({ error: 'Thieu thong tin' }, 400);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO announcements (title, content, level, active, created_by, created_at) VALUES (?, ?, ?, 1, ?, ?)')
+          .bind(String(title).slice(0, 150), String(content || '').slice(0, 2000), level || 'info', adminEmail, ts).run();
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('announce', 'Announcement | ' + ts + ' | ' + title, ts).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/announcements/remove' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { adminEmail, id } = body;
+        if (!adminEmail || !id) return json({ error: 'Thieu tham so' }, 400);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        await db.prepare('UPDATE announcements SET active=0 WHERE id=?').bind(id).run();
+        return json({ ok: true });
       } catch (e) { return json({ error: e.message }, 500); }
     }
 
@@ -679,13 +1027,445 @@ export default {
       } catch (e) { return json({ error: e.message }, 500); }
     }
 
+    // === v112: WEATHER ALERTS — save from auto-weather scan ===
+    if (path === '/api/weather-alert' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, station, riskLevel, detail } = body;
+        if (!email || !station) return json({ error: 'Thieu thong tin' }, 400);
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO weather_alerts (email, station, riskLevel, detail, ts) VALUES (?, ?, ?, ?, ?)').bind(email, station, riskLevel || 0, String(detail || '').slice(0, 1000), ts).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/weather-alerts' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const email = url.searchParams.get('email');
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const rows = await db.prepare('SELECT * FROM weather_alerts WHERE email = ? ORDER BY ts DESC LIMIT 50').bind(email).all();
+        return json({ ok: true, alerts: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v112: PROFILE UPDATE ===
+    if (path === '/api/profile/update' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, name, phone, address } = body;
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const u = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
+        if (!u) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        const ts = new Date().toISOString();
+        const sets = []; const vals = [];
+        if (name !== undefined) { sets.push('name=?'); vals.push(String(name).slice(0, 100)); }
+        if (phone !== undefined) { sets.push('phone=?'); vals.push(String(phone).slice(0, 20)); }
+        if (address !== undefined) { sets.push('address=?'); vals.push(String(address).slice(0, 200)); }
+        if (!sets.length) return json({ error: 'Khong co gi de cap nhat' }, 400);
+        sets.push('updatedAt=?'); vals.push(ts); vals.push(u.id);
+        await db.prepare('UPDATE users SET ' + sets.join(',') + ' WHERE id=?').bind(...vals).run();
+        await db.prepare('INSERT INTO ai_log (logType, detail, createdAt) VALUES (?, ?, ?)').bind('profile_update', 'Profile update | ' + ts + ' | ' + email, ts).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v112: SESSION HISTORY (from login_attempts) ===
+    if (path === '/api/sessions' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const email = url.searchParams.get('email');
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const rows = await db.prepare('SELECT email, failed, last_fail, locked_until FROM login_attempts WHERE email = ? ORDER BY last_fail DESC').bind(email).all();
+        return json({ ok: true, sessions: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v112: ADMIN DASHBOARD STATS ===
+    if (path === '/api/stats/dashboard' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const adminEmail = url.searchParams.get('admin');
+        if (!adminEmail) return json({ error: 'Thieu admin' }, 401);
+        const admin = await db.prepare('SELECT role FROM users WHERE email = ?').bind(adminEmail).first();
+        if (!admin || admin.role !== 'admin') return json({ error: 'Khong co quyen' }, 403);
+        const today = new Date().toISOString().slice(0, 10);
+        const [users, usersAll, dep, wd, tr, sos, weather] = await Promise.all([
+          db.prepare("SELECT COUNT(*) AS c FROM users WHERE substr(createdAt,1,10) = ?").bind(today).first(),
+          db.prepare("SELECT COUNT(*) AS c FROM users").first(),
+          db.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM payments WHERE substr(created_at,1,10) = ?").bind(today).first(),
+          db.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM withdrawals WHERE substr(created_at,1,10) = ?").bind(today).first(),
+          db.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM transfers WHERE substr(created_at,1,10) = ?").bind(today).first(),
+          db.prepare("SELECT COUNT(*) AS c FROM sos_alerts").first(),
+          db.prepare("SELECT COUNT(*) AS c FROM weather_alerts WHERE substr(ts,1,10) = ?").bind(today).first(),
+        ]);
+        return json({
+          ok: true,
+          today: { date: today, newUsers: users.c, deposits: dep.c, depositsAmt: dep.s, withdrawals: wd.c, withdrawalsAmt: wd.s, transfers: tr.c, transfersAmt: tr.s, sosTotal: sos.c, weatherAlerts: weather.c },
+          totals: { users: usersAll.c }
+        });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v112: BACKUP EXPORT (user data) ===
+    if (path === '/api/backup/export' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email } = body;
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const user = await db.prepare('SELECT name, email, phone, role, userRole, tier, trustScore, address, createdAt FROM users WHERE email = ?').bind(email).first();
+        if (!user) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        const [txs, wd, tr, alerts] = await Promise.all([
+          db.prepare('SELECT * FROM wallet_tx WHERE email = ? ORDER BY created_at DESC').bind(email).all(),
+          db.prepare('SELECT * FROM withdrawals WHERE email = ? ORDER BY created_at DESC').bind(email).all(),
+          db.prepare('SELECT * FROM transfers WHERE sender_email = ? OR receiver_email = ? ORDER BY created_at DESC').bind(email, email).all(),
+          db.prepare('SELECT * FROM weather_alerts WHERE email = ? ORDER BY ts DESC').bind(email).all(),
+        ]);
+        return json({
+          ok: true,
+          backup: { version: 'v112', exportedAt: new Date().toISOString(), user, walletTx: txs.results, withdrawals: wd.results, transfers: tr.results, weatherAlerts: alerts.results }
+        });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v113: PRODUCTS (marketplace) ===
+    if (path === '/api/products' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const rows = await db.prepare("SELECT * FROM products WHERE status='active' ORDER BY id DESC LIMIT 100").all();
+        return json({ ok: true, products: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/products' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { sellerEmail, name, price, qty, unit, descr, img } = body;
+        if (!sellerEmail || !name || !price || !qty) return json({ error: 'Thieu thong tin' }, 400);
+        const user = await db.prepare('SELECT role FROM users WHERE email = ?').bind(sellerEmail).first();
+        if (!user) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO products (seller_email, name, price, qty, unit, descr, img, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(sellerEmail, String(name).slice(0,100), parseInt(price)||0, parseInt(qty)||0, String(unit||'kg'), String(descr||'').slice(0,500), String(img||'').slice(0,500), 'active', ts).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    // === v113: ORDERS (marketplace) ===
+    if (path === '/api/orders' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const buyer = url.searchParams.get('buyer');
+        const seller = url.searchParams.get('seller');
+        let q = 'SELECT * FROM orders WHERE 1=1'; const vals = [];
+        if (buyer) { q += ' AND buyer_email=?'; vals.push(buyer); }
+        if (seller) { q += ' AND seller_email=?'; vals.push(seller); }
+        q += ' ORDER BY id DESC LIMIT 100';
+        const rows = await db.prepare(q).bind(...vals).all();
+        return json({ ok: true, orders: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/orders' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { productId, buyerEmail, qty } = body;
+        if (!productId || !buyerEmail || !qty) return json({ error: 'Thieu thong tin' }, 400);
+        const p = await db.prepare('SELECT * FROM products WHERE id=? AND status="active"').bind(productId).first();
+        if (!p) return json({ error: 'San pham khong ton tai' }, 404);
+        if (p.qty < qty) return json({ error: 'So luong khong du' }, 400);
+        const total = p.price * qty;
+        // balance check via wallet_tx sum (direction in/out)
+        const dep = await db.prepare("SELECT COALESCE(SUM(amount),0) AS s FROM wallet_tx WHERE email=? AND direction='in'").bind(buyerEmail).first();
+        const wd = await db.prepare("SELECT COALESCE(SUM(amount),0) AS s FROM wallet_tx WHERE email=? AND direction='out'").bind(buyerEmail).first();
+        const balance = (dep ? dep.s : 0) - (wd ? wd.s : 0);
+        if (balance < total) return json({ error: 'So du khong du' }, 400);
+        const ts = new Date().toISOString();
+        await db.prepare('UPDATE products SET qty=? WHERE id=?').bind(p.qty - qty, productId).run();
+        await db.prepare('INSERT INTO orders (product_id, buyer_email, seller_email, qty, total, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(productId, buyerEmail, p.seller_email, qty, total, 'pending', ts).run();
+        const buyerId = 'WX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+        const sellerId = 'WX-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+        // buyer withdraw
+        await db.prepare('INSERT INTO wallet_tx (id, email, full_name, type, direction, amount, method, note, ref, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(buyerId, buyerEmail, '', 'purchase', 'out', total, '', 'Mua san pham #' + productId, '', ts).run();
+        // seller deposit
+        await db.prepare('INSERT INTO wallet_tx (id, email, full_name, type, direction, amount, method, note, ref, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(sellerId, p.seller_email, '', 'sale', 'in', total, '', 'Ban san pham #' + productId, '', ts).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    // === v113: INVENTORY ===
+    if (path === '/api/inventory' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const email = url.searchParams.get('email');
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const rows = await db.prepare('SELECT * FROM inventory WHERE email=? ORDER BY id DESC').bind(email).all();
+        return json({ ok: true, items: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/inventory' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, name, qty, unit, minLevel, price, type } = body;
+        if (!email || !name || !qty) return json({ error: 'Thieu thong tin' }, 400);
+        const ts = new Date().toISOString();
+        const existing = await db.prepare('SELECT * FROM inventory WHERE email=? AND name=?').bind(email, String(name)).first();
+        if (existing) {
+          const newQty = type === 'out' ? Math.max(0, existing.qty - qty) : existing.qty + qty;
+          await db.prepare('UPDATE inventory SET qty=?, updated_at=? WHERE id=?').bind(newQty, ts, existing.id).run();
+        } else {
+          await db.prepare('INSERT INTO inventory (email, name, qty, unit, min_level, price, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+            .bind(email, String(name).slice(0,100), type === 'out' ? 0 : qty, String(unit||'kg'), minLevel || 0, price || 0, ts).run();
+        }
+        await db.prepare('INSERT INTO inventory_tx (email, item_name, type, qty, ts) VALUES (?, ?, ?, ?, ?)').bind(email, String(name).slice(0,100), type || 'in', qty, ts).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    // === v113: FLOOD GAUGES ===
+    if (path === '/api/flood' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const rows = await db.prepare('SELECT * FROM flood_gauges ORDER BY id').all();
+        if (!rows.results.length) {
+          // seed sample gauges
+          const now = new Date().toISOString();
+          const seed = [['Tân Châu', 2.8, 4.0, 'normal'], ['Chợ Mới', 2.5, 4.2, 'normal'], ['Mỹ Thuận', 2.2, 4.5, 'normal'], ['Cao Lãnh', 3.1, 4.1, 'warning'], ['Hồng Ngự', 3.5, 4.0, 'warning'], ['Đồng Tháp Mười', 2.0, 4.3, 'normal']];
+          for (const s of seed) { await db.prepare('INSERT INTO flood_gauges (station, level, threshold, status, ts) VALUES (?, ?, ?, ?, ?)').bind(s[0], s[1], s[2], s[3], now).run(); }
+          const seeded = await db.prepare('SELECT * FROM flood_gauges ORDER BY id').all();
+          return json({ ok: true, gauges: seeded.results });
+        }
+        return json({ ok: true, gauges: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    // === v113: ACHIEVEMENTS ===
+    if (path === '/api/achievements' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const email = url.searchParams.get('email');
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const rows = await db.prepare('SELECT * FROM achievements WHERE email=? ORDER BY earned_at DESC').bind(email).all();
+        return json({ ok: true, badges: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/achievements' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, badgeId, name } = body;
+        if (!email || !badgeId) return json({ error: 'Thieu thong tin' }, 400);
+        const existing = await db.prepare('SELECT id FROM achievements WHERE email=? AND badge_id=?').bind(email, badgeId).first();
+        if (existing) return json({ ok: true, duplicate: true });
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO achievements (email, badge_id, name, earned_at) VALUES (?, ?, ?, ?)').bind(email, badgeId, String(name||'').slice(0,100), ts).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v114: WATER QUALITY ===
+    if (path === '/api/water-quality' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        let rows = await db.prepare('SELECT * FROM water_quality ORDER BY ts DESC LIMIT 200').all();
+        if (!rows.results.length) {
+          const now = new Date().toISOString();
+          const seed = [['Tân Châu','An Giang',7.1,0.2,4.5,6.2,28.5,'normal'],['Chợ Mới','An Giang',7.0,0.3,5.1,6.0,28.8,'normal'],['Cao Lãnh','Đồng Tháp',7.2,0.4,6.8,5.8,29.0,'watch'],['Hồng Ngự','Đồng Tháp',6.9,0.6,8.2,5.5,29.2,'watch'],['Mỹ Thuận','Vĩnh Long',7.1,1.2,7.5,5.6,29.1,'warning'],['Trà Vinh','Trà Vinh',7.2,2.5,6.9,5.4,29.5,'warning'],['Bến Tre','Bến Tre',7.3,3.8,7.2,5.2,29.8,'danger'],['Sóc Trăng','Sóc Trăng',7.4,4.6,7.8,5.0,30.0,'danger']];
+          for (const s of seed) { await db.prepare('INSERT INTO water_quality (station, province, ph, salinity, turbidity, do_amount, temperature, status, ts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(s[0],s[1],s[2],s[3],s[4],s[5],s[6],s[7],now).run(); }
+          rows = await db.prepare('SELECT * FROM water_quality ORDER BY ts DESC LIMIT 200').all();
+        }
+        return json({ ok: true, samples: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/water-quality' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { station, province, ph, salinity, turbidity, do_amount, temperature } = body;
+        if (!station) return json({ error: 'Thieu ten tram' }, 400);
+        let status = 'normal';
+        const sal = Number(salinity) || 0, phN = Number(ph) || 7, doN = Number(do_amount) || 6;
+        if (sal > 4 || phN < 6.5 || phN > 8.5 || doN < 4) status = 'danger';
+        else if (sal > 2 || phN < 7 || doN < 5) status = 'warning';
+        else if (sal > 1) status = 'watch';
+        const ts = new Date().toISOString();
+        await db.prepare('INSERT INTO water_quality (station, province, ph, salinity, turbidity, do_amount, temperature, status, ts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(String(station).slice(0,50), String(province||'').slice(0,50), phN, sal, Number(turbidity)||0, doN, Number(temperature)||28, status, ts).run();
+        return json({ ok: true, status });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v114: GDACS GLOBAL EARLY WARNING (cache 6h) ===
+    if (path === '/api/gdacs' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const fresh = await db.prepare('SELECT * FROM gdacs_cache ORDER BY fetched_at DESC LIMIT 1').first();
+        const sixH = 6 * 3600 * 1000;
+        if (fresh && fresh.fetched_at && (Date.now() - new Date(fresh.fetched_at).getTime()) < sixH) {
+          const rows = await db.prepare('SELECT * FROM gdacs_cache ORDER BY fetched_at DESC, id DESC').all();
+          return json({ ok: true, source: 'cache', fetched_at: fresh.fetched_at, events: rows.results });
+        }
+        let events = [];
+        let fetchedAt = new Date().toISOString();
+        try {
+          const resp = await fetch('https://www.gdacs.org/xml/rss_7d.geojson', { headers: { 'User-Agent': 'MekongEcoShield/1.0' } });
+          if (resp.ok) {
+            const gj = await resp.json();
+            const feats = gj.features || [];
+            for (const f of feats) {
+              const p = f.properties || {};
+              const et = p.eventtype || '';
+              if (et !== 'TC' && et !== 'FL') continue;
+              const coords = (f.geometry && f.geometry.coordinates) || [];
+              const desc = p.description || '';
+              const m = desc.match(/(\d+(?:\.\d+)?)\s*(?:km|Km|KM)/);
+              events.push({
+                eventtype: et,
+                alertlevel: p.alertlevel || 'Green',
+                title: p.title || p.name || 'Unknown',
+                description: desc.slice(0, 500),
+                lat: coords[1], lon: coords[0],
+                scale: p.scale || '',
+                from_date: p.fromdate || p.fromDate || '',
+                to_date: p.todate || p.toDate || ''
+              });
+            }
+            await db.prepare('DELETE FROM gdacs_cache').run();
+            for (const e of events.slice(0, 40)) {
+              await db.prepare('INSERT INTO gdacs_cache (event_id, eventtype, alertlevel, title, description, lat, lon, scale, from_date, to_date, fetched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(String(e.title).slice(0,40), e.eventtype, e.alertlevel, String(e.title).slice(0,120), String(e.description).slice(0,300), e.lat || 0, e.lon || 0, String(e.scale||'').slice(0,20), String(e.from_date||'').slice(0,20), String(e.to_date||'').slice(0,20), fetchedAt).run();
+            }
+          }
+        } catch (e) { /* fall back to stale cache below */ }
+        if (!events.length) {
+          let rows = await db.prepare('SELECT * FROM gdacs_cache ORDER BY fetched_at DESC, id DESC').all();
+          if (rows.results.length) return json({ ok: true, source: 'stale', fetched_at: rows.results[0].fetched_at, events: rows.results });
+          events = [{ eventtype:'TC', alertlevel:'Green', title:'Bão 12W (Dolphin)', description:'Dự báo quỹ đạo bão trên Biển Đông — theo dõi tiếp', lat:15.8, lon:114.5, scale:'Red', from_date:'', to_date:'' }];
+          fetchedAt = new Date().toISOString();
+          for (const e of events) { await db.prepare('INSERT INTO gdacs_cache (event_id, eventtype, alertlevel, title, description, lat, lon, scale, from_date, to_date, fetched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').bind('demo', e.eventtype, e.alertlevel, e.title, e.description, e.lat, e.lon, e.scale, '', '', fetchedAt).run(); }
+          return json({ ok: true, source: 'mock', fetched_at: fetchedAt, events });
+        }
+        return json({ ok: true, source: 'live', fetched_at: fetchedAt, events });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v114: CROWD REPORTS (bottom-up sensor net + AI cluster) ===
+    if (path === '/api/crowd' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, full_name, lat, lon, type, content } = body;
+        if (lat === undefined || lon === undefined) return json({ error: 'Thieu toa do GPS' }, 400);
+        const ts = new Date().toISOString();
+        const nowMs = Date.now();
+        // AI cluster: same type within 10 min + ~3km
+        const recent = await db.prepare('SELECT * FROM crowd_reports WHERE type=? AND ts > ?').bind(String(type||'flood'), new Date(nowMs - 10 * 60000).toISOString()).all();
+        let clusterKey = '', clusterCount = 1;
+        for (const r of recent.results) {
+          const dLat = Math.abs(r.lat - Number(lat)), dLon = Math.abs(r.lon - Number(lon));
+          if (dLat < 0.03 && dLon < 0.03) { clusterKey = r.cluster_key || ('K' + r.id); clusterCount = (r.cluster_count || 1) + 1; break; }
+        }
+        if (!clusterKey) { clusterKey = 'K' + Date.now().toString(36); }
+        await db.prepare('INSERT INTO crowd_reports (email, full_name, lat, lon, type, content, cluster_key, cluster_count, ts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(String(email||'').slice(0,80), String(full_name||'').slice(0,80), Number(lat), Number(lon), String(type||'flood').slice(0,30), String(content||'').slice(0,200), clusterKey, clusterCount, ts).run();
+        if (clusterCount > 1) { await db.prepare('UPDATE crowd_reports SET cluster_count=? WHERE cluster_key=? AND ts > ?').bind(clusterCount, clusterKey, new Date(nowMs - 10 * 60000).toISOString()).run(); }
+        return json({ ok: true, cluster_key: clusterKey, cluster_count: clusterCount, confirmed: clusterCount >= 5 });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (path === '/api/crowd' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const rows = await db.prepare('SELECT * FROM crowd_reports ORDER BY ts DESC LIMIT 200').all();
+        return json({ ok: true, reports: rows.results });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v114: CROP SUGGESTION (salinity + weather + market) ===
+    if (path === '/api/crops/suggest' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const sal = Number(url.searchParams.get('salinity') || 0);
+        const priceRows = await db.prepare('SELECT name, price FROM products').all();
+        const prices = {};
+        for (const r of priceRows.results) { prices[r.name] = r.price; }
+        let crops;
+        if (sal < 1) {
+          crops = [
+            { name: 'Lúa OM5451', salt_tolerance: '0-2‰', yield_kg: '6.5-7.5 tấn/ha', price: prices['Lúa ST25'] || 6500, note: 'Giống chủ lực vụ Đông Xuân', risk: 'Thấp' },
+            { name: 'Thanh Long ruột đỏ', salt_tolerance: '0-1‰', yield_kg: '25-30 tấn/ha', price: prices['Thanh Long'] || 12000, note: 'Thị trường xuất khẩu ổn định', risk: 'Thấp' },
+            { name: 'Mít Thái', salt_tolerance: '0-1.5‰', yield_kg: '20 tấn/ha', price: prices['Mít Thái'] || 15000, note: 'Chu kỳ thu hoạch 3 năm', risk: 'Trung bình' }
+          ];
+        } else if (sal < 3) {
+          crops = [
+            { name: 'Lúa ST25', salt_tolerance: '1-3‰', yield_kg: '6-7 tấn/ha', price: prices['Lúa ST25'] || 8000, note: 'Chịu mặn tốt, dẻo thơm, giá cao', risk: 'Thấp' },
+            { name: 'Lúa chịu mặn OM4900', salt_tolerance: '2-4‰', yield_kg: '5.5-6.5 tấn/ha', price: 7000, note: 'Khuyến cáo vùng nhiễm mặn nhẹ', risk: 'Thấp' },
+            { name: 'Dừa xiêm xanh', salt_tolerance: '1-5‰', yield_kg: '150-200 trái/cây/năm', price: 25000, note: 'Trồng bờ bao chống mặn', risk: 'Trung bình' }
+          ];
+        } else {
+          crops = [
+            { name: 'Lúa chịu mặn cao (AS996)', salt_tolerance: '4-8‰', yield_kg: '4.5-5.5 tấn/ha', price: 6500, note: 'Vùng mặn nặng Bến Tre/Sóc Trăng', risk: 'Trung bình' },
+            { name: 'Tôm sú mô hình luân canh', salt_tolerance: '5-15‰', yield_kg: '2.5-3.5 tấn/ha', price: 180000, note: 'Luân canh tôm-lúa chịu mặn', risk: 'Cao' },
+            { name: 'Cỏ chịu mặn (nuôi bò)', salt_tolerance: '4-10‰', yield_kg: '40-60 tấn/ha/năm', price: 3000, note: 'Đất nhiễm mặn cải tạo dần', risk: 'Thấp' }
+          ];
+        }
+        return json({ ok: true, salinity: sal, crops, source: 'ai' });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v114: RISK QUANTIFICATION (assets + crops governance) ===
+    if (path === '/api/risk' && method === 'GET') {
+      try {
+        const db = await getDB(env);
+        const lat = Number(url.searchParams.get('lat') || 10.5);
+        const lon = Number(url.searchParams.get('lon') || 105.5);
+        const type = url.searchParams.get('type') || 'flood';
+        const floodRows = await db.prepare('SELECT * FROM flood_gauges ORDER BY id').all();
+        const maxFlood = floodRows.results.reduce((m, r) => Math.max(m, Number(r.level) || 0), 0);
+        const waterRows = await db.prepare('SELECT * FROM water_quality ORDER BY ts DESC LIMIT 100').all();
+        const maxSal = waterRows.results.reduce((m, r) => Math.max(m, Number(r.salinity) || 0), 0);
+        let level = 'yellow', hours = '3-7 ngày', impact = 'Thấp', actions = [];
+        if (type === 'flood' || type === 'FL') {
+          if (maxFlood > 3.5) { level = 'red'; hours = 'Đang xảy ra'; impact = 'Rất cao'; }
+          else if (maxFlood > 3.0) { level = 'orange'; hours = '24-48 giờ'; impact = 'Cao'; }
+          else { level = 'yellow'; hours = '3-7 ngày'; impact = 'Thấp'; }
+        } else if (type === 'TC') {
+          level = maxSal > 3 ? 'orange' : 'yellow'; hours = '24-48 giờ'; impact = maxSal > 3 ? 'Cao' : 'Trung bình';
+        }
+        if (level !== 'yellow') {
+          actions = ['Ngắt cầu dao điện tổng', 'Kê cao đồ đạc, thiết bị điện', 'Chuẩn bị balo sinh tồn', 'Khóa van gas', 'Di dời xe cộ lên khu vực cao', 'Sơ tán người già, trẻ em, vật nuôi'];
+        } else {
+          actions = ['Theo dõi bản tin cảnh báo 2 lần/ngày', 'Chuẩn bị tài chính dự phòng', 'Gia cố nhà cửa, mái tôn', 'Dự trữ lương thực - nước uống 3 ngày'];
+        }
+        return json({ ok: true, lat, lon, type, level, hours, impact, maxFlood, maxSal, actions });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
+    // === v114: FARM PROFILE (avatar, farm area, crops, region) ===
+    if (path === '/api/profile/farm' && method === 'POST') {
+      try {
+        const db = await getDB(env);
+        const body = await request.json();
+        const { email, avatar, farm_bio, farm_area, farm_crops, farm_region, farm_unit } = body;
+        if (!email) return json({ error: 'Thieu email' }, 400);
+        const user = await db.prepare('SELECT * FROM users WHERE email=?').bind(email).first();
+        if (!user) return json({ error: 'Khong tim thay tai khoan' }, 404);
+        const sets = [], vals = [];
+        if (avatar !== undefined) { sets.push('avatar=?'); vals.push(String(avatar||'').slice(0,500)); }
+        if (farm_bio !== undefined) { sets.push('farm_bio=?'); vals.push(String(farm_bio||'').slice(0,300)); }
+        if (farm_area !== undefined) { sets.push('farm_area=?'); vals.push(Number(farm_area)||0); }
+        if (farm_crops !== undefined) { sets.push('farm_crops=?'); vals.push(String(farm_crops||'').slice(0,200)); }
+        if (farm_region !== undefined) { sets.push('farm_region=?'); vals.push(String(farm_region||'').slice(0,80)); }
+        if (farm_unit !== undefined) { sets.push('farm_unit=?'); vals.push(String(farm_unit||'ha').slice(0,10)); }
+        if (!sets.length) return json({ error: 'Khong co gi de cap nhat' }, 400);
+        vals.push(user.id);
+        await db.prepare('UPDATE users SET ' + sets.join(',') + ' WHERE id=?').bind(...vals).run();
+        return json({ ok: true });
+      } catch (e) { return json({ error: e.message }, 500); }
+    }
+
     // === STATIC ASSETS ===
     const response = await env.ASSETS.fetch(request);
     return response;
   }
 };
-
-// ===== ENGINE FUNCTIONS (simulated, replace with Python backend calls) =====
 
 function generateStormTracks() {
   const now = Date.now();
