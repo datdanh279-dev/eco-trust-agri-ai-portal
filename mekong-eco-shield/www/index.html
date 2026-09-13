@@ -12,7 +12,7 @@
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;">
 <script>
-var _APP_V='v114.3';
+var _APP_V='v115';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -7313,6 +7313,7 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
     title:'LỊCH SỬ NÂNG CẤP',
     render:function(){
      var log=[
+      {v:'v115',d:'2026-09-13',t:'🤖 Các mô hình AI dự báo thiên tai (đã khóa)',x:'Khảo sát 4 lõi AI: GraphCast (Google DeepMind), Pangu-Weather (Huawei Cloud), Prithvi-100M (IBM & NASA), FourCastNet (NVIDIA Earth-2). Mô phỏng đồng thuận Ensemble + ngưỡng sơ tán 70-80% (Sơ tán nhầm còn hơn bỏ sót). Cơ sở khoa học sai số khí tượng (hiệu ứng cánh bướm, phân phối xác suất). Tham chiếu các hạng mục đã khóa: Ensemble ECMWF+GFS, xác nhận cộng đồng Nexus-X DAO, cảnh báo ngoại tuyến.'},
       {v:'v112',d:'2026-09-08',t:'📊 Dashboard + Sessions + Backup + Weather Push + Profile (đã khóa)',x:'Dashboard thống kê tổng hợp Admin (biểu đồ cột/tròn canvas, realtime stats từ D1), Push Notifications Weather Watch (lưu D1 + hiển thị trong Thông báo), Quản lý Phiên đăng nhập (lịch sử + trạng thái bảo mật), Backup & Restore dữ liệu (export/import JSON), Cập nhật hồ sơ cá nhân (tên/điện thoại/địa chỉ lưu D1).'},
       {v:'v111',d:'2026-09-07',t:'📅 Lịch gieo trồng + Hạn mức GD + 2FA + Broadcast + Offline (đã khóa)',x:'Lịch gieo trồng thông minh theo tỉnh (4 vụ Mekong + nhắc vụ), hiển thị hạn mức giao dịch còn lại hôm nay (progress bar), Xác thực 2 lớp TOTP (bật/tắt 2FA trong CÀI ĐẶT), Thông báo toàn hệ thống (Admin tạo banner announcement), 4 nút xuất CSV QUẢN TRỊ TÀI CHÍNH (nạp/rút/chuyển/lịch sử), Offline Queue tự động đồng bộ khi reconnect.'},
       {v:'v110',d:'2026-09-06',t:'🌐 SOS Cloud + Bảo mật + Xếp hạng (đã khóa)',x:'Trung tâm SOS Cloud (gửi tín hiệu kèm GPS lên D1, Admin xử lý), chống tấn công brute-force phía server (5 lần sai/30 phút → khóa 30 phút), Bảng xếp hạng tin nhiệm Top 50, Thông báo phiên bản + Lịch sử nâng cấp tự động, Quỹ Di sản tự động theo dõi 2%/giao dịch chuyển tiền + Đồng bộ đa tab (BroadcastChannel).'},
@@ -7422,7 +7423,51 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
       sel+'<button class="btn bp" onclick="loadRiskQ()">Tính rủi ro</button></div></div>'+
       '<div id="rqResult" style="min-height:80px"></div>'+cb();
     }
-   }};
+   },
+   // === v115: CÁC MÔ HÌNH AI DỰ BÁO THIÊN TAI ===
+   aiModels:{
+    title:'MÔ HÌNH AI DỰ BÁO',
+    render:function(){
+     var models=[
+      {n:'GraphCast',o:'Google DeepMind',f:'Dự báo thời tiết 10 ngày — độ phân giải 28×28km toàn cầu. Theo dõi bão & dòng sông khí quyển, vượt trội hệ thống HRES/ECMWF.',s:'github.com/google-deepmind/graphcast'},
+      {n:'Pangu-Weather',o:'Huawei Cloud',f:'Mạng nơ-ron 3D dự báo quỹ đạo bão, lượng mưa, nhiệt độ ở nhiều không gian.',s:'github.com/198808xc/Pangu-Weather'},
+      {n:'Prithvi-100M',o:'IBM & NASA',f:'AI không gian địa lý phân tích ảnh vệ tinh — khoanh vùng ngập lụt, cháy rừng, sạt lở.',s:'Hugging Face: NASA-IMPACT'},
+      {n:'FourCastNet',o:'NVIDIA Earth-2',f:'Toán tử thần kinh Fourier mô phỏng cực hạn khí hậu độ phân giải cao.',s:'github.com/NVIDIA/modulus'}
+     ];
+     var pk=['AG','DT','TG','BT','VL','TV','CT','HG','ST','BL','CM','KG','LA'];
+     var pn=['An Giang','Đồng Tháp','Tiền Giang','Bến Tre','Vĩnh Long','Trà Vinh','Cần Thơ','Hậu Giang','Sóc Trăng','Bạc Liêu','Cà Mau','Kiên Giang','Long An'];
+     var pv='';
+     for(var i=0;i<pn.length;i++){pv+='<option value="'+pk[i]+'">'+pn[i]+'</option>'}
+     return '<div class="pt">🤖 CÁC MÔ HÌNH AI DỰ BÁO THIÊN TAI</div><div class="ps">Bộ não Ongang AI — Khảo sát các lõi AI toàn cầu & Nguyên tắc thực chiến (v115)</div>'+
+      '<div class="cc"><h3>🧠 4 LÕI AI KHẢ DỤNG — KHẢO SÁT (Chưa nhúng — cần GPU server)</h3>'+
+      models.map(function(m){return '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:10px;margin-bottom:8px">'+
+       '<div style="display:flex;justify-content:space-between;align-items:center"><b style="color:#00e676;font-size:12px">'+m.n+'</b><span style="font-size:9px;color:#7c4dff">'+m.o+'</span></div>'+
+       '<div style="font-size:10px;color:#b0bec5;margin-top:4px;line-height:1.6">'+m.f+'</div>'+
+       '<div style="font-size:9px;color:#607d8b;margin-top:4px">📦 '+m.s+'</div></div>'}).join('')+
+      '<div style="font-size:9px;color:#607d8b;border-top:1px dashed #1e2d4a;padding-top:8px">⚠️ Triển khai thực tế cần: môi trường Python + máy chủ GPU cao cấp + luồng dữ liệu quan trắc liên tục từ các trạm đo (Ủy hội sông Mekong). Nền tảng hiện tại chạy mô phỏng (simulation) trên trình duyệt — không trùng lặp chức năng đã có.</div></div>'+
+      '<div class="cc"><h3>🌀 CƠ SỞ KHOA HỌC SAI SỐ KHÍ TƯỢNG</h3>'+
+      '<div style="font-size:10px;color:#b0bec5;line-height:1.9">'+
+      '• Dự báo phụ thuộc hệ nhiệt động lực học, áp suất, độ ẩm liên tục biến đổi của Trái Đất.<br>'+
+      '• Mô hình ML như GraphCast cần trạng thái thời tiết <b style="color:#00e676">hiện tại + 6 giờ trước</b> để dự báo chu kỳ tương lai.<br>'+
+      '• <b style="color:#ffc107">Hiệu ứng cánh bướm:</b> biến đổi cực nhỏ cấp vi mô khuếch đại thành nhiễu động lớn khi kéo dài thời gian dự báo.<br>'+
+      '• Kết quả AI là <b style="color:#00bcd4">phân phối xác suất</b>, không phải tính toán tất định tuyệt đối.</div></div>'+
+      '<div class="cc"><h3>⚔️ NGUYÊN TẮC THỰC CHIẾN (Phòng thủ khi máy móc không hoàn hảo)</h3>'+
+      '<div style="font-size:10px;color:#b0bec5;line-height:2">'+
+      '1️⃣ <b style="color:#ff1744">Ngưỡng sơ tán an toàn 70–80%:</b> không đợi AI chắc chắn 100% mới phát lệnh — đạt 70–80% là kích hoạt di tản ngay (Sơ tán nhầm còn hơn bỏ sót). <span class="tg g">Mô phỏng bên dưới</span><br>'+
+      '2️⃣ <b style="color:#00e676">Ensemble Forecasting:</b> chạy song song nhiều mô hình, đồng thuận đa AI → tin cậy tối đa, triệt tiêu lỗi ngẫu nhiên. <span class="tg g">🔒 ĐÃ KHÓA — Dự báo Bão AI (ECMWF+GFS+Ensemble)</span><br>'+
+      '3️⃣ <b style="color:#7c4dff">Trí tuệ bản địa (Human-in-the-loop):</b> cộng đồng đối chiếu cảnh báo AI với dấu hiệu thực tế qua Nexus-X DAO. <span class="tg g">🔒 ĐÃ KHÓA — Báo cáo cộng đồng (v114)</span><br>'+
+      '4️⃣ <b style="color:#ff9100">Hạ tầng cảnh báo dự phòng tuyệt đối:</b> còi hú, loa phát thanh, mạng mesh — lệnh sơ tán luôn được phát đi dù mất internet. <span class="tg g">🔒 ĐÃ KHÓA — Offline SW + SOS + DePIN Mesh</span></div></div>'+
+      '<div class="cc"><h3>🧪 MÔ PHỎNG ĐỒNG THUẬN ENSEMBLE + NGƯỠNG SƠ TÁN 70%</h3>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center">'+
+      '<select class="input" id="aisScenario" style="width:auto"><option value="STORM">🌀 Bão</option><option value="FLOOD">🌊 Lũ lụt</option><option value="SLIDE">⛰️ Sạt lở</option><option value="DROUGHT">☀️ Hạn mặn</option></select>'+
+      '<select class="input" id="aisProvince" style="width:auto;flex:1;min-width:130px">'+pv+'</select>'+
+      '<button class="btn bp" onclick="runAISim()">▶ Chạy mô phỏng</button></div>'+
+      '<div id="aisResult" style="min-height:60px"><div style="color:#607d8b;font-size:11px;text-align:center;padding:14px">Chọn kịch bản + tỉnh rồi nhấn "Chạy mô phỏng" — 3 lõi AI giả lập: GraphCast / Pangu-Weather / Prithvi → đồng thuận Ensemble → kiểm tra ngưỡng sơ tán 70%</div></div></div>'+
+      cb();
+    },
+    init:function(){}
+   }
+  };
 
 
 function simulateGatekeeper(){
@@ -7442,7 +7487,36 @@ function simulateGatekeeper(){
    el.innerHTML='<div style="color:#00bcd4">🤖 Đang duyệt: '+count.toLocaleString()+'/'+total.toLocaleString()+' ('+Math.round(count/total*100)+'%)</div>'+
     '<div style="height:6px;background:#18243c;border-radius:3px;margin-top:4px"><div style="height:6px;background:linear-gradient(90deg,#00c853,#00e676);border-radius:3px;width:'+(count/total*100)+'%"></div></div>'
   }
- },50)
+},50)
+ }
+function runAISim(){
+ var el=document.getElementById('aisResult');
+ if(!el)return;
+ var sc=document.getElementById('aisScenario').value;
+ var pv=document.getElementById('aisProvince').value;
+ var scName=document.getElementById('aisScenario').options[document.getElementById('aisScenario').selectedIndex].text;
+ var pk={'AG':'An Giang','DT':'Đồng Tháp','TG':'Tiền Giang','BT':'Bến Tre','VL':'Vĩnh Long','TV':'Trà Vinh','CT':'Cần Thơ','HG':'Hậu Giang','ST':'Sóc Trăng','BL':'Bạc Liêu','CM':'Cà Mau','KG':'Kiên Giang','LA':'Long An'};
+ el.innerHTML='<div style="color:#ffc107">🤖 Đang chạy 3 lõi AI...</div>';
+ var seed=0;
+ for(var i=0;i<(sc+pv).length;i++){seed=(seed*31+(sc+pv).charCodeAt(i))%100000}
+ function rnd(a,b){var x=Math.sin(seed++*12.9898)*43758.5453;return a+Math.floor((x-Math.floor(x))*(b-a+1))}
+ setTimeout(function(){
+  var gc=rnd(55,95),pw=rnd(50,93),pr=rnd(40,90);
+  var cons=Math.round((gc+pw+pr)/3);
+  var verdict,vc,vb;
+  if(cons>=70){verdict='🔴 KÍCH HOẠT SƠ TÁN — Rủi ro '+cons+'% ≥ ngưỡng 70%. Sơ tán nhầm còn hơn bỏ sót!';vc='#ff1744';vb='rgba(255,23,68,.12)'}
+  else if(cons>=50){verdict='🟠 CẢNH BÁO CAO — Rủi ro '+cons+'%. Chuẩn bị phương án di tản, theo dõi sát sao.';vc='#ff9100';vb='rgba(255,145,0,.12)'}
+  else{verdict='🟡 GIÁM SÁT — Rủi ro '+cons+'%. Chưa đạt ngưỡng, tiếp tục quan trắc.';vc='#ffc107';vb='rgba(255,193,7,.12)'}
+  el.innerHTML='<div style="font-size:11px;color:#607d8b;margin-bottom:8px">Kịch bản: <b style="color:#e8eaf6">'+scName+' @ '+pk[pv]+'</b> — 3 lõi AI giả lập (ensemble)</div>'+
+   '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">'+
+   '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:#607d8b">GraphCast</div><div style="font-size:20px;font-weight:800;color:#00bcd4">'+gc+'%</div></div>'+
+   '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:#607d8b">Pangu-Weather</div><div style="font-size:20px;font-weight:800;color:#7c4dff">'+pw+'%</div></div>'+
+   '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:10px;text-align:center"><div style="font-size:9px;color:#607d8b">Prithvi-100M</div><div style="font-size:20px;font-weight:800;color:#00e676">'+pr+'%</div></div></div>'+
+   '<div style="background:#18243c;border-radius:8px;padding:8px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:10px;color:#607d8b;margin-bottom:4px"><span>ĐỒNG THUẬN ENSEMBLE</span><span style="color:#e8eaf6;font-weight:700">'+cons+'%</span></div>'+
+   '<div style="height:8px;background:#1e2d4a;border-radius:4px"><div style="height:8px;border-radius:4px;background:'+(cons>=70?'linear-gradient(90deg,#ff1744,#ff9100)':cons>=50?'linear-gradient(90deg,#ff9100,#ffc107)':'linear-gradient(90deg,#ffc107,#00e676)')+';width:'+cons+'%"></div></div></div>'+
+   '<div style="padding:10px;border-radius:8px;font-size:12px;font-weight:700;text-align:center;background:'+vb+';color:'+vc+';border:1px solid '+(cons>=70?'rgba(255,23,68,.3)':cons>=50?'rgba(255,145,0,.3)':'rgba(255,193,7,.3)')+'">'+verdict+'</div>'+
+   '<div style="font-size:9px;color:#607d8b;margin-top:8px">🧪 Mô phỏng mang tính minh họa — lõi AI thật cần máy chủ GPU. Ensemble đồng thuận → triệt tiêu lỗi ngẫu nhiên, độ tin cậy tối đa (Ensemble Forecasting).</div>';
+ },400)
 }
 function simulateImmune(){
  var el=document.getElementById('immuneResult');
@@ -8652,7 +8726,8 @@ var MENU=[
            {label:'💧 Chất lượng nước',id:'waterQ',icon:'💧',roles:['GOD','NONG_DAN','NGUOI_DAN']},
            {label:'🌱 Gợi ý giống cây',id:'cropSuggest',icon:'🌱',roles:['GOD','NONG_DAN','NGUOI_DAN']},
            {label:'🌐 GDACS Toàn cầu',id:'gdacs',icon:'🌐',roles:['GOD','NONG_DAN','NGUOI_DAN','DOANH_NGHIEP']},
-           {label:'📊 Định lượng Rủi ro',id:'riskQ',icon:'📊',roles:['GOD','NONG_DAN','NGUOI_DAN']}
+{label:'📊 Định lượng Rủi ro',id:'riskQ',icon:'📊',roles:['GOD','NONG_DAN','NGUOI_DAN']},
+           {label:'🤖 Mô hình AI dự báo',id:'aiModels',icon:'🤖',roles:['GOD','NONG_DAN','DOANH_NGHIEP','NHA_DAU_TU','NGUOI_DAN']}
  ];
 // admin menu item now pushed inside buildSB() for correct timing
 
