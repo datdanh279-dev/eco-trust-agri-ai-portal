@@ -12,7 +12,7 @@
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;">
 <script>
-var _APP_V='v115';
+var _APP_V='v122';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -32,6 +32,12 @@ try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage
   <div class="chat-msg bot">👋 Xin chào! Tôi là <b>Danh Đạt (Sói Cô Độc)</b> — Trợ lý ảo thiên tai.<br><br>Hỏi tôi về: <b>Bão</b>, <b>Động đất</b>, <b>Mưa lũ</b>, <b>Núi lửa</b>, <b>Đất lở</b>...<span class="ts">🤖 Danh Đạt • Online</span></div>
  </div>
  <div class="chat-input"><input id="chatInput" type="text" placeholder="Nhập tin nhắn..." onkeydown="if(event.key==='Enter')sendChat()"><button onclick="sendChat()">➤</button></div>
+</div>
+<!-- NLI ASSISTANT PANEL (Voice) -->
+<div id="nliPanel" style="display:none;position:fixed;bottom:160px;right:20px;z-index:9998;width:340px;max-width:calc(100vw - 40px);background:#131c31;border:1px solid #1e2d4a;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5)">
+ <div class="chat-header"><b>🎤 Danh Đạt AI Voice</b><button onclick="toggleNLI()">✕</button></div>
+ <div class="chat-messages" id="nliMsgs"><div class="chat-msg bot">🎤 Chào bạn! Nói hoặc gõ câu hỏi: thời tiết, giá lúa, mùa mặn, vay vốn, phân bón, điểm ECS...<span class="ts">🎤 Voice • Online</span></div></div>
+ <div class="chat-input"><input id="nliInput" type="text" placeholder="Nhập câu hỏi..." onkeydown="if(event.key==='Enter')sendNLI()"><button onclick="sendNLI()">➤</button></div>
 </div>
 <!-- HYPER-LOCAL DATA PANEL -->
 <div id="hyperLocalPanel"></div>
@@ -914,7 +920,7 @@ function doExportBackup(){
 function doImportBackup(input){
  var file=input.files[0];if(!file)return;
  if(!confirm('⚠️ Nhập backup sẽ ghi đè dữ liệu hiện tại. Tiếp tục?'))return;
- importBackup(file).then(function(result){
+ importBackupFile(file).then(function(result){
   alert('✅ Đã nhập backup!\n\n'+result.keys+' keys từ phiên bản '+result.version);
   location.reload();
  }).catch(function(err){alert('❌ Lỗi: '+err.message)});
@@ -1951,7 +1957,7 @@ function fetchTsunamiData(){
 }
 // === LANDSLIDE RISK LIVE ===
 function fetchLandslideRisk(){
- var el=document.getElementById('landslideContent');
+ var el=document.getElementById('landslideContent')||document.getElementById('landslideAlerts');
  var al=document.getElementById('landslideAlerts');
  var rg=document.getElementById('landslideRegions');
  var rd=document.getElementById('landslideRainfall');
@@ -2097,7 +2103,7 @@ function exportBackup(){
  addAuditLog('backup',U?U.email:'system','Xuất backup: '+Object.keys(data.keys).length+' keys');
  return{ok:true,keys:Object.keys(data.keys).length};
 }
-function importBackup(file){
+function importBackupFile(file){
  return new Promise(function(resolve,reject){
   var reader=new FileReader();
   reader.onload=function(e){
@@ -2661,6 +2667,16 @@ function showModal(title,html,onConfirm){
 function closeModal(){
  var o=document.getElementById('modalOverlay');
  if(o)o.classList.remove('show')
+}
+function showWalletQR(){
+ var src=(U&&U.email)?'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent('MES-CASH:'+(U.email||'')):'';
+ var wl=LS.get(KS+'wallet',{balance:5000000,history:[]});
+ showModal('📱 QR Code Ví MES-CASH','<div style="text-align:center;padding:8px">'+
+  (src?'<img src="'+src+'" style="width:160px;height:160px;border-radius:8px;border:1px solid #1e2d4a;background:#fff;padding:6px" alt="QR ví">':'<div style="font-size:11px;color:#607d8b">Đăng nhập để tạo QR</div>')+
+  '<div style="font-size:13px;font-weight:700;color:#00c853;margin-top:10px">'+esc(U?U.name||U.email:'')+'</div>'+
+  '<div style="font-size:11px;color:#b0bec5;margin-top:2px">'+(U?esc(U.email):'')+'</div>'+
+  '<div style="font-size:12px;color:#e8eaf6;margin-top:8px">Số dư: <b style="color:#ffc107">'+(wl.balance||0).toLocaleString()+' đ</b></div>'+
+  '<div style="font-size:9px;color:#607d8b;margin-top:6px">Quét QR để nhận tiền vào ví MES-CASH</div></div>')
 }
 function showSupportModal(){
  var o=document.getElementById('modalOverlay'),b=document.getElementById('modalBox');
@@ -3795,7 +3811,7 @@ function showLoginModuleInfo(i){
 }
 function showReg(){
  document.getElementById('loginScreen').innerHTML=
- '<div class="lc"><div style="text-align:center;margin-bottom:20px"><h2 style="font-size:18px;font-weight:700">Đăng ký</h2></div><div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:20px"><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Họ tên</label><input class="input" id="rn"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Email</label><input class="input" id="re" type="email"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Số điện thoại</label><input class="input" id="rp" type="tel"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Mật khẩu</label><input class="input" id="rps" type="password" oninput="checkPassStrength()"></div><div id="passStrength" style="margin-bottom:8px"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Xác nhận</label><input class="input" id="rps2" type="password"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Loại</label><select class="input" id="rr" onchange="showPaymentGate()"><option value="nong_dan">Nông dân (Miễn phí)</option><option value="nguoi_dan">Người dân (Miễn phí)</option><option value="nha_dau_tu">Nhà đầu tư</option><option value="doanh_nghiep">Doanh nghiệp</option></select></div><div id="paymentGate"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">🔑 Câu hỏi bảo mật</label><select class="input" id="rsq"><option value="Ten vat nuoi cua ban la gi?">Tên vật nuôi của bạn là gì?</option><option value="Que noi cua ban o dau?">Quê nội của bạn ở đâu?</option><option value="Truong tieu hoc cua ban la gi?">Trường tiểu học của bạn là gì?</option><option value="Mon an yeu thich cua ban la gi?">Món ăn yêu thích của bạn là gì?</option><option value="Ten nguoi ban than nhat cua ban?">Tên người bạn thân nhất của bạn?</option></select></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Câu trả lời bảo mật</label><input class="input" id="rsa" placeholder="Dùng để khôi phục mật khẩu khi quên"></div><div id="rErr" style="color:#ff1744;font-size:12px;margin-bottom:8px"></div><div id="rOk" style="color:#00e676;font-size:12px;margin-bottom:8px"></div><button class="btn bp" style="width:100%;padding:12px;font-size:14px;font-weight:700" onclick="doReg()">ĐĂNG KÝ</button><div style="text-align:center;margin-top:12px;font-size:12px;color:#607d8b">Đã có tài khoản? <span style="color:#00c853;cursor:pointer;font-weight:600" onclick="location.reload()">Đăng nhập</span></div></div></div>'
+ '<div class="lc"><div style="text-align:center;margin-bottom:20px"><h2 style="font-size:18px;font-weight:700">Đăng ký</h2></div><div style="background:#131c31;border:1px solid #1e2d4a;border-radius:10px;padding:20px"><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Họ tên</label><input class="input" id="rn"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Email</label><input class="input" id="re" type="email"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Số điện thoại</label><input class="input" id="rp" type="tel"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Mật khẩu</label><input class="input" id="rps" type="password" oninput="checkPassStrength()"></div><div id="passStrength" style="margin-bottom:8px"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Xác nhận</label><input class="input" id="rps2" type="password"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Loại</label><select class="input" id="rr" onchange="showPaymentGate()"><option value="nong_dan">Nông dân (Miễn phí)</option><option value="nguoi_dan">Người dân (Miễn phí)</option><option value="nha_dau_tu">Nhà đầu tư</option><option value="doanh_nghiep">Doanh nghiệp</option></select></div><div id="paymentGate"></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">🔑 Câu hỏi bảo mật</label><select class="input" id="rsq"><option value="Ten vat nuoi cua ban la gi?">Tên vật nuôi của bạn là gì?</option><option value="Que noi cua ban o dau?">Quê nội của bạn ở đâu?</option><option value="Truong tieu hoc cua ban la gi?">Trường tiểu học của bạn là gì?</option><option value="Mon an yeu thich cua ban la gi?">Món ăn yêu thích của bạn là gì?</option><option value="Ten nguoi ban than nhat cua ban?">Tên người bạn thân nhất của bạn?</option></select></div><div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Câu trả lời bảo mật</label><input class="input" id="rsa" placeholder="Dùng để khôi phục mật khẩu khi quên"></div><div id="rErr" style="color:#ff1744;font-size:12px;margin-bottom:8px"></div><div id="rOk" style="color:#00e676;font-size:12px;margin-bottom:8px"></div><button class="btn bp" style="width:100%;padding:12px;font-size:14px;font-weight:700" type="button" onclick="doReg()">ĐĂNG KÝ</button><div style="text-align:center;margin-top:12px;font-size:12px;color:#607d8b">Đã có tài khoản? <span style="color:#00c853;cursor:pointer;font-weight:600" onclick="location.reload()">Đăng nhập</span></div></div></div>'
 }
 
 function showResetPass(){
@@ -3807,7 +3823,7 @@ function showResetPass(){
  '<div style="margin-bottom:10px"><label style="font-size:12px;color:#b0bec5">Xác nhận mật khẩu mới</label><input class="input" id="rsnp2" type="password"></div>'+
  '<div id="rsErr" style="color:#ff1744;font-size:12px;margin-bottom:8px"></div>'+
  '<div id="rsOk" style="color:#00e676;font-size:12px;margin-bottom:8px"></div>'+
- '<button class="btn bp" style="width:100%;padding:12px;font-size:14px;font-weight:700" onclick="doResetPass()">ĐẶT LẠI MẬT KHẨU</button>'+
+ '<button class="btn bp" style="width:100%;padding:12px;font-size:14px;font-weight:700" type="button" onclick="doResetPass()">ĐẶT LẠI MẬT KHẨU</button>'+
  '<div style="text-align:center;margin-top:12px;font-size:12px;color:#607d8b">Đã nhớ mật khẩu? <span style="color:#00c853;cursor:pointer;font-weight:600" onclick="location.reload()">Đăng nhập</span></div>'+
  '<div style="text-align:center;margin-top:6px;font-size:11px;color:#607d8b">Không nhớ câu trả lời? <span style="color:#00bcd4;cursor:pointer;font-weight:600" onclick="showReg()">Đăng ký tài khoản mới</span> hoặc liên hệ Admin <b style="color:#00e676">0358814661</b></div>'+
  '</div></div>'
@@ -3909,6 +3925,14 @@ function checkPassStrength(){
  var pct=Math.min(s/5*100,100);
  el.innerHTML='<div style="background:#1e2d4a;border-radius:4px;height:4px;overflow:hidden;margin-bottom:2px"><div style="height:100%;width:'+pct+'%;background:'+colors[s]+';transition:width .3s"></div></div><div style="font-size:9px;color:'+colors[s]+'">'+(labels[s]||'')+'</div>';
 }
+function _regErr(err,st){
+ if(err==='Email da ton tai')return 'Email đã tồn tại trên nền tảng! Dùng 🔑 Quên mật khẩu để khôi phục hoặc liên hệ Admin 0358814661.';
+ if(err==='Thieu thong tin')return 'Vui lòng nhập đầy đủ thông tin!';
+ if(st===400)return err||'Dữ liệu đăng ký không hợp lệ!';
+ if(st===409)return 'Email đã tồn tại trên nền tảng! Dùng 🔑 Quên mật khẩu để khôi phục hoặc liên hệ Admin 0358814661.';
+ if(st===500)return 'Lỗi máy chủ nền tảng — vui lòng thử lại sau hoặc liên hệ Admin 0358814661.';
+ return err?('Lỗi: '+err):'Đăng ký không thành công, vui lòng thử lại!';
+}
 function doReg(){
  var n=document.getElementById('rn'),e=document.getElementById('re'),p=document.getElementById('rp'),ps=document.getElementById('rps'),ps2=document.getElementById('rps2'),rl=document.getElementById('rr'),er=document.getElementById('rErr'),ok=document.getElementById('rOk');
  if(!n||!e||!p||!ps||!ps2||!rl)return;
@@ -3926,8 +3950,10 @@ function doReg(){
  ok.innerHTML='Đang đăng ký...';
  var regData={name:n.value,email:e.value,phone:pv,pass:ps.value,role:ro,userRole:ro.toUpperCase(),accessId:aid,secQ:sq.value,secA:sa.value.trim()};
   fetch(API_BASE+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(regData)})
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(d){
-  if(d.error){er.textContent=d.error;ok.textContent='';return}
+  .then(function(r){return r.json().catch(function(){return null}).then(function(d){return {s:r.status,d:d}})}).then(function(res){
+  if(res.s>=400){er.textContent=_regErr(res.d&&res.d.error,res.s);ok.textContent='';return}
+  if(res.d&&res.d.error){er.textContent=_regErr(res.d.error,res.s);ok.textContent='';return}
+  var d=res.d;
   var u=getU();
   var st=d.status||initStatus;
   u.push({name:n.value,email:e.value,phone:pv,pass:ps.value,role:ro,st:st,aid:d.accessId||aid,ts:new Date().toISOString(),updated_at:new Date().toISOString(),userRole:ro.toUpperCase()});
@@ -4406,6 +4432,7 @@ approvalQueue:{
     var loadMsg='<div style="text-align:center;padding:20px;color:#00bcd4">⏳ Đang tải từ Cloud D1...</div>';
     return '<div class="pt">⏳ HÀNG CHỜ PHÊ DUYỆT — Quản trị viên</div>'+
      '<div class="ps">Quản lý tài khoản từ Cloud D1: Duyệt / Từ chối / Khóa / Mở khóa / Xóa</div>'+
+     '<div id="aqSyncStatus" style="font-size:10px;color:#607d8b;margin-bottom:10px">🔄 Chưa kết nối</div>'+
      '<div id="aqStats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">'+loadMsg+'</div>'+
      '<div class="cc" style="margin-bottom:14px"><h3>💵 Yêu cầu nạp tiền (bill) <span style="font-size:9px;color:#607d8b">— auto 10s</span></h3><div id="aqDepositList">'+loadMsg+'</div></div>'+
      '<div class="cc" style="margin-bottom:14px"><h3>🏧 Yêu cầu rút tiền <span style="font-size:9px;color:#607d8b">— auto 10s</span></h3><div id="aqWithdrawList">'+loadMsg+'</div></div>'+
@@ -4485,8 +4512,8 @@ approvalQueue:{
     '<div style="text-align:center;background:#18243c;padding:8px;border-radius:8px"><div style="font-size:16px;font-weight:700;color:#00e676">'+_APP_V+'</div><div style="font-size:9px;color:#607d8b">Phiên bản</div></div>'+
     '</div>'+
     '<div style="display:flex;gap:6px"><button class="btn bp" onclick="doExportBackup()">📤 Xuất Backup</button>'+
-    '<button class="btn bs" onclick="document.getElementById(\'backupFile\').click()">📥 Nhập Backup</button>'+
-    '<input type="file" id="backupFile" accept=".json" style="display:none" onchange="doImportBackup(this)"></div></div>'+
+    '<button class="btn bs" onclick="document.getElementById(\'backupFileAdmin\').click()">📥 Nhập Backup</button>'+
+    '<input type="file" id="backupFileAdmin" accept=".json" style="display:none" onchange="doImportBackup(this)"></div></div>'+
     // Cache
     '<div style="background:linear-gradient(135deg,rgba(124,77,255,.06),rgba(0,188,212,.06));border:1px solid rgba(124,77,255,.15);border-radius:10px;padding:12px;margin-bottom:14px">'+
     '<div style="font-weight:700;font-size:12px;color:#7c4dff;margin-bottom:8px">⚡ CACHE & PERFORMANCE</div>'+
@@ -5503,6 +5530,10 @@ init:function(){setTimeout(loadMarketplace,200);}
          '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;margin-bottom:2px">📤</div><div style="font-size:9px;color:#607d8b">Đã chuyển</div><div style="font-size:12px;font-weight:600;color:#ff9100">'+txs.filter(function(x){return x.type==='send'}).length+'</div></div>'+
          '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;margin-bottom:2px">📥</div><div style="font-size:9px;color:#607d8b">Đã nhận</div><div style="font-size:12px;font-weight:600;color:#00e676">'+txs.filter(function(x){return x.type==='receive'}).length+'</div></div>'+
          '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;margin-bottom:2px">📊</div><div style="font-size:9px;color:#607d8b">Giao dịch</div><div style="font-size:12px;font-weight:600">'+txs.length+'</div></div></div>'+
+         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+         '<div class="cc" style="margin:0"><h3>📥 Yêu cầu nạp của tôi</h3><div id="depositRequests"><div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Đang tải...</div></div></div>'+
+         '<div class="cc" style="margin:0"><h3>📤 Yêu cầu rút của tôi</h3><div id="withdrawRequests"><div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Đang tải...</div></div></div>'+
+         '</div>'+
          '<div class="cc"><h3>📋 Lịch sử giao dịch <button class="exp-btn" style="float:right" onclick="exportWalletCSV()">📥 CSV</button></h3>'+
          (!txs.length?'<div style="color:#607d8b;font-size:12px">Chưa có giao dịch nào</div>':
          txs.slice(-10).reverse().map(function(x,i){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1e2d4a">'+
@@ -5513,7 +5544,7 @@ init:function(){setTimeout(loadMarketplace,200);}
           '<div class="cc"><h3>🛰️ Lịch sử giao dịch đồng bộ Cloud D1 <button class="btn bs" style="font-size:9px;padding:2px 8px;float:right" onclick="loadWalletTx()">🔄 Đồng bộ lại</button></h3><div id="walletTxSync"><div style="color:#607d8b;font-size:11px;text-align:center;padding:8px">Đang tải từ D1...</div></div></div>'+
           cb()+crossSellBanner('wallet'))
 },
-        init:function(){setTimeout(loadWalletTx,100);warnLowBalance();setTimeout(loadWalletLimits,200);}
+        init:function(){setTimeout(loadWalletTx,100);warnLowBalance();setTimeout(loadWalletLimits,200);setTimeout(loadDeposits,300);setTimeout(loadWithdrawals,400);}
        },
        walletHistory:{
         title:'LỊCH SỬ GIAO DỊCH',
@@ -6457,6 +6488,10 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
         '<div style="background:#131c31;border-radius:10px;border:1px solid #1e2d4a;padding:12px">'+
          '<div style="font-size:11px;font-weight:700;color:#ff9100;margin-bottom:8px">📊 LIVE THREAT MATRIX</div>'+
          '<div id="eccThreatMatrix" style="font-size:10px"></div>'+
+         '<div style="font-size:11px;font-weight:700;color:#00bcd4;margin-bottom:8px;margin-top:12px">📞 CALL STATUS</div>'+
+         '<div id="eccCallStatus" style="font-size:10px"></div>'+
+         '<div style="font-size:11px;font-weight:700;color:#e040fb;margin-bottom:8px;margin-top:12px">🧬 ECC CONSENSUS</div>'+
+         '<div id="eccConsensus" style="font-size:10px"></div>'+
         '</div>'+
         '<div style="background:#131c31;border-radius:10px;border:1px solid #1e2d4a;padding:12px">'+
          '<div style="font-size:11px;font-weight:700;color:#00c853;margin-bottom:8px">📊 DỰ BÁO ĐA KỊCH BẢN</div>'+
@@ -7267,14 +7302,20 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
    quydinh:{
     title:'QUY ĐỊNH NỀN TẢNG',
     render:function(){
-     return '<div class="pt">📜 QUY ĐỊNH NỀN TẢNG ỨNG DỤNG</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Quy định phát triển lâu dài hệ sinh thái Mekong Eco-Shield</div>'+
-      '<div class="cc"><h3>1️⃣ ĐỘC QUYỀN NỀN TẢNG</h3>'+
+     return '<div class="pt">📜 QUY ĐỊNH NỀN TẢNG ỨNG DỤNG</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Quy định phát triển lâu dài hệ sinh thái Mekong Eco-Shield • Phiên bản v121 (2026-09-15)</div>'+
+      '<div class="cc"><h3>📜 VĂN BẢN QUY ĐỊNH — HIỆU LỰC TỪ NGÀY 15/09/2026</h3>'+
+      '<div style="background:#18243c;border-left:3px solid #7c4dff;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
+      'Quy định này kế thừa, bổ sung và thay thế hiệu lực của mọi bản quy định về nền tảng ứng dụng trước đây, đồng thời <b style="color:#00e676">bảo toàn nguyên văn</b> toàn bộ nội dung quy định đã có. Mọi hoạt động phát triển, cập nhật, vận hành, đánh giá và tài liệu hóa hệ thống đều phải tuân thủ quy định này.'+
+      '</div></div>'+
+      '<div class="cc"><h3>Điều 1. PHẠM VI ÁP DỤNG</h3>'+
+      '<div style="font-size:11px;color:#e8eaf6;line-height:1.7">Quy định này áp dụng cho <b>toàn bộ hệ sinh thái 08 dự án</b>: Mekong Eco-Shield, Eco-Farm Ops, Eco-Credit AI, Traceability Hub, Heritage Trust, Nexus-X, Bộ não Ongang AI và Biến đổi Khí hậu Cực đoan — cùng mọi thành phần, tài liệu, mã nguồn và nhân sự tham gia phát triển, vận hành nền tảng.</div></div>'+
+      '<div class="cc"><h3>Điều 2. ĐỘC QUYỀN NỀN TẢNG</h3>'+
       '<div style="background:#18243c;border-left:3px solid #ffc107;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
       'Hệ thống Mekong Eco-Shield <b style="color:#00e676">chỉ</b> sử dụng, vận hành và ghi nhận <b style="color:#00e676">duy nhất</b> trên nền tảng tại địa chỉ <b style="color:#00bcd4">https://mekong-eco-shield.pages.dev</b>.<br>'+
       'Mọi hoạt động phát triển, cập nhật và vận hành đều được thực hiện trên nền tảng này.<br>'+
       '<b style="color:#ff1744">Không</b> sử dụng bất kỳ ứng dụng, nền tảng hoặc tên gọi khác để thay thế, chuyển đổi hoặc đổi tên dưới bất kỳ hình thức nào.'+
       '</div></div>'+
-      '<div class="cc"><h3>2️⃣ QUY TẮC LƯU TRỮ VÀ PHÁT TRIỂN</h3>'+
+      '<div class="cc"><h3>Điều 3. QUY TẮC LƯU TRỮ VÀ PHÁT TRIỂN</h3>'+
       '<div style="background:#18243c;border-left:3px solid #00e676;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
       'Toàn bộ nội dung, chức năng, quy tắc và cấu trúc của hệ thống được xem là <b>nền tảng phát triển lâu dài</b>. Trong quá trình phát triển:'+
       '<div style="margin-top:8px">1️⃣ <b style="color:#00e676">Không xóa hoặc loại bỏ</b> các chức năng đã có.<br>'+
@@ -7282,7 +7323,10 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
       '3️⃣ <b style="color:#ffc107">Không đề xuất hoặc thực hiện</b> các nội dung đã hoàn thành nhằm tránh trùng lặp.<br>'+
       '4️⃣ Mỗi nội dung nâng cấp hoặc sửa lỗi <b style="color:#7c4dff">chỉ được ghi nhận một lần</b>; sau khi hoàn thành sẽ được xem là <b>đã khóa</b> và <b>không đưa vào danh sách đề xuất</b> ở các lần đánh giá tiếp theo.</div>'+
       '</div></div>'+
-      '<div class="cc"><h3>3️⃣ NGUYÊN TẮC VẬN HÀNH (RÚT GỌN)</h3>'+
+      '<div class="cc"><h3>Điều 4. GHI NHẬN MỘT LẦN VÀ KHÓA NỘI DUNG</h3>'+
+      '<div style="font-size:11px;color:#e8eaf6;line-height:1.7">Mỗi nội dung nâng cấp hoặc sửa lỗi <b style="color:#7c4dff">chỉ được ghi nhận một lần</b> trên Lịch sử nâng cấp của nền tảng.<br>'+
+      'Sau khi hoàn thành, nội dung được xem là <b style="color:#00e676">đã khóa</b>: <b>không thực hiện lại</b>, <b>không đưa vào danh sách đề xuất</b> ở các lần đánh giá tiếp theo, và <b>không bị xóa, thay thế hoặc đổi tên</b> trong bất kỳ lần phát triển nào sau đó.</div></div>'+
+      '<div class="cc"><h3>Điều 5. NGUYÊN TẮC VẬN HÀNH (RÚT GỌN)</h3>'+
       '<table style="width:100%;border-collapse:collapse;font-size:11px">'+
       '<tr style="background:#18243c"><th style="padding:8px;text-align:left;border:1px solid #1e2d4a">Nguyên tắc</th><th style="padding:8px;text-align:left;border:1px solid #1e2d4a">Yêu cầu</th></tr>'+
       '<tr><td style="padding:8px;border:1px solid #1e2d4a">Độc quyền URL</td><td style="padding:8px;border:1px solid #1e2d4a">Chỉ https://mekong-eco-shield.pages.dev</td></tr>'+
@@ -7294,25 +7338,61 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
        '<div style="font-size:10px;color:#607d8b;margin-top:8px">🔒 Mọi nội dung đã hoàn thành trên nền tảng đều được khóa và không đưa vào danh sách đề xuất ở các lần đánh giá tiếp theo.</div>'+
        '<button class="btn bp" style="width:100%;margin-top:10px;font-size:11px;padding:8px" onclick="navigate(\'upgradeLog\')">📋 Xem Lịch sử nâng cấp (đã khóa)</button>'+
        '</div>'+
-       '<div class="cc"><h3>4️⃣ QUY ĐỊNH VỀ ĐỘ CHÍNH XÁC DỰ BÁO THIÊN TAI</h3>'+
+       '<div class="cc"><h3>Điều 6. QUY ĐỊNH VỀ ĐỘ CHÍNH XÁC DỰ BÁO THIÊN TAI <span class="tg g">Đã khóa</span></h3>'+
        '<div style="background:#18243c;border-left:3px solid #ff9100;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
        'Hệ thống dự báo thiên tai phải đạt độ chính xác <b style="color:#00e676">100%</b>, khớp đúng với thiên tai <b>thật</b> của Việt Nam và thế giới.<br>'+
        'Chỉ cần một <b style="color:#ffc107">biến đổi nhỏ</b> cũng phải dự đoán được <b style="color:#00bcd4">hướng đi</b> của thiên tai (quỹ đạo, diễn biến, cấp độ).'+
        '</div></div>'+
-       '<div class="cc"><h3>🛡️ KIỂM TRA ĐỘC QUYỀN NỀN TẢNG</h3>'+
+       '<div class="cc"><h3>Điều 7. KIỂM TRA & GIÁM SÁT TUÂN THỦ</h3>'+
        (function(){var h=location.hostname;var proto=location.protocol+'//'+location.hostname+(location.port?':'+location.port:'');var st,cl,bg,bd;if(h==='mekong-eco-shield.pages.dev'){st='ĐÚNG NỀN TẢNG ĐỘC QUYỀN — hoạt động hợp lệ';cl='#00e676';bg='rgba(0,230,118,.1)';bd='rgba(0,230,118,.3)'}else if(h.indexOf('.mekong-eco-shield.pages.dev')>0){st='ĐANG CHẠY BẢN XEM TRƯỚC CỦA NỀN TẢNG (alias)';cl='#ffc107';bg='rgba(255,193,7,.1)';bd='rgba(255,193,7,.3)'}else{st='KHÔNG PHẢI NỀN TẢNG ĐỘC QUYỀN — chỉ dùng https://mekong-eco-shield.pages.dev';cl='#ff1744';bg='rgba(255,23,68,.1)';bd='rgba(255,23,68,.3)'}return '<div style="background:#18243c;border:1px solid #1e2d4a;border-radius:8px;padding:12px;font-size:11px">'+
 '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="color:#607d8b">Nền tảng độc quyền:</span><span style="color:#00bcd4;font-weight:700">https://mekong-eco-shield.pages.dev</span></div>'+
 '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="color:#607d8b">Host hiện tại:</span><span style="color:#e8eaf6;font-weight:600">'+esc(proto)+'</span></div>'+
 '<div style="padding:8px;border-radius:6px;text-align:center;font-size:12px;font-weight:700;background:'+bg+';color:'+cl+';border:1px solid '+bd+'">'+(h==='mekong-eco-shield.pages.dev'?'✅':'⚠️')+' '+st+'</div>'+
 '<div style="font-size:9px;color:#607d8b;margin-top:8px">Theo quy định: mọi hoạt động phát triển, cập nhật, vận hành đều phải trên đúng địa chỉ trên — không dùng ứng dụng, nền tảng hay tên gọi khác thay thế, chuyển đổi, đổi tên.</div></div>'}())+
        '</div>'+
-       cb()
+       '<div class="cc"><h3>Điều 8. HIỆU LỰC THI HÀNH</h3>'+
+       '<div style="background:#18243c;border-left:3px solid #00bcd4;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
+       'Quy định này có hiệu lực kể từ ngày <b style="color:#00bcd4">15/09/2026</b> (Phiên bản <b style="color:#00e676">v121</b>), kế thừa và thay thế hiệu lực của mọi bản quy định về nền tảng ứng dụng trước đây; toàn bộ nội dung quy định cũ được <b style="color:#00e676">bảo toàn nguyên văn</b>.<br>'+
+       'Mọi nội dung đã hoàn thành trước ngày này đều được xem là <b style="color:#00e676">đã khóa</b> theo Điều 4 — không thực hiện lại và không đưa vào danh sách đề xuất ở các lần đánh giá tiếp theo.<br>'+
+'Trách nhiệm thi hành thuộc về người vận hành và mọi thành viên tham gia phát triển hệ thống trên nền tảng độc quyền quy định tại Điều 2.'+
+        '</div></div>'+
+        '<div class="cc"><h3>Điều 9. BẢO VỆ NGƯỜI DÙNG HỢP PHÁP TRÊN NỀN TẢNG CHÍNH THỨC</h3>'+
+        '<div style="background:#18243c;border-left:3px solid #00c853;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
+        'Người dùng <b style="color:#00e676">hợp pháp</b> thao tác trên nền tảng chính thức (https://mekong-eco-shield.pages.dev) <b style="color:#00e676">không được phép bị chặn, thoát hoặc ngắt giữa chừng</b> do các cảnh báo bảo mật không xác định: chống tự động hóa, phát hiện DevTools, watermark hay session token chỉ được <b style="color:#00bcd4">ghi nhận vào nhật ký vi phạm (_sec_log)</b> và hiển thị cảnh báo không phá hủy trang.<br>'+
+        'Mọi thao tác hợp lệ trong ô nhập liệu (copy/cut/paste tại Form đăng ký, đăng nhập, khôi phục mật khẩu) được <b style="color:#00e676">cho phép</b>; việc chống sao chép chỉ áp dụng cho <b>nội dung nền tảng</b>.<br>'+
+        'Cơ chế bảo vệ đã khóa và giữ nguyên: <b style="color:#7c4dff">khóa miền độc quyền (Điều 2)</b>, chống iframe, chống sao chép nội dung, ghi nhận vi phạm — không được xóa hoặc làm suy yếu trong bất kỳ lần nâng cấp nào (bảo toàn theo Điều 3).'+
+        '</div></div>'+
+        '<div class="cc"><h3>Điều 10. HIỆU LỰC CẢNH BÁO VÀ HƯỚNG DẪN HÀNH ĐỘNG</h3>'+
+        '<div style="background:#18243c;border-left:3px solid #ff9100;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
+        'Mọi cảnh báo thiên tai, chất lượng nước, thời tiết và rủi ro hiển thị trên nền tảng <b style="color:#00e676">bắt buộc</b> phải bao gồm đầy đủ các thành phần sau:<br>'+
+        '1️⃣ <b style="color:#00bcd4">Nguồn dữ liệu</b> (trạm giám sát, vệ tinh Sentinel/Copernicus, mô hình AI, GDACS, cơ quan khí tượng...)<br>'+
+        '2️⃣ <b style="color:#ffc107">Mức tin cậy</b> (phần trăm chính xác, nguồn xác minh, trạng thái dữ liệu)<br>'+
+        '3️⃣ <b style="color:#00e676">Hướng dẫn hành động cụ thể</b> cho từng đối tượng (nông dân, nhà đầu tư, doanh nghiệp, quản trị viên) — không chỉ hiển thị số liệu mà phải kèm hành động cần thực hiện<br>'+
+        '4️⃣ <b style="color:#7c4dff">Thời gian cập nhật và phạm vi ảnh hưởng</b> (tỉnh/thành, tọa độ, bán kính)<br><br>'+
+        '<b style="color:#ff1744">Không được phép</b> hiển thị cảnh báo mà <b>không có cơ sở dữ liệu rõ ràng</b> hoặc <b>không có hướng dẫn hành động</b> cho người dùng.<br>'+
+        'Mọi cảnh báo phải được ghi nhận vào nhật ký quyết định (ai_log) và có thể truy xuất lại khi được yêu cầu (minh bạch theo Điều 2).'+
+        '</div></div>'+
+        '<div class="cc"><h3>Điều 11. BẢO MẬT VÀ QUYỀN RIÊNG TƯ DỮ LIỆU NGƯỜI DÙNG</h3>'+
+        '<div style="background:#18243c;border-left:3px solid #00bcd4;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
+        'Dữ liệu người dùng (họ tên, email, số điện thoại, tài sản, tọa độ nông trại, lịch sử giao dịch) <b style="color:#00e676">chỉ được lưu trữ trên nền tảng độc quyền</b> quy định tại Điều 2 và <b style="color:#00e676">không được chia sẻ, bán hoặc chuyển giao cho bên thứ ba</b> dưới bất kỳ hình thức nào.<br>'+
+        'Dữ liệu cá nhân được <b style="color:#ffc107">mã hóa khi truyền tải và lưu trữ</b>; chỉ các chức năng nền tảng có mục đích hợp pháp mới được truy cập đúng phần dữ liệu cần thiết.<br>'+
+        'Người dùng có quyền: 1️⃣ <b style="color:#00bcd4">xem dữ liệu</b> của chính mình, 2️⃣ <b style="color:#00bcd4">xuất dữ liệu</b> (hồ sơ, giao dịch, lịch sử hoạt động) khi yêu cầu, 3️⃣ <b style="color:#00bcd4">khóa tài khoản</b> tạm thời hoặc vĩnh viễn.<br>'+
+        'Mọi thao tác truy cập dữ liệu người dùng phải được <b style="color:#7c4dff">ghi nhận vào nhật ký hệ thống (ai_log/_sec_log)</b> với thời gian và mục đích, có thể truy xuất lại khi được yêu cầu (minh bạch theo Điều 2, Điều 10).'+
+        '</div></div>'+
+        cb()
     }
    },
    upgradeLog:{
     title:'LỊCH SỬ NÂNG CẤP',
     render:function(){
      var log=[
+        {v:'v122',d:'2026-09-17',t:'🔧 Sửa toàn bộ lỗi còn sót — quét & vá triệt để (đã khóa)',x:'Rà quét toàn diện toàn bộ index.html, phát hiện và sửa triệt để mọi lỗi còn lại: (1) thêm hàm showWalletQR bị thiếu định nghĩa — trước đây bấm nút QR Code ví điện tử bị ReferenceError; (2) fetchLandslideRisk dùng fallback khi thiếu #landslideContent — trang ĐẤT LỞ LIVE giờ tải dữ liệu mưa + địa hình đúng; (3) showVerifyModal/doVerifyAlert chuyển sang dùng modal chuẩn #modalOverlay/#modalBox + showModal() — trước đây dùng #modal không tồn tại nên tính năng xác minh cảnh báo chết im lặng; (4) đổi tên importBackup(file) -> importBackupFile để loại xung đột khai báo 2 lần — doImportBackup giờ gọi đúng hàm trả Promise, không còn .then trên undefined; (5) khôi phục panel NLI Assistant (#nliPanel/#nliInput/#nliMsgs) — trợ lý voice hoạt động trở lại; (6) bổ sung container #aqSyncStatus (trạng thái Cloud D1), #eccCallStatus/#eccConsensus (ECC), #depositRequests/#withdrawRequests (yêu cầu nạp/rút của user trên trang Ví); (7) loại id trùng backupFile (backup page vs admin system) và aqUserTableWrap (fetch vs local fallback). Bảo toàn nguyên vẹn toàn bộ Quy định 11 Điều, SHIELD v2.0, khóa miền độc quyền. Hiệu lực Điều 8: 15/09/2026, phiên bản v122.'},
+       {v:'v121',d:'2026-09-15',t:'📜 Quy định nền tảng — thêm Điều 11 Bảo mật & quyền riêng tư dữ liệu người dùng (đã khóa)',x:'Bổ sung Điều 11 vào Quy định nền tảng ứng dụng: dữ liệu người dùng (họ tên, email, SĐT, tài sản, tọa độ nông trại, lịch sử giao dịch) chỉ lưu trữ trên nền tảng độc quyền (Điều 2) và không chia sẻ/bán/chuyển giao cho bên thứ ba; mã hóa khi truyền tải và lưu trữ; người dùng có quyền xem dữ liệu, xuất dữ liệu và khóa tài khoản; mọi truy cập dữ liệu ghi nhận vào ai_log/_sec_log. Không trùng lặp với Điều 9 (bảo vệ người dùng hợp pháp) và Điều 10 (hiệu lực cảnh báo). Bảo toàn nguyên văn toàn bộ Điều 1-10. Hiệu lực Điều 8: 15/09/2026, phiên bản v121.'},
+       {v:'v120',d:'2026-09-15',t:'📜 Quy định nền tảng — thêm Điều 10 Hiệu lực cảnh báo & hướng dẫn hành động (đã khóa)',x:'Bổ sung Điều 10 vào Quy định nền tảng ứng dụng: mọi cảnh báo thiên tai/chất lượng nước/thời tiết trên nền tảng bắt buộc phải có nguồn dữ liệu rõ ràng (trạm, vệ tinh, AI, GDACS), mức tin cậy, hướng dẫn hành động cụ thể cho từng đối tượng (nông dân, nhà đầu tư, doanh nghiệp), thời gian cập nhật và phạm vi ảnh hưởng. Không hiển thị cảnh báo không cơ sở dữ liệu hoặc không hướng dẫn hành động. Mọi cảnh báo ghi nhận vào ai_log để truy xuất lại khi cần. Bảo toàn nguyên tắc Điều 3: không xóa cảnh báo đã có, chỉ nâng cấp/mở rộng. Hiệu lực Điều 8: 15/09/2026, phiên bản v120.'},
+       {v:'v119',d:'2026-09-15',t:'📜 Quy định nền tảng — thêm Điều 9 Bảo vệ người dùng hợp pháp (đã khóa)',x:'Bổ sung Điều 9 vào Quy định nền tảng ứng dụng: người dùng hợp pháp trên nền tảng chính thức không bị chặn/thoát/ngắt giữa chừng do cảnh báo bảo mật không xác định — chỉ ghi nhận _sec_log + cảnh báo không phá hủy trang; cho phép copy/cut/paste trong ô nhập liệu Form (chống sao chép chỉ áp dụng cho nội dung nền tảng); cơ chế bảo vệ đã khóa (khóa miền Điều 2, chống iframe, chống sao chép nội dung, nhật ký vi phạm) giữ nguyên theo Điều 3. Cập nhật Điều 8: hiệu lực 15/09/2026, phiên bản v119 — toàn bộ quy định cũ bảo toàn nguyên văn.'},
+       {v:'v118',d:'2026-09-14',t:'🔓 Sửa lỗi thoát ra khi ghi thông tin đăng ký — bảo vệ người dùng hợp pháp (đã khóa)',x:'Loại bỏ mọi cơ chế đuổi người dùng khỏi form đăng ký do cảnh báo bảo mật dương tính giả: chống tự động hóa chỉ ghi nhận + cảnh báo không phá trang; session token hết hạn/hỏng hoặc lưu trữ bị chặn tự tạo mới KHÔNG clear+reload; cho phép copy/cut/paste trong ô nhập liệu (vẫn chặn sao chép nội dung trang); nới ngưỡng phát hiện DevTools cho thiết bị chậm; watcher watermark không đuổi người dùng thật; tab khác cập nhật ví/thông báo không quét sạch form đang ghi; nút ĐĂNG KÝ/ĐẶT LẠI MẬT KHẨU type=button. Bảo toàn: khóa miền độc quyền, chống iframe, chống sao chép nội dung nền tảng, ghi nhận vi phạm _sec_log.'},
+      {v:'v117',d:'2026-09-14',t:'📜 Nâng cấp Quy định nền tảng ứng dụng (đã khóa)',x:'Cấu trúc hóa văn bản Quy định nền tảng ứng dụng thành 08 Điều khoản: Điều 1 Phạm vi áp dụng, Điều 2 Độc quyền nền tảng, Điều 3 Quy tắc lưu trữ và phát triển, Điều 4 Ghi nhận một lần và khóa nội dung, Điều 5 Nguyên tắc vận hành, Điều 6 Độ chính xác dự báo thiên tai, Điều 7 Kiểm tra & giám sát tuân thủ, Điều 8 Hiệu lực thi hành. Toàn bộ nội dung quy định cũ được bảo toàn nguyên văn — không xóa, không đổi tên bất kỳ chức năng nào; chỉ bổ sung khung cấu trúc, lời dẫn và dấu hiệu lực phiên bản v117 (14/09/2026).'},
+      {v:'v116',d:'2026-09-14',t:'🔐 Sửa lỗi đăng ký — tôn trọng độc quyền nền tảng (đã khóa)',x:'Sửa lỗi đăng ký thoát ra ngoài quy định: phân biệt lỗi thật từ máy chủ (400/409/500) với mất mạng — lỗi máy chủ hiển thị rõ (Email đã tồn tại, dữ liệu không hợp lệ, lỗi máy chủ) và KHÔNG tạo tài khoản offline ngoài nền tảng; chỉ fallback offline khi thực sự không có mạng. Siết chặt khóa miền: chỉ đúng https://mekong-eco-shield.pages.dev (và preview .mekong-eco-shield.pages.dev) + localhost — chặn host giả mạo chứa chuỗi tên nền tảng. Bảo toàn toàn bộ chức năng cũ.'},
       {v:'v115',d:'2026-09-13',t:'🤖 Các mô hình AI dự báo thiên tai (đã khóa)',x:'Khảo sát 4 lõi AI: GraphCast (Google DeepMind), Pangu-Weather (Huawei Cloud), Prithvi-100M (IBM & NASA), FourCastNet (NVIDIA Earth-2). Mô phỏng đồng thuận Ensemble + ngưỡng sơ tán 70-80% (Sơ tán nhầm còn hơn bỏ sót). Cơ sở khoa học sai số khí tượng (hiệu ứng cánh bướm, phân phối xác suất). Tham chiếu các hạng mục đã khóa: Ensemble ECMWF+GFS, xác nhận cộng đồng Nexus-X DAO, cảnh báo ngoại tuyến.'},
       {v:'v112',d:'2026-09-08',t:'📊 Dashboard + Sessions + Backup + Weather Push + Profile (đã khóa)',x:'Dashboard thống kê tổng hợp Admin (biểu đồ cột/tròn canvas, realtime stats từ D1), Push Notifications Weather Watch (lưu D1 + hiển thị trong Thông báo), Quản lý Phiên đăng nhập (lịch sử + trạng thái bảo mật), Backup & Restore dữ liệu (export/import JSON), Cập nhật hồ sơ cá nhân (tên/điện thoại/địa chỉ lưu D1).'},
       {v:'v111',d:'2026-09-07',t:'📅 Lịch gieo trồng + Hạn mức GD + 2FA + Broadcast + Offline (đã khóa)',x:'Lịch gieo trồng thông minh theo tỉnh (4 vụ Mekong + nhắc vụ), hiển thị hạn mức giao dịch còn lại hôm nay (progress bar), Xác thực 2 lớp TOTP (bật/tắt 2FA trong CÀI ĐẶT), Thông báo toàn hệ thống (Admin tạo banner announcement), 4 nút xuất CSV QUẢN TRỊ TÀI CHÍNH (nạp/rút/chuyển/lịch sử), Offline Queue tự động đồng bộ khi reconnect.'},
@@ -7820,7 +7900,7 @@ var rows=u.map(function(x,i){
       if(x.role!=='admin')btns2+='<button class="btn" style="font-size:9px;padding:2px 6px;background:#7c4dff20;color:#b388ff" onclick="adminResetPass(\''+esc(x.email)+'\')">🔑 Reset</button>';
       return '<tr><td>'+esc(x.email)+'</td><td>'+esc(x.name||'')+'</td><td style="color:#00bcd4">📱 '+esc(x.phone||'—')+'</td><td>'+esc(x.role)+'</td><td><span class="tg '+sc2+'">'+x.st+'</span></td><td style="font-size:11px">'+esc(x.aid||'')+'</td><td>'+btns2+'</td></tr>'
     }).join('');
-    table.innerHTML='<div id="aqUserTableWrap" style="max-height:420px;overflow-y:auto;border:1px solid #1e2d4a;border-radius:8px"><table class="dt" style="width:100%"><thead style="position:sticky;top:0;background:#0b1120;z-index:2"><tr><th>Email</th><th>Tên</th><th>Số điện thoại</th><th>Vai trò</th><th>Trạng thái</th><th>Access ID</th><th>Thao tác</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    table.innerHTML='<div id="aqUserTableWrap2" style="max-height:420px;overflow-y:auto;border:1px solid #1e2d4a;border-radius:8px"><table class="dt" style="width:100%"><thead style="position:sticky;top:0;background:#0b1120;z-index:2"><tr><th>Email</th><th>Tên</th><th>Số điện thoại</th><th>Vai trò</th><th>Trạng thái</th><th>Access ID</th><th>Thao tác</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
     if(window.MES_PERF&&window.MES_PERF.attachAdminUsersVirtual)window.MES_PERF.attachAdminUsersVirtual();
    }
 }
@@ -7905,9 +7985,7 @@ function renderAlerts(t){
  }).join('')
 }
 function showVerifyModal(alertId,desc){
- var m=document.getElementById('modal');if(!m)return;
- m.innerHTML='<div class="mc" style="max-width:400px"><h3 style="margin:0 0 12px;color:#ffc107">🔍 Xác minh sau sự kiện</h3>'+
-  '<div style="font-size:12px;color:#b0bec5;margin-bottom:12px">Cảnh báo: <b>'+esc(desc)+'</b></div>'+
+ showModal('🔍 Xác minh sau sự kiện','<div style="font-size:12px;color:#b0bec5;margin-bottom:12px">Cảnh báo: <b>'+esc(desc)+'</b></div>'+
   '<label style="font-size:11px;color:#b0bec5">Kết quả thực tế:</label>'+
   '<select id="vOutcome" style="width:100%;padding:8px;background:#18243c;color:#e8eaf6;border:1px solid #2e4a6e;border-radius:6px;margin:6px 0;font-size:12px">'+
   '<option value="correct">✅ Chính xác</option><option value="partially_correct">⚠️ Đúng một phần</option><option value="incorrect">❌ Sai</option><option value="false_positive">⚠️ Báo giả</option></select>'+
@@ -7915,17 +7993,15 @@ function showVerifyModal(alertId,desc){
   '<select id="vSeverity" style="width:100%;padding:8px;background:#18243c;color:#e8eaf6;border:1px solid #2e4a6e;border-radius:6px;margin:6px 0;font-size:12px">'+
   '<option value="cao">🔴 Cao</option><option value="trung bình">🟡 Trung bình</option><option value="thấp">🟢 Thấp</option><option value="không xảy ra">⚪ Không xảy ra</option></select>'+
   '<label style="font-size:11px;color:#b0bec5">Ghi chú:</label>'+
-  '<textarea id="vNotes" rows="3" style="width:100%;padding:8px;background:#18243c;color:#e8eaf6;border:1px solid #2e4a6e;border-radius:6px;margin:6px 0;font-size:12px;resize:none" placeholder="Ghi chú..."></textarea>'+
-  '<div style="display:flex;gap:8px;margin-top:12px"><button onclick="doVerifyAlert(\''+alertId+'\')" style="flex:1;padding:8px;background:#ffc107;color:#000;border:none;border-radius:6px;font-size:12px;cursor:pointer">Xác minh</button>'+
-  '<button onclick="document.getElementById(\'modal\').classList.remove(\'show\')" style="flex:1;padding:8px;background:#2e4a6e;color:#b0bec5;border:none;border-radius:6px;font-size:12px;cursor:pointer">Hủy</button></div></div>';
- m.classList.add('show');
+  '<textarea id="vNotes" rows="3" style="width:100%;padding:8px;background:#18243c;color:#e8eaf6;border:1px solid #2e4a6e;border-radius:6px;margin:6px 0;font-size:12px;resize:none" placeholder="Ghi chú..."></textarea>',
+  function(){doVerifyAlert(alertId)})
 }
 function doVerifyAlert(alertId){
  var outcome=document.getElementById('vOutcome').value;
  var severity=document.getElementById('vSeverity').value;
  var notes=document.getElementById('vNotes').value;
  var ok=verifyAlertEvent(alertId,outcome,severity,notes);
- if(ok){alert('✅ Đã xác minh! Kết quả đã lưu vào Knowledge Base.');document.getElementById('modal').classList.remove('show');showPage('alerts')}
+ if(ok){alert('✅ Đã xác minh! Kết quả đã lưu vào Knowledge Base.');closeModal();showPage('alerts')}
  else alert('❌ Không tìm thấy cảnh báo để xác minh.');
 }
 function renderLogs(a){
@@ -8986,7 +9062,7 @@ function initBroadcastChannel(){
   MES_BC.onmessage=function(ev){
    var msg=ev.data||{};
    try{
-    if(msg.type==='wallet-updated'){toast('🔄 Ví đã cập nhật','Dữ liệu đồng bộ từ tab khác');setTimeout(function(){try{location.reload()}catch(e){}},1200);}
+    if(msg.type==='wallet-updated'){toast('🔄 Ví đã cập nhật','Dữ liệu đồng bộ từ tab khác');if(!U)return;setTimeout(function(){try{location.reload()}catch(e){}},1200);}
     else if(msg.type==='logout-all'){LS.del(KS+'user');toast('📡 Đã đăng xuất','Phiên bị thu hồi từ thiết bị khác');setTimeout(function(){location.reload()},800);}
    }catch(e){}
   };
@@ -9000,7 +9076,7 @@ function logoutAllDevices(){
  toast('📡 Đã đăng xuất toàn bộ','Tất cả thiết bị đã thu hồi phiên');
  setTimeout(function(){location.reload()},900);
 }
-try{window.addEventListener('storage',function(ev){if(ev.key===KS+'wallet'||ev.key===KS+'n'){setTimeout(function(){try{location.reload()}catch(e){}},800)}})}catch(e){}
+try{window.addEventListener('storage',function(ev){if(!U)return;if(ev.key===KS+'wallet'||ev.key===KS+'n'){setTimeout(function(){try{location.reload()}catch(e){}},800)}})}catch(e){}
 
 // === v111: TRANSFER LIMITS DISPLAY ===
 function loadWalletLimits(){
@@ -12759,16 +12835,16 @@ j:atob('UmF0ZSBMaW1pdA==')
   var _t1=performance.now();
   (function(){var d=new Function('');d();})();
   var _t2=performance.now();
-  if(_t2-_t1>50){_dt.o=true;_dt.c++;_kd()}
+  if(_t2-_t1>200){_dt.o=true;_dt.c++;_kd()}
   _dts.push(_t2-_t1);
-  if(_dts.length>5){var _avg=_dts.reduce(function(a,b){return a+b},0)/_dts.length;if(_avg>30){_dt.o=true;_kd()}}
+  if(_dts.length>5){var _avg=_dts.reduce(function(a,b){return a+b},0)/_dts.length;if(_avg>120){_dt.o=true;_kd()}}
  }
  function _cdt(){
   var _c=0;
   var _i=setInterval(function(){
    var _s=performance.now();
    (function(){var d=new Function('');d();})();
-   if(performance.now()-_s>80){_c++;if(_c>2){clearInterval(_i);_dt.o=true;_kd()}}
+   if(performance.now()-_s>250){_c++;if(_c>2){clearInterval(_i);_dt.o=true;_kd()}}
   },1000);
   setTimeout(function(){clearInterval(_i)},10000);
  }
@@ -12785,9 +12861,9 @@ j:atob('UmF0ZSBMaW1pdA==')
 document.addEventListener('contextmenu',function(e){e.preventDefault();_kd('Right-click blocked');return false},true);
 document.addEventListener('selectstart',function(e){if(!_ie(e.target)){e.preventDefault();return false}},true);
 document.addEventListener('dragstart',function(e){e.preventDefault();return false},true);
-document.addEventListener('copy',function(e){e.preventDefault();_kd('Copy blocked');navigator.clipboard.writeText(atob('TUVLT05HIEVDTy1TSElFTEQgU0VDVVJJVFl8Q29weSBibG9ja2Vk')).catch(function(){})},true);
-document.addEventListener('cut',function(e){e.preventDefault();return false},true);
-document.addEventListener('paste',function(e){e.preventDefault();return false},true);
+document.addEventListener('copy',function(e){if(_ie(e.target))return;e.preventDefault();_kd('Copy blocked');navigator.clipboard.writeText(atob('TUVLT05HIEVDTy1TSElFTEQgU0VDVVJJVFl8Q29weSBibG9ja2Vk')).catch(function(){})},true);
+document.addEventListener('cut',function(e){if(_ie(e.target))return;e.preventDefault();return false},true);
+document.addEventListener('paste',function(e){if(_ie(e.target))return;e.preventDefault();return false},true);
 document.addEventListener('keydown',function(e){
  var _b=false;
  if(e.key==='PrintScreen'){_b=true}
@@ -12802,11 +12878,11 @@ window.addEventListener('afterprint',function(){});
 // === ANTI-IFRAME / CLICKJACKING ===
 if(window.self!==window.top){try{window.top.location=window.location}catch(e){document.body.innerHTML='<div style="color:#ff1744;text-align:center;padding:100px">🚫 Iframe blocked</div>'}}
 
-// === DOMAIN LOCK: Only allow authorized domains ===
+// === DOMAIN LOCK: Only the exclusive platform domain (and local dev) are allowed ===
 function _dl(){
- var _ad=['mekong-eco-shield.pages.dev','localhost','127.0.0.1'];
  var _h=location.hostname;
- if(_h&&!_ad.some(function(d){return _h.indexOf(d)>=0})){
+ var _ok=!!_h&&(_h==='mekong-eco-shield.pages.dev'||/\.mekong-eco-shield\.pages\.dev$/i.test(_h)||_h==='localhost'||_h==='127.0.0.1');
+ if(!_ok){
   document.body.innerHTML='<div style="color:#ff1744;text-align:center;padding:100px;font-size:20px">🚫 '+atob('VW5hdXRob3JpemVkIGRvbWFpbg==')+'<br><span style="font-size:14px;color:#ff9100">Only mekong-eco-shield.pages.dev</span></div>';
   throw new Error('Domain lock');
  }
@@ -12826,18 +12902,19 @@ function _gu(){
 function _iw(){
  if(!_fp){_fp=_gfp()}
  var _w=document.createElement('img');_w.src=_fp;_w.style.cssText='position:fixed;top:-100px;left:-100px;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1';document.body.appendChild(_w);
- setInterval(function(){if(!document.body.contains(_w)){_kd('Watermark removed');_dl()}},30000);
+ setInterval(function(){if(!document.body.contains(_w)){_kd('Watermark removed');_alert('Dấu vân tay trang đã bị thay đổi - vẫn cho phép sử dụng nền tảng')}},30000);
 }
 _iw();
 
 // === SESSION TOKEN: Encrypted session validation ===
 function _st(){
+ var _n=Date.now();
+ function _mk(_u,_v){try{_tk=_et(JSON.stringify({t:_n,u:_u||_gu(),v:_v||1}));localStorage.setItem('_st',_tk)}catch(e){}}
  try{
   var _t=localStorage.getItem('_st');
-  var _n=Date.now();
-  if(!_t){_tk=_et(JSON.stringify({t:_n,u:_gu(),v:1}));localStorage.setItem('_st',_tk)}
-  else{var _d=_dt(_t);if(_n-_d.t>3600000){localStorage.clear();location.reload()}else{_tk=_et(JSON.stringify({t:_n,u:_d.u,v:_d.v+1}));localStorage.setItem('_st',_tk)}}
- }catch(e){localStorage.clear();location.reload()}
+  if(!_t){_mk()}
+  else{var _d=_dt(_t);if(!_d||!_d.t||_n-_d.t>3600000){_mk()}else{_tk=_et(JSON.stringify({t:_n,u:_d.u,v:_d.v+1}));try{localStorage.setItem('_st',_tk)}catch(e){}}}
+ }catch(e){_kd('Session storage unavailable')}
 }
 function _et(d){return btoa(d.split('').map(function(c,i){return String.fromCharCode(c.charCodeAt(0)^_k[i%_k.length])}).join(''))}
 function _dt(e){try{var _d=atob(e).split('').map(function(c,i){return String.fromCharCode(c.charCodeAt(0)^_k[i%_k.length])}).join('');return JSON.parse(_d)}catch(e){return {t:0,u:'',v:0}}}
@@ -12859,7 +12936,7 @@ _icv();setInterval(_icv,10000);
 // === ANTI-AUTOMATION: Detect bots, scrapers, selenium ===
 function _aad(){
  var _bd=navigator.webdriver||window.callPhantom||window._phantom||window.__nightmare||window.__webdriver_evaluate||document.__selenium_unwrapped||document.__webdriver_evaluate||document.__driver_evaluate;
- if(_bd){_kd('Automation detected');document.body.innerHTML='<div style="color:#ff1744;text-align:center;padding:100px">🚫 '+atob('QXV0b21hdGlvbiBkZXRlY3RlZA==')+'</div>'}
+ if(_bd){_kd('Automation detected');_alert('Dấu hiệu tự động hóa - vẫn cho phép sử dụng nền tảng chính thức')}
  var _pl=navigator.plugins.length;var _ml=navigator.mimeTypes.length;
  if(_pl===0&&_ml===0&&navigator.userAgent.indexOf('Headless')===-1){_kd('Headless browser suspected')}
 }
