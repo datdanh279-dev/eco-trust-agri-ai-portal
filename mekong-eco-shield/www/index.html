@@ -12,7 +12,7 @@
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;">
 <script>
-var _APP_V='v122';
+var _APP_V='v123';
 try{var cv=localStorage.getItem('_app_version');if(cv&&cv!==_APP_V){localStorage.setItem('_app_version',_APP_V);if('caches' in window){caches.keys().then(function(n){n.forEach(function(k){if(k.indexOf('mekong-eco-')===0)caches.delete(k)})})}location.reload(true)}else if(!cv){localStorage.setItem('_app_version',_APP_V)}}catch(e){}
 </script>
 <title>DANH ĐẠT (SÓI CÔ ĐỘC) — MEKONG ECO-SHIELD AI</title>
@@ -5321,8 +5321,9 @@ title:'🛒 CHỢ NÔNG SẢN',
 render:function(){
  if(!U)return cb();
  return '<div class="pt">🛒 Chợ nông sản Mekong (v113)</div><div class="ps">Mua bán nông sản trực tiếp, thanh toán bằng ví MES-CASH</div>'+
-  '<div style="margin-bottom:12px"><button class="btn bp" onclick="showSellModal()">➕ Đăng sản phẩm mới</button></div>'+
-  '<div id="mpProducts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="color:#607d8b;font-size:11px;text-align:center;padding:30px;grid-column:span 2">Đang tải...</div></div>'+cb()+crossSellBanner('marketplace');
+'<div style="margin-bottom:12px"><button class="btn bp" onclick="showSellModal()">➕ Đăng sản phẩm mới</button></div>'+
+   '<div id="mpToolbar"></div>'+
+   '<div id="mpProducts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="color:#607d8b;font-size:11px;text-align:center;padding:30px;grid-column:span 2">Đang tải...</div></div>'+cb()+crossSellBanner('marketplace');
 },
 init:function(){setTimeout(loadMarketplace,200);}
 },
@@ -7302,7 +7303,7 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
    quydinh:{
     title:'QUY ĐỊNH NỀN TẢNG',
     render:function(){
-     return '<div class="pt">📜 QUY ĐỊNH NỀN TẢNG ỨNG DỤNG</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Quy định phát triển lâu dài hệ sinh thái Mekong Eco-Shield • Phiên bản v121 (2026-09-15)</div>'+
+     return '<div class="pt">📜 QUY ĐỊNH NỀN TẢNG ỨNG DỤNG</div><div class="ps">DANH ĐẠT (SÓI CÔ ĐỘC) — Quy định phát triển lâu dài hệ sinh thái Mekong Eco-Shield • Phiên bản v123 (2026-09-17)</div>'+
       '<div class="cc"><h3>📜 VĂN BẢN QUY ĐỊNH — HIỆU LỰC TỪ NGÀY 15/09/2026</h3>'+
       '<div style="background:#18243c;border-left:3px solid #7c4dff;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
       'Quy định này kế thừa, bổ sung và thay thế hiệu lực của mọi bản quy định về nền tảng ứng dụng trước đây, đồng thời <b style="color:#00e676">bảo toàn nguyên văn</b> toàn bộ nội dung quy định đã có. Mọi hoạt động phát triển, cập nhật, vận hành, đánh giá và tài liệu hóa hệ thống đều phải tuân thủ quy định này.'+
@@ -7352,7 +7353,7 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
        '</div>'+
        '<div class="cc"><h3>Điều 8. HIỆU LỰC THI HÀNH</h3>'+
        '<div style="background:#18243c;border-left:3px solid #00bcd4;padding:12px;border-radius:0 8px 8px 0;font-size:11px;color:#e8eaf6;line-height:1.7">'+
-       'Quy định này có hiệu lực kể từ ngày <b style="color:#00bcd4">15/09/2026</b> (Phiên bản <b style="color:#00e676">v121</b>), kế thừa và thay thế hiệu lực của mọi bản quy định về nền tảng ứng dụng trước đây; toàn bộ nội dung quy định cũ được <b style="color:#00e676">bảo toàn nguyên văn</b>.<br>'+
+       'Quy định này có hiệu lực kể từ ngày <b style="color:#00bcd4">15/09/2026</b> (Phiên bản <b style="color:#00e676">v123</b>), kế thừa và thay thế hiệu lực của mọi bản quy định về nền tảng ứng dụng trước đây; toàn bộ nội dung quy định cũ được <b style="color:#00e676">bảo toàn nguyên văn</b>.<br>'+
        'Mọi nội dung đã hoàn thành trước ngày này đều được xem là <b style="color:#00e676">đã khóa</b> theo Điều 4 — không thực hiện lại và không đưa vào danh sách đề xuất ở các lần đánh giá tiếp theo.<br>'+
 'Trách nhiệm thi hành thuộc về người vận hành và mọi thành viên tham gia phát triển hệ thống trên nền tảng độc quyền quy định tại Điều 2.'+
         '</div></div>'+
@@ -7386,6 +7387,7 @@ return '<div class="pt">Quản trị viên</div><div class="ps">Dữ liệu từ
     title:'LỊCH SỬ NÂNG CẤP',
     render:function(){
      var log=[
+        {v:'v123',d:'2026-09-17',t:'📜 Quy định nền tảng — xác nhận Điều 2 & Điều 3 khớp nguyên văn + sửa lỗi Chợ nông sản (đã khóa)',x:'Đối chiếu toàn văn Điều 2 (Độc quyền nền tảng: chỉ sử dụng/vận hành/ghi nhận duy nhất https://mekong-eco-shield.pages.dev, không dùng ứng dụng/nền tảng/tên gọi khác thay thế, chuyển đổi, đổi tên) và Điều 3 (Quy tắc lưu trữ và phát triển: không xóa chức năng đã có, chỉ nâng cấp/mở rộng/sửa lỗi, không đề xuất nội dung đã hoàn thành, ghi nhận một lần rồi khóa) — xác nhận cả hai điều đã khớp nguyên văn yêu cầu, không trùng lặp nội dung đã khóa (tuân thủ Điều 3.3/Điều 4). Đồng thời quét toàn diện lần 2: sửa lỗi còn sót — bổ sung container #mpToolbar cho trang Chợ nông sản (trước đây thiếu element nên thanh tìm kiếm/lọc/sắp xếp sản phẩm không bao giờ hiển thị; guard if(!el)return che lỗi). Các ref còn lại (initMultiLayerMap, searchWH/whList/whSearch) xác nhận là dead code có guard an toàn — giữ nguyên theo Điều 3 (không xóa). Cập nhật dấu hiệu phiên bản Quy định lên v123, hiệu lực Điều 8: 15/09/2026. Bảo toàn toàn bộ 11 Điều + SHIELD v2.0.'},
         {v:'v122',d:'2026-09-17',t:'🔧 Sửa toàn bộ lỗi còn sót — quét & vá triệt để (đã khóa)',x:'Rà quét toàn diện toàn bộ index.html, phát hiện và sửa triệt để mọi lỗi còn lại: (1) thêm hàm showWalletQR bị thiếu định nghĩa — trước đây bấm nút QR Code ví điện tử bị ReferenceError; (2) fetchLandslideRisk dùng fallback khi thiếu #landslideContent — trang ĐẤT LỞ LIVE giờ tải dữ liệu mưa + địa hình đúng; (3) showVerifyModal/doVerifyAlert chuyển sang dùng modal chuẩn #modalOverlay/#modalBox + showModal() — trước đây dùng #modal không tồn tại nên tính năng xác minh cảnh báo chết im lặng; (4) đổi tên importBackup(file) -> importBackupFile để loại xung đột khai báo 2 lần — doImportBackup giờ gọi đúng hàm trả Promise, không còn .then trên undefined; (5) khôi phục panel NLI Assistant (#nliPanel/#nliInput/#nliMsgs) — trợ lý voice hoạt động trở lại; (6) bổ sung container #aqSyncStatus (trạng thái Cloud D1), #eccCallStatus/#eccConsensus (ECC), #depositRequests/#withdrawRequests (yêu cầu nạp/rút của user trên trang Ví); (7) loại id trùng backupFile (backup page vs admin system) và aqUserTableWrap (fetch vs local fallback). Bảo toàn nguyên vẹn toàn bộ Quy định 11 Điều, SHIELD v2.0, khóa miền độc quyền. Hiệu lực Điều 8: 15/09/2026, phiên bản v122.'},
        {v:'v121',d:'2026-09-15',t:'📜 Quy định nền tảng — thêm Điều 11 Bảo mật & quyền riêng tư dữ liệu người dùng (đã khóa)',x:'Bổ sung Điều 11 vào Quy định nền tảng ứng dụng: dữ liệu người dùng (họ tên, email, SĐT, tài sản, tọa độ nông trại, lịch sử giao dịch) chỉ lưu trữ trên nền tảng độc quyền (Điều 2) và không chia sẻ/bán/chuyển giao cho bên thứ ba; mã hóa khi truyền tải và lưu trữ; người dùng có quyền xem dữ liệu, xuất dữ liệu và khóa tài khoản; mọi truy cập dữ liệu ghi nhận vào ai_log/_sec_log. Không trùng lặp với Điều 9 (bảo vệ người dùng hợp pháp) và Điều 10 (hiệu lực cảnh báo). Bảo toàn nguyên văn toàn bộ Điều 1-10. Hiệu lực Điều 8: 15/09/2026, phiên bản v121.'},
        {v:'v120',d:'2026-09-15',t:'📜 Quy định nền tảng — thêm Điều 10 Hiệu lực cảnh báo & hướng dẫn hành động (đã khóa)',x:'Bổ sung Điều 10 vào Quy định nền tảng ứng dụng: mọi cảnh báo thiên tai/chất lượng nước/thời tiết trên nền tảng bắt buộc phải có nguồn dữ liệu rõ ràng (trạm, vệ tinh, AI, GDACS), mức tin cậy, hướng dẫn hành động cụ thể cho từng đối tượng (nông dân, nhà đầu tư, doanh nghiệp), thời gian cập nhật và phạm vi ảnh hưởng. Không hiển thị cảnh báo không cơ sở dữ liệu hoặc không hướng dẫn hành động. Mọi cảnh báo ghi nhận vào ai_log để truy xuất lại khi cần. Bảo toàn nguyên tắc Điều 3: không xóa cảnh báo đã có, chỉ nâng cấp/mở rộng. Hiệu lực Điều 8: 15/09/2026, phiên bản v120.'},
